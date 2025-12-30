@@ -1,13 +1,21 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import yfinance as yf
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import time
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend to access
+CORS(app)
 
 logging.basicConfig(level=logging.INFO)
+
+# Cache to store data and avoid rate limits
+cache = {
+    'data': None,
+    'timestamp': None,
+    'cache_duration': 300  # 5 minutes cache
+}
 
 groups = {
     "Index ETFs": ['EZPZ', 'GDLC', 'NCIQ', 'BITW'],
@@ -44,103 +52,148 @@ descriptions = {
     'XRPP.NE': 'Purpose NEO'
 }
 
-def fetch_etf_data():
-    """Fetch all ETF data from yfinance"""
+def fetch_etf_data_batch():
+    """Fetch all ETF data using batch download to minimize API calls"""
     data = {}
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     errors = []
     
-    for group_name, symbols in groups.items():
-        data[group_name] = []
+    # Get all symbols
+    all_symbols = []
+    for symbols in groups.values():
+        all_symbols.extend(symbols)
+    
+    logging.info(f"Fetching {len(all_symbols)} symbols in batch...")
+    
+    try:
+        # Download history in batch - this makes fewer API calls
+        logging.info("Downloading 5-day history...")
+        hist_5d = yf.download(all_symbols, period="5d", group_by='ticker', progress=False, threads=False)
+        time.sleep(2)
         
-        for symbol in symbols:
-            try:
-                logging.info(f"Fetching {symbol}...")
-                ticker = yf.Ticker(symbol)
-                
-                # Try multiple ways to get price
-                info = ticker.info
-                price = info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
-                volume = info.get('regularMarketVolume') or info.get('volume') or 0
-                
-                # If info doesn't work, try history
-                if not price:
-                    hist = ticker.history(period="1d")
-                    if not hist.empty:
-                        price = hist['Close'].iloc[-1]
-                        volume = int(hist['Volume'].iloc[-1])
-                
-                if price:
-                    etf_data = {
-                        'symbol': symbol,
-                        'description': descriptions.get(symbol, ''),
-                        'price': round(float(price), 2),
-                        'daily': {
-                            'shares': int(volume) if volume else 0,
-                            'dollars': int(float(price) * float(volume)) if volume else 0
+        logging.info("Downloading 1-month history...")
+        hist_1mo = yf.download(all_symbols, period="1mo", group_by='ticker', progress=False, threads=False)
+        time.sleep(2)
+        
+        logging.info("Downloading 1-year history...")
+        hist_1y = yf.download(all_symbols, period="1y", group_by='ticker', progress=False, threads=False)
+        
+        # Process each group
+        for group_name, symbols in groups.items():
+            data[group_name] = []
+            
+            for symbol in symbols:
+                try:
+                    price = None
+                    volume = 0
+                    
+                    # Get price from 5d history (most recent close)
+                    if hist_5d is not None and not hist_5d.empty:
+                        try:
+                            if symbol in hist_5d.columns.get_level_values(0):
+                                symbol_data = hist_5d[symbol]
+                                if not symbol_data.empty and not symbol_data['Close'].isna().all():
+                                    price = float(symbol_data['Close'].dropna().iloc[-1])
+                                    vol_series = symbol_data['Volume'].dropna()
+                                    volume = int(vol_series.iloc[-1]) if not vol_series.empty else 0
+                        except Exception as e:
+                            logging.warning(f"Error getting price for {symbol}: {e}")
+                    
+                    if price and price > 0:
+                        etf_data = {
+                            'symbol': symbol,
+                            'description': descriptions.get(symbol, ''),
+                            'price': round(price, 2),
+                            'daily': {
+                                'shares': volume,
+                                'dollars': int(price * volume)
+                            }
                         }
-                    }
-                    
-                    # Weekly data (last 5 trading days)
-                    try:
-                        hist_week = ticker.history(period="5d")
-                        if not hist_week.empty and len(hist_week) > 0:
-                            volume_week = int(hist_week['Volume'].sum())
-                            dollar_week = int((hist_week['Close'] * hist_week['Volume']).sum())
-                            etf_data['weekly'] = {
-                                'shares': volume_week,
-                                'dollars': dollar_week
-                            }
-                    except Exception as e:
-                        logging.warning(f"Weekly data error for {symbol}: {e}")
-                    
-                    # Monthly data
-                    try:
-                        hist_month = ticker.history(period="1mo")
-                        if not hist_month.empty and len(hist_month) > 0:
-                            volume_month = int(hist_month['Volume'].sum())
-                            dollar_month = int((hist_month['Close'] * hist_month['Volume']).sum())
-                            etf_data['monthly'] = {
-                                'shares': volume_month,
-                                'dollars': dollar_month
-                            }
-                    except Exception as e:
-                        logging.warning(f"Monthly data error for {symbol}: {e}")
-                    
-                    # Yearly data
-                    try:
-                        hist_year = ticker.history(period="1y")
-                        if not hist_year.empty and len(hist_year) > 0:
-                            volume_year = int(hist_year['Volume'].sum())
-                            dollar_year = int((hist_year['Close'] * hist_year['Volume']).sum())
-                            etf_data['yearly'] = {
-                                'shares': volume_year,
-                                'dollars': dollar_year
-                            }
-                    except Exception as e:
-                        logging.warning(f"Yearly data error for {symbol}: {e}")
-                    
-                    data[group_name].append(etf_data)
-                    logging.info(f"✓ Successfully fetched {symbol}: ${price}")
-                else:
-                    logging.warning(f"✗ No price data for {symbol}")
-                    errors.append(f"No price for {symbol}")
-                    
-            except Exception as e:
-                logging.error(f"✗ Error fetching {symbol}: {e}")
-                errors.append(f"{symbol}: {str(e)}")
+                        
+                        # Weekly data (from 5d)
+                        try:
+                            if symbol in hist_5d.columns.get_level_values(0):
+                                sym_5d = hist_5d[symbol].dropna()
+                                if not sym_5d.empty and 'Volume' in sym_5d.columns:
+                                    vol_week = int(sym_5d['Volume'].sum())
+                                    dollar_week = int((sym_5d['Close'] * sym_5d['Volume']).sum())
+                                    etf_data['weekly'] = {'shares': vol_week, 'dollars': dollar_week}
+                        except:
+                            pass
+                        
+                        # Monthly data
+                        try:
+                            if hist_1mo is not None and symbol in hist_1mo.columns.get_level_values(0):
+                                sym_1mo = hist_1mo[symbol].dropna()
+                                if not sym_1mo.empty and 'Volume' in sym_1mo.columns:
+                                    vol_month = int(sym_1mo['Volume'].sum())
+                                    dollar_month = int((sym_1mo['Close'] * sym_1mo['Volume']).sum())
+                                    etf_data['monthly'] = {'shares': vol_month, 'dollars': dollar_month}
+                        except:
+                            pass
+                        
+                        # Yearly data
+                        try:
+                            if hist_1y is not None and symbol in hist_1y.columns.get_level_values(0):
+                                sym_1y = hist_1y[symbol].dropna()
+                                if not sym_1y.empty and 'Volume' in sym_1y.columns:
+                                    vol_year = int(sym_1y['Volume'].sum())
+                                    dollar_year = int((sym_1y['Close'] * sym_1y['Volume']).sum())
+                                    etf_data['yearly'] = {'shares': vol_year, 'dollars': dollar_year}
+                        except:
+                            pass
+                        
+                        data[group_name].append(etf_data)
+                        logging.info(f"✓ {symbol}: ${price}")
+                    else:
+                        errors.append(f"No price for {symbol}")
+                        
+                except Exception as e:
+                    logging.error(f"Error processing {symbol}: {e}")
+                    errors.append(f"{symbol}: {str(e)}")
+    
+    except Exception as e:
+        logging.error(f"Batch download error: {e}")
+        errors.append(f"Batch error: {str(e)}")
     
     return {
         'timestamp': timestamp,
         'data': data,
-        'errors': errors if errors else None
+        'errors': errors if errors else None,
+        'cached': False
     }
+
+def get_cached_or_fetch():
+    """Return cached data if valid, otherwise fetch new data"""
+    now = datetime.now()
+    
+    # Check if cache is valid
+    if cache['data'] and cache['timestamp']:
+        age = (now - cache['timestamp']).total_seconds()
+        if age < cache['cache_duration']:
+            logging.info(f"Returning cached data (age: {int(age)}s)")
+            result = cache['data'].copy()
+            result['cached'] = True
+            result['cache_age'] = int(age)
+            return result
+    
+    # Fetch new data
+    logging.info("Fetching fresh data...")
+    result = fetch_etf_data_batch()
+    
+    # Update cache only if we got some data
+    has_data = any(len(etfs) > 0 for etfs in result['data'].values())
+    if has_data:
+        cache['data'] = result
+        cache['timestamp'] = now
+    
+    return result
 
 @app.route('/api/etf-data', methods=['GET'])
 def get_etf_data():
     """API endpoint to get all ETF data"""
     try:
-        result = fetch_etf_data()
+        result = get_cached_or_fetch()
         return jsonify(result)
     except Exception as e:
         logging.error(f"API Error: {e}")
@@ -151,25 +204,16 @@ def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'cache_valid': cache['data'] is not None
     })
 
-@app.route('/api/test', methods=['GET'])
-def test_single():
-    """Test endpoint - fetch just one ticker to debug"""
-    try:
-        ticker = yf.Ticker('BITW')
-        info = ticker.info
-        return jsonify({
-            'symbol': 'BITW',
-            'info_keys': list(info.keys()) if info else [],
-            'price': info.get('regularMarketPrice'),
-            'currentPrice': info.get('currentPrice'),
-            'previousClose': info.get('previousClose'),
-            'volume': info.get('regularMarketVolume')
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+@app.route('/api/clear-cache', methods=['GET'])
+def clear_cache():
+    """Clear the cache to force fresh data"""
+    cache['data'] = None
+    cache['timestamp'] = None
+    return jsonify({'message': 'Cache cleared'})
 
 @app.route('/', methods=['GET'])
 def home():
@@ -177,9 +221,9 @@ def home():
     return jsonify({
         'message': 'XRP ETF API',
         'endpoints': {
-            '/api/etf-data': 'Get all ETF data',
+            '/api/etf-data': 'Get all ETF data (cached 5 min)',
             '/api/health': 'Health check',
-            '/api/test': 'Test single ticker (BITW)'
+            '/api/clear-cache': 'Clear cache'
         }
     })
 
