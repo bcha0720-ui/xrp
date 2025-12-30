@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XRP ETF Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1a1a25;
+            --border: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8888a0;
+            --text-muted: #5a5a70;
+            --accent-xrp: #23f7dd;
+            --accent-xrp-dim: rgba(35, 247, 221, 0.15);
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(35, 247, 221, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(35, 247, 221, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(35, 247, 221, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: glowPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--bg-primary);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-xrp) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-meta {
+            text-align: right;
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--accent-xrp-dim);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent-xrp);
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-xrp);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-xrp);
+            color: var(--text-primary);
+        }
+
+        .btn.active {
+            background: var(--accent-xrp-dim);
+            border-color: var(--accent-xrp);
+            color: var(--accent-xrp);
+        }
+
+        .btn-refresh {
+            margin-left: auto;
+            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            border: none;
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.3);
+        }
+
+        .btn-refresh:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-xrp);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Error State */
+        .error-container {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: var(--accent-red);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-hint {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ETF Groups */
+        .etf-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .etf-group {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            animation: fadeSlideIn 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .etf-group:nth-child(1) { animation-delay: 0.1s; }
+        .etf-group:nth-child(2) { animation-delay: 0.2s; }
+        .etf-group:nth-child(3) { animation-delay: 0.3s; }
+        .etf-group:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeSlideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .group-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .group-icon.index { background: rgba(59, 130, 246, 0.2); }
+        .group-icon.spot { background: rgba(34, 197, 94, 0.2); }
+        .group-icon.futures { background: rgba(249, 115, 22, 0.2); }
+        .group-icon.canada { background: rgba(168, 85, 247, 0.2); }
+
+        .group-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .group-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th.right {
+            text-align: right;
+        }
+
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .symbol-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .symbol-badge {
+            font-weight: 600;
+            color: var(--accent-xrp);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .symbol-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .price {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .volume-cell {
+            text-align: right;
+        }
+
+        .volume-shares {
+            color: var(--text-secondary);
+        }
+
+        .volume-dollars {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .no-data {
+            color: var(--text-muted);
+            font-style: italic;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-xrp);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* API Input */
+        .api-config {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .api-config label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .api-input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .api-input-group input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .api-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-xrp);
+        }
+
+        .api-input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-meta {
+                text-align: center;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .btn-refresh {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .api-input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">XRP</div>
+                <h1>XRP ETF Tracker</h1>
+            </div>
+            <div class="header-meta">
+                <div class="last-updated" id="lastUpdated">Not yet loaded</div>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="api-config">
+            <label for="apiUrl">API URL (your Render backend)</label>
+            <div class="api-input-group">
+                <input type="text" id="apiUrl" placeholder="https://your-app.onrender.com" value="">
+                <button class="btn btn-refresh" onclick="saveAndFetch()">Connect</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
+            <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
+            <button class="btn" data-period="monthly" onclick="setPeriod('monthly')">Monthly</button>
+            <button class="btn" data-period="yearly" onclick="setPeriod('yearly')">Yearly</button>
+            <button class="btn btn-refresh" id="refreshBtn" onclick="fetchData()">
+                ↻ Refresh Data
+            </button>
+        </div>
+
+        <main id="mainContent">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p class="loading-text">Enter your API URL above to load data...</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Data provided by <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> via yfinance</p>
+            <p style="margin-top: 0.5rem;">Prices and volumes may be delayed</p>
+        </footer>
+    </div>
+
+    <script>
+        // ETF Descriptions
+        const descriptions = {
+            'EZPZ': 'Franklin Templeton',
+            'GDLC': 'Grayscale Digital Large Cap',
+            'NCIQ': 'Hashdex Nasdaq Crypto Index',
+            'BITW': 'Bitwise 10 Crypto Index',
+            'GXRP': 'Grayscale',
+            'XRP': 'Bitwise XRP',
+            'XRPC': 'Canary Capital XRP',
+            'XRPZ': 'Franklin XRP',
+            'TOXR': '21Shares',
+            'UXRP': 'ProShares Ultra',
+            'XRPI': 'Volatility Shares Trust',
+            'XRPM': 'Amplify',
+            'XRPR': 'REX-Osprey',
+            'XRPK': 'T-REX 2X Long',
+            'XRPT': 'Volatility Shares 2x',
+            'XXRP': 'Teucrium 2x Long',
+            'XRP.TO': 'Purpose',
+            'XRPP-B.TO': 'Purpose',
+            'XRPP-U.TO': 'Purpose USD Non-Hedged',
+            'XRPP.TO': 'Purpose CAD Hedged',
+            'XRPQ-U.TO': '3iQ USD',
+            'XRPQ.TO': '3iQ',
+            'XRP.NE': 'Canada ETF',
+            'XRPP.NE': 'Purpose NEO',
+            'RPQ.NE': 'RPQ NEO'
+        };
+
+        const groupIcons = {
+            'Index ETFs': { icon: '📊', class: 'index' },
+            'Spot ETFs': { icon: '💎', class: 'spot' },
+            'Futures ETFs': { icon: '📈', class: 'futures' },
+            'Canada ETFs': { icon: '🍁', class: 'canada' }
+        };
+
+        let currentPeriod = 'daily';
+        let cachedData = null;
+
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        function formatCurrency(num) {
+            return '$' + formatNumber(num);
+        }
+
+        function setPeriod(period) {
+            currentPeriod = period;
+            document.querySelectorAll('.controls .btn[data-period]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
+            if (cachedData) {
+                renderData(cachedData);
+            }
+        }
+
+        function saveAndFetch() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (url) {
+                localStorage.setItem('xrp_etf_api_url', url);
+                fetchData();
+            }
+        }
+
+        async function fetchData() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            if (!apiUrl) {
+                showError('Please enter your API URL first');
+                return;
+            }
+
+            const refreshBtn = document.getElementById('refreshBtn');
+            const statusText = document.getElementById('statusText');
+            
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '⟳ Loading...';
+            statusText.textContent = 'Fetching...';
+            
+            document.getElementById('mainContent').innerHTML = `
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Fetching ETF data from API...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${apiUrl}/api/etf-data`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                cachedData = data;
+                
+                document.getElementById('lastUpdated').textContent = `Last updated: ${data.timestamp}`;
+                statusText.textContent = 'Live';
+                
+                renderData(data);
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showError(`Failed to fetch data: ${error.message}`);
+                statusText.textContent = 'Error';
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '↻ Refresh Data';
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="error-container">
+                    <div class="error-icon">⚠️</div>
+                    <p class="error-message">${message}</p>
+                    <p class="error-hint">Make sure your API URL is correct and the server is running.</p>
+                    <button class="btn btn-refresh" onclick="fetchData()">Try Again</button>
+                </div>
+            `;
+        }
+
+        function renderData(data) {
+            const groups = data.data;
+            let html = '<div class="etf-groups">';
+
+            for (const [groupName, etfs] of Object.entries(groups)) {
+                const groupInfo = groupIcons[groupName] || { icon: '📋', class: 'index' };
+                
+                html += `
+                    <div class="etf-group">
+                        <div class="group-header">
+                            <div class="group-title">
+                                <div class="group-icon ${groupInfo.class}">${groupInfo.icon}</div>
+                                <span class="group-name">${groupName}</span>
+                            </div>
+                            <span class="group-count">${etfs.length} ETFs</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th class="right">Price</th>
+                                        <th class="right">Volume (Shares)</th>
+                                        <th class="right">Volume ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                if (etfs.length === 0) {
+                    html += `
+                        <tr>
+                            <td colspan="4" class="no-data">No data available for this group</td>
+                        </tr>
+                    `;
+                } else {
+                    for (const etf of etfs) {
+                        const periodData = etf[currentPeriod] || etf.daily || {};
+                        const desc = descriptions[etf.symbol] || '';
+                        
+                        html += `
+                            <tr>
+                                <td>
+                                    <div class="symbol-cell">
+                                        <div>
+                                            <div class="symbol-badge">${etf.symbol}</div>
+                                            <div class="symbol-desc">${desc}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="volume-cell">
+                                    <span class="price">$${etf.price.toFixed(2)}</span>
+                                </td>
+                                <td class="volume-cell">
+                                    <div class="volume-shares">${formatNumber(periodData.shares || 0)}</div>
+                                </td>
+                                <td class="volume-cell">
+                                    <div class="volume-shares">${formatCurrency(periodData.dollars || 0)}</div>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('mainContent').innerHTML = html;
+        }
+
+        // Load saved API URL on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('xrp_etf_api_url');
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+            }
+        });
+    </script>
+</body>
+</html>
