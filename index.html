@@ -121,6 +121,43 @@
             text-align: right;
         }
 
+        .xrp-price {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent-xrp-dim), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--accent-xrp);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .xrp-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .xrp-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-xrp);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .xrp-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .xrp-change.positive {
+            color: var(--accent-green);
+        }
+
+        .xrp-change.negative {
+            color: var(--accent-red);
+        }
+
         .last-updated {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -566,6 +603,10 @@
                 <div class="logo-icon">XRP</div>
                 <h1>XRP ETF Tracker</h1>
             </div>
+            <div class="xrp-price" id="xrpPrice">
+                <span class="xrp-label">XRP Price</span>
+                <span class="xrp-value">Loading...</span>
+            </div>
             <div class="header-meta">
                 <div class="last-updated" id="lastUpdated">Not yet loaded</div>
                 <div class="status">
@@ -644,6 +685,31 @@
         let cachedData = null;
         let autoRefreshInterval = null;
 
+        async function fetchXRPPrice() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                const price = data.ripple.usd;
+                const change = data.ripple.usd_24h_change;
+                
+                const priceEl = document.getElementById('xrpPrice');
+                const changeClass = change >= 0 ? 'positive' : 'negative';
+                const changeSymbol = change >= 0 ? '+' : '';
+                
+                priceEl.innerHTML = `
+                    <span class="xrp-label">XRP Price</span>
+                    <span class="xrp-value">$${price.toFixed(4)}</span>
+                    <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
+                `;
+            } catch (error) {
+                console.error('Error fetching XRP price:', error);
+                document.getElementById('xrpPrice').innerHTML = `
+                    <span class="xrp-label">XRP Price</span>
+                    <span class="xrp-value">--</span>
+                `;
+            }
+        }
+
         function formatNumber(num) {
             if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
             if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
@@ -673,6 +739,7 @@
             // Set up auto-refresh every 5 minutes (300000 ms)
             autoRefreshInterval = setInterval(() => {
                 console.log('Auto-refreshing data...');
+                fetchXRPPrice();
                 fetchData(true); // silent refresh
             }, 300000);
         }
@@ -859,6 +926,7 @@
 
         // Auto-connect on page load
         window.addEventListener('DOMContentLoaded', () => {
+            fetchXRPPrice();
             fetchData();
             startAutoRefresh();
         });
