@@ -14,7 +14,7 @@ groups = {
     "Spot ETFs": ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
     "Futures ETFs": ['UXRP', 'XRPI', 'XRPM', 'XRPT', 'XXRP', 'XRPK'],
     "Canada ETFs": ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 
-                    'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE', 'RPQ.NE']
+                    'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE']
 }
 
 descriptions = {
@@ -41,76 +41,99 @@ descriptions = {
     'XRPQ-U.TO': '3iQ USD',
     'XRPQ.TO': '3iQ',
     'XRP.NE': 'Canada ETF',
-    'XRPP.NE': 'Purpose NEO',
-    'RPQ.NE': 'RPQ NEO'
+    'XRPP.NE': 'Purpose NEO'
 }
 
 def fetch_etf_data():
     """Fetch all ETF data from yfinance"""
     data = {}
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    errors = []
     
     for group_name, symbols in groups.items():
         data[group_name] = []
         
         for symbol in symbols:
             try:
+                logging.info(f"Fetching {symbol}...")
                 ticker = yf.Ticker(symbol)
-                info = ticker.info
-                price = info.get('regularMarketPrice') or info.get('currentPrice')
-                volume = info.get('regularMarketVolume') or info.get('volume')
                 
-                if price and volume:
+                # Try multiple ways to get price
+                info = ticker.info
+                price = info.get('regularMarketPrice') or info.get('currentPrice') or info.get('previousClose')
+                volume = info.get('regularMarketVolume') or info.get('volume') or 0
+                
+                # If info doesn't work, try history
+                if not price:
+                    hist = ticker.history(period="1d")
+                    if not hist.empty:
+                        price = hist['Close'].iloc[-1]
+                        volume = int(hist['Volume'].iloc[-1])
+                
+                if price:
                     etf_data = {
                         'symbol': symbol,
-                        'price': round(price, 2),
+                        'description': descriptions.get(symbol, ''),
+                        'price': round(float(price), 2),
                         'daily': {
-                            'shares': volume,
-                            'dollars': int(price * volume)
+                            'shares': int(volume) if volume else 0,
+                            'dollars': int(float(price) * float(volume)) if volume else 0
                         }
                     }
                     
                     # Weekly data (last 5 trading days)
-                    hist_week = ticker.history(period="5d")
-                    if not hist_week.empty:
-                        volume_week = int(hist_week['Volume'].sum())
-                        dollar_week = int((hist_week['Close'] * hist_week['Volume']).sum())
-                        etf_data['weekly'] = {
-                            'shares': volume_week,
-                            'dollars': dollar_week
-                        }
+                    try:
+                        hist_week = ticker.history(period="5d")
+                        if not hist_week.empty and len(hist_week) > 0:
+                            volume_week = int(hist_week['Volume'].sum())
+                            dollar_week = int((hist_week['Close'] * hist_week['Volume']).sum())
+                            etf_data['weekly'] = {
+                                'shares': volume_week,
+                                'dollars': dollar_week
+                            }
+                    except Exception as e:
+                        logging.warning(f"Weekly data error for {symbol}: {e}")
                     
                     # Monthly data
-                    hist_month = ticker.history(period="1mo")
-                    if not hist_month.empty:
-                        volume_month = int(hist_month['Volume'].sum())
-                        dollar_month = int((hist_month['Close'] * hist_month['Volume']).sum())
-                        etf_data['monthly'] = {
-                            'shares': volume_month,
-                            'dollars': dollar_month
-                        }
+                    try:
+                        hist_month = ticker.history(period="1mo")
+                        if not hist_month.empty and len(hist_month) > 0:
+                            volume_month = int(hist_month['Volume'].sum())
+                            dollar_month = int((hist_month['Close'] * hist_month['Volume']).sum())
+                            etf_data['monthly'] = {
+                                'shares': volume_month,
+                                'dollars': dollar_month
+                            }
+                    except Exception as e:
+                        logging.warning(f"Monthly data error for {symbol}: {e}")
                     
                     # Yearly data
-                    hist_year = ticker.history(period="1y")
-                    if not hist_year.empty:
-                        volume_year = int(hist_year['Volume'].sum())
-                        dollar_year = int((hist_year['Close'] * hist_year['Volume']).sum())
-                        etf_data['yearly'] = {
-                            'shares': volume_year,
-                            'dollars': dollar_year
-                        }
+                    try:
+                        hist_year = ticker.history(period="1y")
+                        if not hist_year.empty and len(hist_year) > 0:
+                            volume_year = int(hist_year['Volume'].sum())
+                            dollar_year = int((hist_year['Close'] * hist_year['Volume']).sum())
+                            etf_data['yearly'] = {
+                                'shares': volume_year,
+                                'dollars': dollar_year
+                            }
+                    except Exception as e:
+                        logging.warning(f"Yearly data error for {symbol}: {e}")
                     
                     data[group_name].append(etf_data)
-                    logging.info(f"Successfully fetched data for {symbol}")
+                    logging.info(f"✓ Successfully fetched {symbol}: ${price}")
                 else:
-                    logging.warning(f"No current data for {symbol}")
+                    logging.warning(f"✗ No price data for {symbol}")
+                    errors.append(f"No price for {symbol}")
                     
             except Exception as e:
-                logging.error(f"Error fetching {symbol}: {e}")
+                logging.error(f"✗ Error fetching {symbol}: {e}")
+                errors.append(f"{symbol}: {str(e)}")
     
     return {
         'timestamp': timestamp,
-        'data': data
+        'data': data,
+        'errors': errors if errors else None
     }
 
 @app.route('/api/etf-data', methods=['GET'])
@@ -131,6 +154,23 @@ def health_check():
         'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
+@app.route('/api/test', methods=['GET'])
+def test_single():
+    """Test endpoint - fetch just one ticker to debug"""
+    try:
+        ticker = yf.Ticker('BITW')
+        info = ticker.info
+        return jsonify({
+            'symbol': 'BITW',
+            'info_keys': list(info.keys()) if info else [],
+            'price': info.get('regularMarketPrice'),
+            'currentPrice': info.get('currentPrice'),
+            'previousClose': info.get('previousClose'),
+            'volume': info.get('regularMarketVolume')
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/', methods=['GET'])
 def home():
     """Home endpoint with API info"""
@@ -138,7 +178,8 @@ def home():
         'message': 'XRP ETF API',
         'endpoints': {
             '/api/etf-data': 'Get all ETF data',
-            '/api/health': 'Health check'
+            '/api/health': 'Health check',
+            '/api/test': 'Test single ticker (BITW)'
         }
     })
 
