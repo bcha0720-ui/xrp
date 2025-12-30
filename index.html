@@ -40,7 +40,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background */
         .bg-grid {
             position: fixed;
             top: 0;
@@ -81,7 +80,6 @@
             padding: 2rem;
         }
 
-        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -154,7 +152,12 @@
             50% { opacity: 0.5; transform: scale(0.8); }
         }
 
-        /* Controls */
+        .auto-refresh-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
         .controls {
             display: flex;
             gap: 1rem;
@@ -206,7 +209,6 @@
             transform: none;
         }
 
-        /* Loading State */
         .loading-container {
             display: flex;
             flex-direction: column;
@@ -234,7 +236,6 @@
             font-size: 1rem;
         }
 
-        /* Error State */
         .error-container {
             text-align: center;
             padding: 4rem 2rem;
@@ -257,7 +258,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* ETF Groups */
         .etf-groups {
             display: flex;
             flex-direction: column;
@@ -326,7 +326,6 @@
             border-radius: 20px;
         }
 
-        /* Table */
         .table-wrapper {
             overflow-x: auto;
         }
@@ -365,6 +364,20 @@
 
         tr:hover {
             background: var(--bg-card-hover);
+        }
+
+        tr.total-row {
+            background: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        tr.total-row:hover {
+            background: var(--bg-secondary);
+        }
+
+        tr.total-row td {
+            border-top: 2px solid var(--accent-xrp);
+            color: var(--accent-xrp);
         }
 
         .symbol-cell {
@@ -410,7 +423,6 @@
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Footer */
         footer {
             margin-top: 3rem;
             padding-top: 2rem;
@@ -429,7 +441,6 @@
             text-decoration: underline;
         }
 
-        /* API Input */
         .api-config {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -470,7 +481,46 @@
             color: var(--text-muted);
         }
 
-        /* Responsive */
+        .grand-total {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+            border: 2px solid var(--accent-xrp);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .grand-total h3 {
+            color: var(--accent-xrp);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .grand-total-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .grand-total-item {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .grand-total-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .grand-total-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -522,16 +572,9 @@
                     <span class="status-dot"></span>
                     <span id="statusText">Ready</span>
                 </div>
+                <div class="auto-refresh-info" id="autoRefreshInfo">Auto-refresh: every 5 minutes</div>
             </div>
         </header>
-
-        <div class="api-config">
-            <label for="apiUrl">API URL (your Render backend)</label>
-            <div class="api-input-group">
-                <input type="text" id="apiUrl" placeholder="https://your-app.onrender.com" value="">
-                <button class="btn btn-refresh" onclick="saveAndFetch()">Connect</button>
-            </div>
-        </div>
 
         <div class="controls">
             <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
@@ -546,18 +589,17 @@
         <main id="mainContent">
             <div class="loading-container">
                 <div class="spinner"></div>
-                <p class="loading-text">Enter your API URL above to load data...</p>
+                <p class="loading-text">Loading ETF data...</p>
             </div>
         </main>
 
         <footer>
             <p>Data provided by <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> via yfinance</p>
-            <p style="margin-top: 0.5rem;">Prices and volumes may be delayed</p>
+            <p style="margin-top: 0.5rem;">Prices and volumes may be delayed • Auto-refreshes every 5 minutes</p>
         </footer>
     </div>
 
     <script>
-        // ETF Descriptions
         const descriptions = {
             'EZPZ': 'Franklin Templeton',
             'GDLC': 'Grayscale Digital Large Cap',
@@ -582,19 +624,25 @@
             'XRPQ-U.TO': '3iQ USD',
             'XRPQ.TO': '3iQ',
             'XRP.NE': 'Canada ETF',
-            'XRPP.NE': 'Purpose NEO',
-            'RPQ.NE': 'RPQ NEO'
+            'XRPP.NE': 'Purpose NEO'
         };
 
         const groupIcons = {
-            'Index ETFs': { icon: '📊', class: 'index' },
             'Spot ETFs': { icon: '💎', class: 'spot' },
             'Futures ETFs': { icon: '📈', class: 'futures' },
+            'Index ETFs': { icon: '📊', class: 'index' },
             'Canada ETFs': { icon: '🍁', class: 'canada' }
         };
 
+        // Order of groups (Spot first)
+        const groupOrder = ['Spot ETFs', 'Futures ETFs', 'Index ETFs', 'Canada ETFs'];
+
+        // Default API URL
+        const API_URL = 'https://xrp-gtve.onrender.com';
+
         let currentPeriod = 'daily';
         let cachedData = null;
+        let autoRefreshInterval = null;
 
         function formatNumber(num) {
             if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
@@ -617,21 +665,19 @@
             }
         }
 
-        function saveAndFetch() {
-            const url = document.getElementById('apiUrl').value.trim();
-            if (url) {
-                localStorage.setItem('xrp_etf_api_url', url);
-                fetchData();
+        function startAutoRefresh() {
+            // Clear existing interval
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
             }
+            // Set up auto-refresh every 5 minutes (300000 ms)
+            autoRefreshInterval = setInterval(() => {
+                console.log('Auto-refreshing data...');
+                fetchData(true); // silent refresh
+            }, 300000);
         }
 
-        async function fetchData() {
-            const apiUrl = document.getElementById('apiUrl').value.trim();
-            if (!apiUrl) {
-                showError('Please enter your API URL first');
-                return;
-            }
-
+        async function fetchData(silent = false) {
             const refreshBtn = document.getElementById('refreshBtn');
             const statusText = document.getElementById('statusText');
             
@@ -639,27 +685,32 @@
             refreshBtn.textContent = '⟳ Loading...';
             statusText.textContent = 'Fetching...';
             
-            document.getElementById('mainContent').innerHTML = `
-                <div class="loading-container">
-                    <div class="spinner"></div>
-                    <p class="loading-text">Fetching ETF data from API...</p>
-                </div>
-            `;
+            if (!silent) {
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="loading-container">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Fetching ETF data...</p>
+                    </div>
+                `;
+            }
 
             try {
-                const response = await fetch(`${apiUrl}/api/etf-data`);
+                const response = await fetch(`${API_URL}/api/etf-data`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
                 cachedData = data;
                 
-                document.getElementById('lastUpdated').textContent = `Last updated: ${data.timestamp}`;
-                statusText.textContent = 'Live';
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('lastUpdated').textContent = `Last updated: ${data.timestamp} (fetched ${now})`;
+                statusText.textContent = data.cached ? 'Cached' : 'Live';
                 
                 renderData(data);
             } catch (error) {
                 console.error('Fetch error:', error);
-                showError(`Failed to fetch data: ${error.message}`);
+                if (!silent) {
+                    showError(`Failed to fetch data: ${error.message}`);
+                }
                 statusText.textContent = 'Error';
             } finally {
                 refreshBtn.disabled = false;
@@ -682,9 +733,27 @@
             const groups = data.data;
             let html = '<div class="etf-groups">';
 
-            for (const [groupName, etfs] of Object.entries(groups)) {
+            let grandTotalShares = 0;
+            let grandTotalDollars = 0;
+
+            // Render in specified order
+            for (const groupName of groupOrder) {
+                const etfs = groups[groupName] || [];
                 const groupInfo = groupIcons[groupName] || { icon: '📋', class: 'index' };
                 
+                // Calculate group totals
+                let groupTotalShares = 0;
+                let groupTotalDollars = 0;
+
+                etfs.forEach(etf => {
+                    const periodData = etf[currentPeriod] || etf.daily || {};
+                    groupTotalShares += periodData.shares || 0;
+                    groupTotalDollars += periodData.dollars || 0;
+                });
+
+                grandTotalShares += groupTotalShares;
+                grandTotalDollars += groupTotalDollars;
+
                 html += `
                     <div class="etf-group">
                         <div class="group-header">
@@ -716,7 +785,7 @@
                 } else {
                     for (const etf of etfs) {
                         const periodData = etf[currentPeriod] || etf.daily || {};
-                        const desc = descriptions[etf.symbol] || '';
+                        const desc = descriptions[etf.symbol] || etf.description || '';
                         
                         html += `
                             <tr>
@@ -740,6 +809,22 @@
                             </tr>
                         `;
                     }
+
+                    // Add total row for each group
+                    html += `
+                        <tr class="total-row">
+                            <td>
+                                <div class="symbol-badge">TOTAL</div>
+                            </td>
+                            <td></td>
+                            <td class="volume-cell">
+                                <div class="volume-shares">${formatNumber(groupTotalShares)}</div>
+                            </td>
+                            <td class="volume-cell">
+                                <div class="volume-shares">${formatCurrency(groupTotalDollars)}</div>
+                            </td>
+                        </tr>
+                    `;
                 }
 
                 html += `
@@ -751,15 +836,31 @@
             }
 
             html += '</div>';
+
+            // Grand Total Section
+            html += `
+                <div class="grand-total">
+                    <h3>📊 Grand Total (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})</h3>
+                    <div class="grand-total-grid">
+                        <div class="grand-total-item">
+                            <div class="grand-total-label">Total Volume (Shares)</div>
+                            <div class="grand-total-value">${formatNumber(grandTotalShares)}</div>
+                        </div>
+                        <div class="grand-total-item">
+                            <div class="grand-total-label">Total Volume ($)</div>
+                            <div class="grand-total-value">${formatCurrency(grandTotalDollars)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
             document.getElementById('mainContent').innerHTML = html;
         }
 
-        // Load saved API URL on page load
+        // Auto-connect on page load
         window.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('xrp_etf_api_url');
-            if (savedUrl) {
-                document.getElementById('apiUrl').value = savedUrl;
-            }
+            fetchData();
+            startAutoRefresh();
         });
     </script>
 </body>

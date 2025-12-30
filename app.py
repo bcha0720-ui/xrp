@@ -18,9 +18,9 @@ cache = {
 }
 
 groups = {
-    "Index ETFs": ['EZPZ', 'GDLC', 'NCIQ', 'BITW'],
     "Spot ETFs": ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
     "Futures ETFs": ['UXRP', 'XRPI', 'XRPM', 'XRPT', 'XXRP', 'XRPK'],
+    "Index ETFs": ['EZPZ', 'GDLC', 'NCIQ', 'BITW'],
     "Canada ETFs": ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 
                     'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE']
 }
