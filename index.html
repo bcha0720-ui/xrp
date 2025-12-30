@@ -728,26 +728,57 @@
 
         async function fetchXRPPrice() {
             try {
+                // Try CoinGecko first
                 const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true');
+                
+                if (!response.ok) {
+                    throw new Error('CoinGecko API error');
+                }
+                
                 const data = await response.json();
-                const price = data.ripple.usd;
-                const change = data.ripple.usd_24h_change;
                 
-                const priceEl = document.getElementById('xrpPrice');
-                const changeClass = change >= 0 ? 'positive' : 'negative';
-                const changeSymbol = change >= 0 ? '+' : '';
-                
-                priceEl.innerHTML = `
-                    <span class="xrp-label">XRP Price</span>
-                    <span class="xrp-value">$${price.toFixed(4)}</span>
-                    <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
-                `;
+                if (data.ripple && data.ripple.usd) {
+                    const price = data.ripple.usd;
+                    const change = data.ripple.usd_24h_change || 0;
+                    
+                    const priceEl = document.getElementById('xrpPrice');
+                    const changeClass = change >= 0 ? 'positive' : 'negative';
+                    const changeSymbol = change >= 0 ? '+' : '';
+                    
+                    priceEl.innerHTML = `
+                        <span class="xrp-label">XRP Price</span>
+                        <span class="xrp-value">$${price.toFixed(4)}</span>
+                        <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
+                    `;
+                } else {
+                    throw new Error('Invalid data');
+                }
             } catch (error) {
                 console.error('Error fetching XRP price:', error);
-                document.getElementById('xrpPrice').innerHTML = `
-                    <span class="xrp-label">XRP Price</span>
-                    <span class="xrp-value">--</span>
-                `;
+                // Try backup API (Binance)
+                try {
+                    const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=XRPUSDT');
+                    const binanceData = await binanceResponse.json();
+                    
+                    const price = parseFloat(binanceData.lastPrice);
+                    const change = parseFloat(binanceData.priceChangePercent);
+                    
+                    const priceEl = document.getElementById('xrpPrice');
+                    const changeClass = change >= 0 ? 'positive' : 'negative';
+                    const changeSymbol = change >= 0 ? '+' : '';
+                    
+                    priceEl.innerHTML = `
+                        <span class="xrp-label">XRP Price</span>
+                        <span class="xrp-value">$${price.toFixed(4)}</span>
+                        <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
+                    `;
+                } catch (backupError) {
+                    console.error('Backup API also failed:', backupError);
+                    document.getElementById('xrpPrice').innerHTML = `
+                        <span class="xrp-label">XRP Price</span>
+                        <span class="xrp-value">--</span>
+                    `;
+                }
             }
         }
 
