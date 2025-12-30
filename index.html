@@ -158,6 +158,42 @@
             color: var(--accent-red);
         }
 
+        .twitter-handle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .twitter-handle:hover {
+            border-color: var(--accent-xrp);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .twitter-icon {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .twitter-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .twitter-user {
+            font-size: 0.75rem;
+            color: var(--accent-xrp);
+        }
+
         .last-updated {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -607,6 +643,11 @@
                 <span class="xrp-label">XRP Price</span>
                 <span class="xrp-value">Loading...</span>
             </div>
+            <a href="https://x.com/chachakobe4er" target="_blank" class="twitter-handle">
+                <span class="twitter-icon">𝕏</span>
+                <span class="twitter-name">XRP 🅧 Army</span>
+                <span class="twitter-user">@chachakobe4er</span>
+            </a>
             <div class="header-meta">
                 <div class="last-updated" id="lastUpdated">Not yet loaded</div>
                 <div class="status">
@@ -929,6 +970,11 @@
             fetchXRPPrice();
             fetchData();
             startAutoRefresh();
+            
+            // Update XRP price every 10 seconds
+            setInterval(() => {
+                fetchXRPPrice();
+            }, 10000);
         });
     </script>
 </body>
