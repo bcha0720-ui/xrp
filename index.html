@@ -204,6 +204,40 @@
             color: var(--accent-xrp);
         }
 
+        .site-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .site-link:hover {
+            border-color: var(--accent-purple);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .site-link-icon {
+            font-size: 1.2rem;
+        }
+
+        .site-link-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .site-link-desc {
+            font-size: 0.75rem;
+            color: var(--accent-purple);
+        }
+
         .last-updated {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -779,6 +813,11 @@
                 <span class="twitter-icon">𝕏</span>
                 <span class="twitter-name">XRP 🅧 Army</span>
                 <span class="twitter-user">@chachakobe4er</span>
+            </a>
+            <a href="https://xrpexchange.streamlit.app/" target="_blank" class="site-link">
+                <span class="site-link-icon">📊</span>
+                <span class="site-link-name">XRP Exchange</span>
+                <span class="site-link-desc">Holdings Tracker</span>
             </a>
             <div class="header-meta">
                 <div class="last-updated" id="lastUpdated">Not yet loaded</div>
