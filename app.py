@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yfinance as yf
 from datetime import datetime, timedelta
@@ -197,6 +197,57 @@ def get_etf_data():
         return jsonify(result)
     except Exception as e:
         logging.error(f"API Error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/historical', methods=['GET'])
+def get_historical():
+    """API endpoint to get historical price data for charts"""
+    try:
+        period = request.args.get('period', '1mo')  # 1mo, 3mo, 6mo, 1y
+        
+        all_symbols = []
+        for symbols in groups.values():
+            all_symbols.extend(symbols)
+        
+        logging.info(f"Fetching historical data for {len(all_symbols)} symbols, period: {period}")
+        
+        # Download historical data
+        hist = yf.download(all_symbols, period=period, group_by='ticker', progress=False, threads=False)
+        
+        historical_data = {}
+        
+        for symbol in all_symbols:
+            try:
+                if symbol in hist.columns.get_level_values(0):
+                    symbol_data = hist[symbol]
+                    if not symbol_data.empty and not symbol_data['Close'].isna().all():
+                        closes = symbol_data['Close'].dropna()
+                        volumes = symbol_data['Volume'].dropna()
+                        
+                        # Convert to list of {date, price, volume}
+                        prices = []
+                        for date, price in closes.items():
+                            vol = volumes.get(date, 0)
+                            prices.append({
+                                'date': date.strftime('%Y-%m-%d'),
+                                'price': round(float(price), 2),
+                                'volume': int(vol) if vol else 0
+                            })
+                        
+                        if prices:
+                            historical_data[symbol] = prices
+                            logging.info(f"✓ {symbol}: {len(prices)} data points")
+            except Exception as e:
+                logging.warning(f"Error processing {symbol}: {e}")
+        
+        return jsonify({
+            'period': period,
+            'data': historical_data,
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+        
+    except Exception as e:
+        logging.error(f"Historical API Error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])

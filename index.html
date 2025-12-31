@@ -942,6 +942,21 @@
             margin-bottom: 1rem;
         }
 
+        .chart-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: var(--text-muted);
+        }
+
+        .chart-loading .spinner {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 1rem;
+        }
+
         .chart-legend {
             display: flex;
             flex-wrap: wrap;
@@ -1033,15 +1048,18 @@
                     <button class="chart-close" onclick="closeChartModal()">×</button>
                 </div>
                 <div class="chart-controls">
-                    <button class="chart-tab active" data-chart="volume" onclick="switchChart('volume')">Volume ($)</button>
-                    <button class="chart-tab" data-chart="shares" onclick="switchChart('shares')">Volume (Shares)</button>
-                    <button class="chart-tab" data-chart="price" onclick="switchChart('price')">Price</button>
+                    <button class="chart-tab active" data-chart="price" onclick="switchChart('price')">Price</button>
+                    <button class="chart-tab" data-chart="volume" onclick="switchChart('volume')">Volume</button>
                 </div>
                 <div class="chart-period-controls">
-                    <button class="chart-period active" data-cperiod="daily" onclick="setChartPeriod('daily')">Daily</button>
-                    <button class="chart-period" data-cperiod="weekly" onclick="setChartPeriod('weekly')">Weekly</button>
-                    <button class="chart-period" data-cperiod="monthly" onclick="setChartPeriod('monthly')">Monthly</button>
-                    <button class="chart-period" data-cperiod="yearly" onclick="setChartPeriod('yearly')">Yearly</button>
+                    <button class="chart-period active" data-cperiod="1mo" onclick="setChartPeriod('1mo')">1 Month</button>
+                    <button class="chart-period" data-cperiod="3mo" onclick="setChartPeriod('3mo')">3 Months</button>
+                    <button class="chart-period" data-cperiod="6mo" onclick="setChartPeriod('6mo')">6 Months</button>
+                    <button class="chart-period" data-cperiod="1y" onclick="setChartPeriod('1y')">1 Year</button>
+                </div>
+                <div class="chart-loading" id="chartLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading chart data...</p>
                 </div>
                 <div class="chart-container">
                     <canvas id="etfChart"></canvas>
@@ -1400,20 +1418,20 @@
 
         // Chart variables
         let etfChart = null;
-        let currentChartType = 'volume';
-        let currentChartPeriod = 'daily';
+        let currentChartType = 'price';
+        let currentChartPeriod = '1mo';
+        let historicalData = null;
 
         const chartColors = [
             '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6', 
             '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
-            '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981'
+            '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981',
+            '#f59e0b', '#64748b', '#0ea5e9', '#d946ef', '#78716c'
         ];
 
         function openChartModal() {
             document.getElementById('chartOverlay').classList.add('active');
-            if (cachedData) {
-                renderChart();
-            }
+            fetchHistoricalData();
         }
 
         function closeChartModal() {
@@ -1425,7 +1443,9 @@
             document.querySelectorAll('.chart-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.chart === type);
             });
-            renderChart();
+            if (historicalData) {
+                renderChart();
+            }
         }
 
         function setChartPeriod(period) {
@@ -1433,11 +1453,35 @@
             document.querySelectorAll('.chart-period').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.cperiod === period);
             });
-            renderChart();
+            fetchHistoricalData();
+        }
+
+        async function fetchHistoricalData() {
+            document.getElementById('chartLoading').style.display = 'flex';
+            document.getElementById('etfChart').style.display = 'none';
+            document.getElementById('chartLegend').innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/api/historical?period=${currentChartPeriod}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                historicalData = await response.json();
+                renderChart();
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+                document.getElementById('chartLegend').innerHTML = `
+                    <div style="color: var(--accent-red); text-align: center; width: 100%;">
+                        Failed to load chart data. Please try again.
+                    </div>
+                `;
+            } finally {
+                document.getElementById('chartLoading').style.display = 'none';
+                document.getElementById('etfChart').style.display = 'block';
+            }
         }
 
         function renderChart() {
-            if (!cachedData) return;
+            if (!historicalData || !historicalData.data) return;
 
             const ctx = document.getElementById('etfChart').getContext('2d');
             
@@ -1446,64 +1490,72 @@
                 etfChart.destroy();
             }
 
-            // Collect all ETFs with data
-            const allEtfs = [];
-            const labels = [];
-            const data = [];
+            const datasets = [];
             let colorIndex = 0;
+            let allDates = new Set();
 
-            for (const groupName of groupOrder) {
-                const etfs = cachedData.data[groupName] || [];
-                for (const etf of etfs) {
-                    const periodData = etf[currentChartPeriod] || etf.daily || {};
-                    let value = 0;
-                    
-                    if (currentChartType === 'volume') {
-                        value = periodData.dollars || 0;
-                    } else if (currentChartType === 'shares') {
-                        value = periodData.shares || 0;
-                    } else if (currentChartType === 'price') {
-                        value = etf.price || 0;
-                    }
-
-                    if (value > 0) {
-                        labels.push(etf.symbol);
-                        data.push(value);
-                        allEtfs.push({
-                            symbol: etf.symbol,
-                            value: value,
-                            color: chartColors[colorIndex % chartColors.length]
-                        });
-                        colorIndex++;
-                    }
-                }
+            // Collect all dates and prepare datasets
+            for (const [symbol, data] of Object.entries(historicalData.data)) {
+                data.forEach(d => allDates.add(d.date));
             }
 
-            // Sort by value descending
-            const sorted = allEtfs.sort((a, b) => b.value - a.value);
-            
-            const chartTitle = currentChartType === 'volume' 
-                ? `Volume ($) - ${currentChartPeriod.charAt(0).toUpperCase() + currentChartPeriod.slice(1)}`
-                : currentChartType === 'shares'
-                ? `Volume (Shares) - ${currentChartPeriod.charAt(0).toUpperCase() + currentChartPeriod.slice(1)}`
-                : 'ETF Prices';
+            const sortedDates = Array.from(allDates).sort();
+
+            // Create dataset for each ETF
+            for (const [symbol, data] of Object.entries(historicalData.data)) {
+                const color = chartColors[colorIndex % chartColors.length];
+                
+                // Create a map for quick lookup
+                const dataMap = {};
+                data.forEach(d => {
+                    dataMap[d.date] = currentChartType === 'price' ? d.price : d.volume;
+                });
+
+                // Fill in data for all dates
+                const values = sortedDates.map(date => dataMap[date] || null);
+
+                datasets.push({
+                    label: symbol,
+                    data: values,
+                    borderColor: color,
+                    backgroundColor: color + '20',
+                    pointBackgroundColor: color,
+                    pointBorderColor: color,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    spanGaps: true
+                });
+                colorIndex++;
+            }
+
+            // Sort datasets by latest value for legend
+            datasets.sort((a, b) => {
+                const aLast = a.data.filter(v => v !== null).pop() || 0;
+                const bLast = b.data.filter(v => v !== null).pop() || 0;
+                return bLast - aLast;
+            });
+
+            const chartTitle = currentChartType === 'price' ? 'Price Comparison' : 'Volume Comparison';
 
             etfChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: sorted.map(e => e.symbol),
-                    datasets: [{
-                        label: chartTitle,
-                        data: sorted.map(e => e.value),
-                        backgroundColor: sorted.map(e => e.color),
-                        borderColor: sorted.map(e => e.color),
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
+                    labels: sortedDates.map(d => {
+                        const date = new Date(d);
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: {
                         legend: {
                             display: false
@@ -1517,13 +1569,12 @@
                             padding: 12,
                             callbacks: {
                                 label: function(context) {
+                                    if (context.raw === null) return null;
                                     let value = context.raw;
-                                    if (currentChartType === 'volume') {
-                                        return '$' + formatNumber(value);
-                                    } else if (currentChartType === 'shares') {
-                                        return formatNumber(value) + ' shares';
+                                    if (currentChartType === 'price') {
+                                        return context.dataset.label + ': $' + value.toFixed(2);
                                     } else {
-                                        return '$' + value.toFixed(2);
+                                        return context.dataset.label + ': ' + formatNumber(value);
                                     }
                                 }
                             }
@@ -1533,7 +1584,9 @@
                         x: {
                             ticks: {
                                 color: '#8888a0',
-                                font: { size: 11 }
+                                maxRotation: 45,
+                                minRotation: 45,
+                                maxTicksLimit: 10
                             },
                             grid: {
                                 color: '#2a2a3a'
@@ -1544,7 +1597,7 @@
                                 color: '#8888a0',
                                 callback: function(value) {
                                     if (currentChartType === 'price') {
-                                        return '$' + value;
+                                        return '$' + value.toFixed(2);
                                     }
                                     return formatNumber(value);
                                 }
@@ -1557,14 +1610,33 @@
                 }
             });
 
-            // Render legend
-            const legendHtml = sorted.slice(0, 10).map(e => `
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${e.color}"></div>
-                    <span>${e.symbol}: ${currentChartType === 'price' ? '$' + e.value.toFixed(2) : (currentChartType === 'volume' ? '$' : '') + formatNumber(e.value)}</span>
-                </div>
-            `).join('');
+            // Render interactive legend
+            const legendHtml = datasets.map((d, i) => {
+                const lastValue = d.data.filter(v => v !== null).pop() || 0;
+                const valueStr = currentChartType === 'price' 
+                    ? '$' + lastValue.toFixed(2) 
+                    : formatNumber(lastValue);
+                return `
+                    <div class="legend-item" onclick="toggleDataset(${i})" style="cursor: pointer; opacity: 1;" data-index="${i}">
+                        <div class="legend-color" style="background: ${d.borderColor}"></div>
+                        <span>${d.label}: ${valueStr}</span>
+                    </div>
+                `;
+            }).join('');
             document.getElementById('chartLegend').innerHTML = legendHtml;
+        }
+
+        function toggleDataset(index) {
+            if (!etfChart) return;
+            const meta = etfChart.getDatasetMeta(index);
+            meta.hidden = !meta.hidden;
+            etfChart.update();
+            
+            // Update legend opacity
+            const legendItem = document.querySelector(`.legend-item[data-index="${index}"]`);
+            if (legendItem) {
+                legendItem.style.opacity = meta.hidden ? '0.4' : '1';
+            }
         }
 
         // Close modals on escape key
