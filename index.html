@@ -14,6 +14,9 @@
       gtag('config', 'G-JFYKZKVTMZ');
     </script>
     
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -793,6 +796,174 @@
         .popup-later:hover {
             color: var(--text-secondary);
         }
+
+        /* Chart Button */
+        .btn-chart {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-chart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+            color: white;
+        }
+
+        /* Chart Modal */
+        .chart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chart-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chart-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-overlay.active .chart-modal {
+            transform: scale(1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .chart-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .chart-close:hover {
+            color: var(--text-primary);
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-tab {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .chart-tab:hover {
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+        }
+
+        .chart-tab.active {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            color: white;
+        }
+
+        .chart-period-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-period {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .chart-period:hover {
+            border-color: var(--accent-xrp);
+            color: var(--text-primary);
+        }
+
+        .chart-period.active {
+            background: var(--accent-xrp-dim);
+            border-color: var(--accent-xrp);
+            color: var(--accent-xrp);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -834,6 +1005,9 @@
             <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
             <button class="btn" data-period="monthly" onclick="setPeriod('monthly')">Monthly</button>
             <button class="btn" data-period="yearly" onclick="setPeriod('yearly')">Yearly</button>
+            <button class="btn btn-chart" onclick="openChartModal()">
+                📊 Charts
+            </button>
             <button class="btn btn-refresh" id="refreshBtn" onclick="fetchData()">
                 ↻ Refresh Data
             </button>
@@ -850,6 +1024,31 @@
             <p>Data provided by <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> via yfinance</p>
             <p style="margin-top: 0.5rem;">Prices and volumes may be delayed • Auto-refreshes every 5 minutes</p>
         </footer>
+
+        <!-- Chart Modal -->
+        <div class="chart-overlay" id="chartOverlay">
+            <div class="chart-modal">
+                <div class="chart-header">
+                    <h2>📊 ETF Volume Comparison</h2>
+                    <button class="chart-close" onclick="closeChartModal()">×</button>
+                </div>
+                <div class="chart-controls">
+                    <button class="chart-tab active" data-chart="volume" onclick="switchChart('volume')">Volume ($)</button>
+                    <button class="chart-tab" data-chart="shares" onclick="switchChart('shares')">Volume (Shares)</button>
+                    <button class="chart-tab" data-chart="price" onclick="switchChart('price')">Price</button>
+                </div>
+                <div class="chart-period-controls">
+                    <button class="chart-period active" data-cperiod="daily" onclick="setChartPeriod('daily')">Daily</button>
+                    <button class="chart-period" data-cperiod="weekly" onclick="setChartPeriod('weekly')">Weekly</button>
+                    <button class="chart-period" data-cperiod="monthly" onclick="setChartPeriod('monthly')">Monthly</button>
+                    <button class="chart-period" data-cperiod="yearly" onclick="setChartPeriod('yearly')">Yearly</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="etfChart"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+        </div>
 
         <!-- Follow Popup Modal -->
         <div class="popup-overlay" id="popupOverlay">
@@ -1189,18 +1388,192 @@
 
         function closePopup() {
             document.getElementById('popupOverlay').classList.remove('active');
-            // Remember that user closed it (don't show again for 24 hours)
             localStorage.setItem('popup_closed', Date.now());
         }
 
         function shouldShowPopup() {
             const lastClosed = localStorage.getItem('popup_closed');
             if (!lastClosed) return true;
-            
-            // Show again after 24 hours
             const hoursSinceClosed = (Date.now() - parseInt(lastClosed)) / (1000 * 60 * 60);
             return hoursSinceClosed > 24;
         }
+
+        // Chart variables
+        let etfChart = null;
+        let currentChartType = 'volume';
+        let currentChartPeriod = 'daily';
+
+        const chartColors = [
+            '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6', 
+            '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
+            '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981'
+        ];
+
+        function openChartModal() {
+            document.getElementById('chartOverlay').classList.add('active');
+            if (cachedData) {
+                renderChart();
+            }
+        }
+
+        function closeChartModal() {
+            document.getElementById('chartOverlay').classList.remove('active');
+        }
+
+        function switchChart(type) {
+            currentChartType = type;
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.chart === type);
+            });
+            renderChart();
+        }
+
+        function setChartPeriod(period) {
+            currentChartPeriod = period;
+            document.querySelectorAll('.chart-period').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.cperiod === period);
+            });
+            renderChart();
+        }
+
+        function renderChart() {
+            if (!cachedData) return;
+
+            const ctx = document.getElementById('etfChart').getContext('2d');
+            
+            // Destroy existing chart
+            if (etfChart) {
+                etfChart.destroy();
+            }
+
+            // Collect all ETFs with data
+            const allEtfs = [];
+            const labels = [];
+            const data = [];
+            let colorIndex = 0;
+
+            for (const groupName of groupOrder) {
+                const etfs = cachedData.data[groupName] || [];
+                for (const etf of etfs) {
+                    const periodData = etf[currentChartPeriod] || etf.daily || {};
+                    let value = 0;
+                    
+                    if (currentChartType === 'volume') {
+                        value = periodData.dollars || 0;
+                    } else if (currentChartType === 'shares') {
+                        value = periodData.shares || 0;
+                    } else if (currentChartType === 'price') {
+                        value = etf.price || 0;
+                    }
+
+                    if (value > 0) {
+                        labels.push(etf.symbol);
+                        data.push(value);
+                        allEtfs.push({
+                            symbol: etf.symbol,
+                            value: value,
+                            color: chartColors[colorIndex % chartColors.length]
+                        });
+                        colorIndex++;
+                    }
+                }
+            }
+
+            // Sort by value descending
+            const sorted = allEtfs.sort((a, b) => b.value - a.value);
+            
+            const chartTitle = currentChartType === 'volume' 
+                ? `Volume ($) - ${currentChartPeriod.charAt(0).toUpperCase() + currentChartPeriod.slice(1)}`
+                : currentChartType === 'shares'
+                ? `Volume (Shares) - ${currentChartPeriod.charAt(0).toUpperCase() + currentChartPeriod.slice(1)}`
+                : 'ETF Prices';
+
+            etfChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(e => e.symbol),
+                    datasets: [{
+                        label: chartTitle,
+                        data: sorted.map(e => e.value),
+                        backgroundColor: sorted.map(e => e.color),
+                        borderColor: sorted.map(e => e.color),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            titleColor: '#ffffff',
+                            bodyColor: '#8888a0',
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw;
+                                    if (currentChartType === 'volume') {
+                                        return '$' + formatNumber(value);
+                                    } else if (currentChartType === 'shares') {
+                                        return formatNumber(value) + ' shares';
+                                    } else {
+                                        return '$' + value.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#8888a0',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                color: '#2a2a3a'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8888a0',
+                                callback: function(value) {
+                                    if (currentChartType === 'price') {
+                                        return '$' + value;
+                                    }
+                                    return formatNumber(value);
+                                }
+                            },
+                            grid: {
+                                color: '#2a2a3a'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Render legend
+            const legendHtml = sorted.slice(0, 10).map(e => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${e.color}"></div>
+                    <span>${e.symbol}: ${currentChartType === 'price' ? '$' + e.value.toFixed(2) : (currentChartType === 'volume' ? '$' : '') + formatNumber(e.value)}</span>
+                </div>
+            `).join('');
+            document.getElementById('chartLegend').innerHTML = legendHtml;
+        }
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeChartModal();
+                closePopup();
+            }
+        });
 
         // Auto-connect on page load
         window.addEventListener('DOMContentLoaded', () => {
