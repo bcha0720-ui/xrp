@@ -979,6 +979,278 @@
             height: 12px;
             border-radius: 3px;
         }
+
+        /* Main Tab Navigation */
+        .main-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .main-tab {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .main-tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .main-tab.active {
+            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            color: var(--bg-primary);
+        }
+
+        .main-tab-icon {
+            font-size: 1.2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Holdings Tracker Styles */
+        .holdings-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .summary-card.highlight {
+            border-color: var(--accent-xrp);
+            background: linear-gradient(135deg, var(--bg-card), var(--accent-xrp-dim));
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .summary-value.accent {
+            color: var(--accent-xrp);
+        }
+
+        .holdings-table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .holdings-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .holdings-table-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .holdings-table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .holdings-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .holdings-table th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            z-index: 10;
+            padding: 0.75rem 1rem;
+            text-align: right;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .holdings-table th:first-child {
+            text-align: left;
+        }
+
+        .holdings-table th.etf-header {
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+        }
+
+        .holdings-table th.sub-header {
+            font-size: 0.65rem;
+            color: var(--accent-xrp);
+        }
+
+        .holdings-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
+        .holdings-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-xrp);
+        }
+
+        .holdings-table tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .holdings-table .value-cell {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .holdings-table .xrp-cell {
+            color: var(--text-primary);
+        }
+
+        .holdings-table .no-data {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .etf-column-group {
+            border-left: 1px solid var(--border);
+        }
+
+        /* Data Update Section */
+        .data-update-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .data-update-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .update-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .update-method {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .update-method h4 {
+            font-size: 0.9rem;
+            color: var(--accent-xrp);
+            margin-bottom: 0.75rem;
+        }
+
+        .update-method p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .update-method code {
+            background: var(--bg-primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--accent-xrp);
+        }
+
+        .csv-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .csv-upload-area:hover {
+            border-color: var(--accent-xrp);
+            background: var(--accent-xrp-dim);
+        }
+
+        .csv-upload-area input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -1015,25 +1287,109 @@
             </div>
         </header>
 
-        <div class="controls">
-            <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
-            <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
-            <button class="btn" data-period="monthly" onclick="setPeriod('monthly')">Monthly</button>
-            <button class="btn" data-period="yearly" onclick="setPeriod('yearly')">Yearly</button>
-            <button class="btn btn-chart" onclick="openChartModal()">
-                📊 Charts
+        <!-- Main Tab Navigation -->
+        <div class="main-tabs">
+            <button class="main-tab active" onclick="switchMainTab('trading')">
+                <span class="main-tab-icon">📈</span>
+                ETF Trading Volume
             </button>
-            <button class="btn btn-refresh" id="refreshBtn" onclick="fetchData()">
-                ↻ Refresh Data
+            <button class="main-tab" onclick="switchMainTab('holdings')">
+                <span class="main-tab-icon">💎</span>
+                Spot ETF XRP Holdings
             </button>
         </div>
 
-        <main id="mainContent">
-            <div class="loading-container">
-                <div class="spinner"></div>
-                <p class="loading-text">Loading ETF data...</p>
+        <!-- Trading Tab Content -->
+        <div id="tradingTab" class="tab-content active">
+            <div class="controls">
+                <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
+                <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
+                <button class="btn" data-period="monthly" onclick="setPeriod('monthly')">Monthly</button>
+                <button class="btn" data-period="yearly" onclick="setPeriod('yearly')">Yearly</button>
+                <button class="btn btn-chart" onclick="openChartModal()">
+                    📊 Charts
+                </button>
+                <button class="btn btn-refresh" id="refreshBtn" onclick="fetchData()">
+                    ↻ Refresh Data
+                </button>
             </div>
-        </main>
+
+            <main id="mainContent">
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Loading ETF data...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- Holdings Tab Content -->
+        <div id="holdingsTab" class="tab-content">
+            <div class="holdings-summary" id="holdingsSummary">
+                <div class="summary-card highlight">
+                    <div class="summary-label">Total XRP</div>
+                    <div class="summary-value accent" id="totalXRP">769,657,715</div>
+                </div>
+                <div class="summary-card highlight">
+                    <div class="summary-label">Total Value</div>
+                    <div class="summary-value accent" id="totalValue">$1,541,932,266</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Current XRP Price</div>
+                    <div class="summary-value" id="holdingsXRPPrice">$2.0034</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Active ETFs</div>
+                    <div class="summary-value" id="activeETFs">11</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Last Updated</div>
+                    <div class="summary-value" id="holdingsLastUpdated" style="font-size: 1rem;">1/3/2026</div>
+                </div>
+            </div>
+
+            <div class="holdings-table-container">
+                <div class="holdings-table-header">
+                    <div class="holdings-table-title">
+                        <span>📊</span>
+                        Daily Holdings Data
+                    </div>
+                    <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
+                        ↻ Refresh Display
+                    </button>
+                </div>
+                <div class="holdings-table-wrapper">
+                    <table class="holdings-table" id="holdingsTable">
+                        <!-- Table will be populated by JavaScript -->
+                    </table>
+                </div>
+            </div>
+
+            <div class="data-update-section">
+                <div class="data-update-title">
+                    <span>📝</span>
+                    How to Update Holdings Data
+                </div>
+                <div class="update-methods">
+                    <div class="update-method">
+                        <h4>Option 1: Edit JavaScript Data</h4>
+                        <p>Update the <code>holdingsData</code> array in this HTML file. Add new rows to the beginning of the array with the latest date's data.</p>
+                    </div>
+                    <div class="update-method">
+                        <h4>Option 2: CSV Upload (Coming Soon)</h4>
+                        <p>Upload a CSV file with columns: Date, Canary XRP, Canary Value, Bitwise XRP, etc. The data will be parsed and displayed automatically.</p>
+                        <div class="csv-upload-area" onclick="document.getElementById('csvInput').click()">
+                            <input type="file" id="csvInput" accept=".csv" onchange="handleCSVUpload(event)">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Click to upload CSV file</div>
+                        </div>
+                    </div>
+                    <div class="update-method">
+                        <h4>Option 3: External JSON API</h4>
+                        <p>Host your data as a JSON file (e.g., on GitHub Pages, Render, or any static host) and update the <code>HOLDINGS_API_URL</code> variable.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <footer>
             <p>Data provided by <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> via yfinance</p>
@@ -1085,6 +1441,354 @@
     </div>
 
     <script>
+        // =====================================================
+        // XRP SPOT ETF HOLDINGS DATA
+        // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
+        // =====================================================
+        const holdingsData = [
+            {
+                date: "1/5/2026",
+                canary: { xrp: 175640703, value: 349221200.58 },
+                bitwise: { xrp: null, value: null },
+                franklin: { xrp: null, value: null },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "1/2/2026",
+                canary: { xrp: 175547917, value: 319148921.70 },
+                bitwise: { xrp: 132104912, value: 262824043 },
+                franklin: { xrp: 123274697, value: 245256242.88 },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/31/2025",
+                canary: { xrp: 175552727, value: 328418423.11 },
+                bitwise: { xrp: 118387154, value: 215197065.61 },
+                franklin: { xrp: 136925159.19, value: 246367782.25 },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/30/2025",
+                canary: { xrp: 175555131, value: null },
+                bitwise: { xrp: 131223200, value: 245443810 },
+                franklin: { xrp: 116214913, value: 217371859.35 },
+                grayscale: { xrp: 122230386, value: 228252534 },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/29/2025",
+                canary: { xrp: 175557536, value: 324731233 },
+                bitwise: { xrp: 125625472, value: 232284011 },
+                franklin: { xrp: 113499611, value: 209863051 },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/26/2025",
+                canary: { xrp: 176203556, value: 328519019 },
+                bitwise: { xrp: null, value: null },
+                franklin: { xrp: null, value: null },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/24/2025",
+                canary: { xrp: 176208383, value: 332060117 },
+                bitwise: { xrp: null, value: null },
+                franklin: { xrp: 111870430, value: 208556687 },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/23/2025",
+                canary: { xrp: 175784910, value: 333629564 },
+                bitwise: { xrp: null, value: null },
+                franklin: { xrp: 105896766, value: 199553984 },
+                grayscale: { xrp: 121454333, value: 228341918 },
+                shares21: { xrp: 135739074, value: 255426264 },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/22/2025",
+                canary: { xrp: 175787318, value: 335859777 },
+                bitwise: { xrp: 122826582, value: 230048700 },
+                franklin: { xrp: 101552284, value: 192683272 },
+                grayscale: { xrp: 116603997, value: 221122690 },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/19/2025",
+                canary: { xrp: 175794542, value: 318653801 },
+                bitwise: { xrp: 112749910, value: 215424487 },
+                franklin: { xrp: null, value: null },
+                grayscale: { xrp: 115633930, value: 220682384 },
+                shares21: { xrp: 132421082, value: 232394226 },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/18/2025",
+                canary: { xrp: 174412723, value: 326809327 },
+                bitwise: { xrp: 112190079, value: 203322080 },
+                franklin: { xrp: 96664740, value: 175185509 },
+                grayscale: { xrp: 110007542, value: 198205098 },
+                shares21: { xrp: 128419942, value: 230206632 },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: null, value: null }
+            },
+            {
+                date: "12/17/2025",
+                canary: { xrp: 174415112, value: 336316637 },
+                bitwise: { xrp: 110174688, value: 206425499 },
+                franklin: { xrp: null, value: null },
+                grayscale: { xrp: null, value: null },
+                shares21: { xrp: null, value: null },
+                rex: { xrp: null, value: null },
+                nciq: { xrp: null, value: null },
+                bitw: { xrp: null, value: null },
+                gdlc: { xrp: null, value: null },
+                ezpz: { xrp: 330324, value: 618901 }
+            },
+            {
+                date: "12/16/2025",
+                canary: { xrp: 171648969, value: 323681379 },
+                bitwise: { xrp: 107487501, value: 200245575 },
+                franklin: { xrp: 92863318, value: 179048835 },
+                grayscale: { xrp: 108261421, value: 208683308 },
+                shares21: { xrp: 123052427, value: 231256177 },
+                rex: { xrp: 30484262, value: null },
+                nciq: { xrp: 3647484, value: null },
+                bitw: { xrp: 30843614, value: null },
+                gdlc: { xrp: 14176113, value: null },
+                ezpz: { xrp: 330366, value: 636976 }
+            }
+        ];
+
+        // ETF column definitions for the holdings table
+        const etfColumns = [
+            { key: 'canary', name: 'Canary XRP', ticker: 'XRPC' },
+            { key: 'bitwise', name: 'Bitwise XRP', ticker: 'XRP' },
+            { key: 'franklin', name: 'Franklin XRP', ticker: 'XRPZ' },
+            { key: 'grayscale', name: 'Grayscale XRP', ticker: 'GXRP' },
+            { key: 'shares21', name: '21Shares XRP', ticker: 'TOXR' },
+            { key: 'rex', name: 'Rex Shares', ticker: 'XRPR' },
+            { key: 'nciq', name: 'NCIQ', ticker: 'NCIQ' },
+            { key: 'bitw', name: 'BITW', ticker: 'BITW' },
+            { key: 'gdlc', name: 'Grayscale GDLC', ticker: 'GDLC' },
+            { key: 'ezpz', name: 'Franklin EZPZ', ticker: 'EZPZ' }
+        ];
+
+        // Tab switching function
+        function switchMainTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.main-tab').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tabName === 'trading') {
+                document.getElementById('tradingTab').classList.add('active');
+            } else if (tabName === 'holdings') {
+                document.getElementById('holdingsTab').classList.add('active');
+                renderHoldingsTable();
+                updateHoldingsSummary();
+            }
+        }
+
+        // Format number for holdings display
+        function formatHoldingsNumber(num) {
+            if (num === null || num === undefined) return '—';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        function formatHoldingsCurrency(num) {
+            if (num === null || num === undefined) return '—';
+            return '$' + formatHoldingsNumber(num);
+        }
+
+        // Calculate and update summary statistics
+        function updateHoldingsSummary() {
+            // Get latest data (first row)
+            const latestData = holdingsData[0];
+            let totalXRP = 0;
+            let totalValue = 0;
+            let activeCount = 0;
+
+            // Sum up all ETF holdings from latest row
+            etfColumns.forEach(col => {
+                const data = latestData[col.key];
+                if (data && data.xrp) {
+                    totalXRP += data.xrp;
+                    activeCount++;
+                }
+                if (data && data.value) {
+                    totalValue += data.value;
+                }
+            });
+
+            // If latest row doesn't have all data, look at most recent complete data
+            holdingsData.forEach(row => {
+                etfColumns.forEach(col => {
+                    const data = row[col.key];
+                    if (data && data.xrp && !latestData[col.key]?.xrp) {
+                        // Use this older value if latest doesn't have it
+                    }
+                });
+            });
+
+            // Update the summary cards
+            document.getElementById('totalXRP').textContent = formatHoldingsNumber(totalXRP);
+            document.getElementById('totalValue').textContent = formatHoldingsCurrency(totalValue);
+            document.getElementById('holdingsLastUpdated').textContent = latestData.date;
+            
+            // Calculate price from total value / total XRP
+            if (totalXRP > 0 && totalValue > 0) {
+                const impliedPrice = totalValue / totalXRP;
+                document.getElementById('holdingsXRPPrice').textContent = '$' + impliedPrice.toFixed(4);
+            }
+        }
+
+        // Render the holdings table
+        function renderHoldingsTable() {
+            const table = document.getElementById('holdingsTable');
+            
+            // Build header rows
+            let headerRow1 = '<tr><th rowspan="2">Date</th>';
+            let headerRow2 = '<tr>';
+            
+            etfColumns.forEach(col => {
+                headerRow1 += `<th colspan="2" class="etf-header">${col.name}<br><span style="color: var(--accent-xrp); font-size: 0.65rem;">${col.ticker}</span></th>`;
+                headerRow2 += `<th class="sub-header">XRP</th><th class="sub-header">Value</th>`;
+            });
+            
+            headerRow1 += '</tr>';
+            headerRow2 += '</tr>';
+
+            // Build data rows
+            let dataRows = '';
+            holdingsData.forEach(row => {
+                dataRows += `<tr><td>${row.date}</td>`;
+                etfColumns.forEach(col => {
+                    const data = row[col.key] || {};
+                    const xrpVal = data.xrp !== null && data.xrp !== undefined 
+                        ? formatHoldingsNumber(data.xrp) 
+                        : '<span class="no-data">—</span>';
+                    const valueVal = data.value !== null && data.value !== undefined 
+                        ? formatHoldingsCurrency(data.value) 
+                        : '<span class="no-data">—</span>';
+                    dataRows += `<td class="xrp-cell etf-column-group">${xrpVal}</td><td class="value-cell">${valueVal}</td>`;
+                });
+                dataRows += '</tr>';
+            });
+
+            table.innerHTML = `
+                <thead>
+                    ${headerRow1}
+                    ${headerRow2}
+                </thead>
+                <tbody>
+                    ${dataRows}
+                </tbody>
+            `;
+        }
+
+        function refreshHoldingsDisplay() {
+            renderHoldingsTable();
+            updateHoldingsSummary();
+        }
+
+        // CSV Upload handler
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    
+                    console.log('CSV Headers:', headers);
+                    console.log('CSV has', lines.length - 1, 'data rows');
+                    
+                    // Parse and add to holdings data
+                    // This is a basic implementation - you would expand this
+                    // to properly map your CSV columns to the data structure
+                    
+                    alert('CSV uploaded successfully! Check console for parsed data. To fully integrate, update the holdingsData array in the HTML file.');
+                } catch (error) {
+                    alert('Error parsing CSV: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // =====================================================
+        // EXISTING ETF TRADING TRACKER CODE BELOW
+        // =====================================================
+
         const descriptions = {
             'EZPZ': 'Franklin Templeton',
             'GDLC': 'Grayscale Digital Large Cap',
