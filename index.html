@@ -1364,31 +1364,6 @@
                 </div>
             </div>
 
-            <div class="data-update-section">
-                <div class="data-update-title">
-                    <span>📝</span>
-                    How to Update Holdings Data
-                </div>
-                <div class="update-methods">
-                    <div class="update-method">
-                        <h4>Option 1: Edit JavaScript Data</h4>
-                        <p>Update the <code>holdingsData</code> array in this HTML file. Add new rows to the beginning of the array with the latest date's data.</p>
-                    </div>
-                    <div class="update-method">
-                        <h4>Option 2: CSV Upload (Coming Soon)</h4>
-                        <p>Upload a CSV file with columns: Date, Canary XRP, Canary Value, Bitwise XRP, etc. The data will be parsed and displayed automatically.</p>
-                        <div class="csv-upload-area" onclick="document.getElementById('csvInput').click()">
-                            <input type="file" id="csvInput" accept=".csv" onchange="handleCSVUpload(event)">
-                            <div class="upload-icon">📄</div>
-                            <div class="upload-text">Click to upload CSV file</div>
-                        </div>
-                    </div>
-                    <div class="update-method">
-                        <h4>Option 3: External JSON API</h4>
-                        <p>Host your data as a JSON file (e.g., on GitHub Pages, Render, or any static host) and update the <code>HOLDINGS_API_URL</code> variable.</p>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <footer>
