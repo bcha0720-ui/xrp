@@ -1327,23 +1327,23 @@
             <div class="holdings-summary" id="holdingsSummary">
                 <div class="summary-card highlight">
                     <div class="summary-label">Total XRP</div>
-                    <div class="summary-value accent" id="totalXRP">769,657,715</div>
+                    <div class="summary-value accent" id="totalXRP">Loading...</div>
                 </div>
                 <div class="summary-card highlight">
                     <div class="summary-label">Total Value</div>
-                    <div class="summary-value accent" id="totalValue">$1,541,932,266</div>
+                    <div class="summary-value accent" id="totalValue">Loading...</div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Current XRP Price</div>
-                    <div class="summary-value" id="holdingsXRPPrice">$2.0034</div>
+                    <div class="summary-value" id="holdingsXRPPrice">Loading...</div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Active ETFs</div>
-                    <div class="summary-value" id="activeETFs">11</div>
+                    <div class="summary-value" id="activeETFs">--</div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label">Last Updated</div>
-                    <div class="summary-value" id="holdingsLastUpdated" style="font-size: 1rem;">1/3/2026</div>
+                    <div class="summary-value" id="holdingsLastUpdated" style="font-size: 1rem;">--</div>
                 </div>
             </div>
 
@@ -1669,38 +1669,32 @@
 
         // Calculate and update summary statistics
         function updateHoldingsSummary() {
-            // Get latest data (first row)
-            const latestData = holdingsData[0];
+            // Get the most recent value for each ETF (they may report on different days)
             let totalXRP = 0;
             let totalValue = 0;
             let activeCount = 0;
+            let latestDate = holdingsData[0].date;
 
-            // Sum up all ETF holdings from latest row
+            // For each ETF, find its most recent data point
             etfColumns.forEach(col => {
-                const data = latestData[col.key];
-                if (data && data.xrp) {
-                    totalXRP += data.xrp;
-                    activeCount++;
-                }
-                if (data && data.value) {
-                    totalValue += data.value;
-                }
-            });
-
-            // If latest row doesn't have all data, look at most recent complete data
-            holdingsData.forEach(row => {
-                etfColumns.forEach(col => {
+                for (const row of holdingsData) {
                     const data = row[col.key];
-                    if (data && data.xrp && !latestData[col.key]?.xrp) {
-                        // Use this older value if latest doesn't have it
+                    if (data && data.xrp) {
+                        totalXRP += data.xrp;
+                        activeCount++;
+                        if (data.value) {
+                            totalValue += data.value;
+                        }
+                        break; // Found most recent for this ETF, move to next
                     }
-                });
+                }
             });
 
             // Update the summary cards
             document.getElementById('totalXRP').textContent = formatHoldingsNumber(totalXRP);
             document.getElementById('totalValue').textContent = formatHoldingsCurrency(totalValue);
-            document.getElementById('holdingsLastUpdated').textContent = latestData.date;
+            document.getElementById('holdingsLastUpdated').textContent = latestDate;
+            document.getElementById('activeETFs').textContent = activeCount;
             
             // Calculate price from total value / total XRP
             if (totalXRP > 0 && totalValue > 0) {
