@@ -1646,7 +1646,6 @@
         function updateHoldingsSummary() {
             // Get the most recent value for each ETF (they may report on different days)
             let totalXRP = 0;
-            let totalValue = 0;
             let activeCount = 0;
             let latestDate = holdingsData[0].date;
 
@@ -1657,9 +1656,6 @@
                     if (data && data.xrp) {
                         totalXRP += data.xrp;
                         activeCount++;
-                        if (data.value) {
-                            totalValue += data.value;
-                        }
                         break; // Found most recent for this ETF, move to next
                     }
                 }
@@ -1667,14 +1663,17 @@
 
             // Update the summary cards
             document.getElementById('totalXRP').textContent = formatHoldingsNumber(totalXRP);
-            document.getElementById('totalValue').textContent = formatHoldingsCurrency(totalValue);
             document.getElementById('holdingsLastUpdated').textContent = latestDate;
             document.getElementById('activeETFs').textContent = activeCount;
             
-            // Calculate price from total value / total XRP
-            if (totalXRP > 0 && totalValue > 0) {
-                const impliedPrice = totalValue / totalXRP;
-                document.getElementById('holdingsXRPPrice').textContent = '$' + impliedPrice.toFixed(4);
+            // Use live XRP price to calculate total value
+            if (currentXRPPrice && totalXRP > 0) {
+                const totalValue = totalXRP * currentXRPPrice;
+                document.getElementById('totalValue').textContent = formatHoldingsCurrency(totalValue);
+                document.getElementById('holdingsXRPPrice').textContent = '$' + currentXRPPrice.toFixed(4);
+            } else {
+                document.getElementById('totalValue').textContent = 'Loading...';
+                document.getElementById('holdingsXRPPrice').textContent = 'Loading...';
             }
         }
 
@@ -1802,6 +1801,9 @@
         let cachedData = null;
         let autoRefreshInterval = null;
 
+        // Global variable to store current XRP price
+        let currentXRPPrice = null;
+
         async function fetchXRPPrice() {
             try {
                 // Try CoinGecko first
@@ -1817,6 +1819,9 @@
                     const price = data.ripple.usd;
                     const change = data.ripple.usd_24h_change || 0;
                     
+                    // Store price globally
+                    currentXRPPrice = price;
+                    
                     const priceEl = document.getElementById('xrpPrice');
                     const changeClass = change >= 0 ? 'positive' : 'negative';
                     const changeSymbol = change >= 0 ? '+' : '';
@@ -1826,6 +1831,9 @@
                         <span class="xrp-value">$${price.toFixed(4)}</span>
                         <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
                     `;
+                    
+                    // Update holdings summary if on that tab
+                    updateHoldingsSummary();
                 } else {
                     throw new Error('Invalid data');
                 }
@@ -1839,6 +1847,9 @@
                     const price = parseFloat(binanceData.lastPrice);
                     const change = parseFloat(binanceData.priceChangePercent);
                     
+                    // Store price globally
+                    currentXRPPrice = price;
+                    
                     const priceEl = document.getElementById('xrpPrice');
                     const changeClass = change >= 0 ? 'positive' : 'negative';
                     const changeSymbol = change >= 0 ? '+' : '';
@@ -1848,6 +1859,9 @@
                         <span class="xrp-value">$${price.toFixed(4)}</span>
                         <span class="xrp-change ${changeClass}">${changeSymbol}${change.toFixed(2)}% (24h)</span>
                     `;
+                    
+                    // Update holdings summary if on that tab
+                    updateHoldingsSummary();
                 } catch (backupError) {
                     console.error('Backup API also failed:', backupError);
                     document.getElementById('xrpPrice').innerHTML = `
