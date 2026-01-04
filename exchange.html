@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XRP Exchange Holdings Tracker</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JFYKZKVTMZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JFYKZKVTMZ');
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1a1a25;
+            --border: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #8888a0;
+            --text-muted: #5a5a70;
+            --accent-xrp: #23f7dd;
+            --accent-xrp-dim: rgba(35, 247, 221, 0.15);
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(35, 247, 221, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(35, 247, 221, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-xrp), var(--accent-blue));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--bg-primary);
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-xrp) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .xrp-price {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent-xrp-dim), rgba(59, 130, 246, 0.1));
+            border: 1px solid var(--accent-xrp);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .xrp-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .xrp-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-xrp);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .xrp-change {
+            font-size: 0.8rem;
+        }
+
+        .xrp-change.positive { color: var(--accent-green); }
+        .xrp-change.negative { color: var(--accent-red); }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--accent-xrp);
+            color: var(--text-primary);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .summary-card.highlight {
+            border-color: var(--accent-xrp);
+            background: linear-gradient(135deg, var(--bg-card), var(--accent-xrp-dim));
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .summary-value.accent {
+            color: var(--accent-xrp);
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-xrp);
+            color: var(--text-primary);
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            border: none;
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.3);
+        }
+
+        .btn-refresh:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.7rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-xrp);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            padding: 1.5rem;
+            height: 350px;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            text-align: right;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th:first-child, th:nth-child(2) {
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+        td:first-child, td:nth-child(2) {
+            text-align: left;
+        }
+
+        tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        tr.total-row {
+            background: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        tr.total-row td {
+            border-top: 2px solid var(--accent-xrp);
+            color: var(--accent-xrp);
+        }
+
+        .rank-cell {
+            font-weight: 600;
+            color: var(--accent-xrp);
+        }
+
+        .exchange-name {
+            text-transform: capitalize;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+        }
+
+        .positive { color: var(--accent-green); }
+        .negative { color: var(--accent-red); }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-xrp);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 300px;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-xrp), var(--accent-purple));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-xrp);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .wallet-details {
+            margin-top: 1.5rem;
+        }
+
+        .wallet-select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .wallet-select:focus {
+            outline: none;
+            border-color: var(--accent-xrp);
+        }
+
+        .wallet-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .wallet-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .wallet-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .wallet-name {
+            font-weight: 500;
+        }
+
+        .wallet-address {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .wallet-balance {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-xrp);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🏦</div>
+                <div>
+                    <h1>XRP Exchange Holdings</h1>
+                    <div class="logo-subtitle">Real-time XRPL Balance Tracker</div>
+                </div>
+            </div>
+            <div class="xrp-price" id="xrpPrice">
+                <span class="xrp-label">XRP Price</span>
+                <span class="xrp-value">Loading...</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <span>📈</span> ETF Tracker
+                </a>
+                <a href="https://xrpexchange.streamlit.app/" target="_blank" class="nav-link">
+                    <span>📊</span> Streamlit App
+                </a>
+            </div>
+        </header>
+
+        <div class="summary-cards">
+            <div class="summary-card highlight">
+                <div class="summary-label">Total XRP on Exchanges</div>
+                <div class="summary-value accent" id="totalXRP">--</div>
+            </div>
+            <div class="summary-card highlight">
+                <div class="summary-label">Total Value (USD)</div>
+                <div class="summary-value accent" id="totalValue">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Exchanges Tracked</div>
+                <div class="summary-value" id="exchangeCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Wallets Fetched</div>
+                <div class="summary-value" id="walletsFetched">0 / 0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Status</div>
+                <div class="summary-value" id="status" style="font-size: 1rem;">● Ready</div>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn btn-refresh" id="fetchBtn" onclick="fetchAllData()">
+                🔄 Fetch Live Data
+            </button>
+            <select class="btn" id="chartType" onchange="updateChart()">
+                <option value="bar">Bar Chart</option>
+                <option value="pie">Pie Chart</option>
+                <option value="doughnut">Doughnut</option>
+            </select>
+            <select class="btn" id="topN" onchange="updateChart()">
+                <option value="10">Top 10</option>
+                <option value="15">Top 15</option>
+                <option value="20">Top 20</option>
+                <option value="all">All</option>
+            </select>
+            <input type="text" class="filter-input" id="filterInput" placeholder="🔍 Filter exchanges..." onkeyup="filterTable()">
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📊</span> Holdings Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="holdingsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🏆</span> Exchange Rankings
+                    </div>
+                    <span id="tableCount" style="color: var(--text-muted); font-size: 0.85rem;">0 exchanges</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Exchange</th>
+                                <th>Balance (XRP)</th>
+                                <th>Value (USD)</th>
+                                <th>Share</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    Click "Fetch Live Data" to load balances
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card wallet-details">
+            <div class="card-header">
+                <div class="card-title">
+                    <span>🔍</span> Wallet Details
+                </div>
+            </div>
+            <div style="padding: 1rem;">
+                <select class="wallet-select" id="exchangeSelect" onchange="showWalletDetails()">
+                    <option value="">Select an exchange to view wallets...</option>
+                </select>
+                <div class="wallet-list" id="walletList">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        Select an exchange above to view individual wallet balances
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data fetched directly from XRPL nodes (s1.ripple.com, s2.ripple.com, xrplcluster.com)</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="index.html">← Back to ETF Tracker</a> • 
+                <a href="https://xrpexchange.streamlit.app/" target="_blank">Full Streamlit Dashboard</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const RIPPLED_URLS = [
+            "https://s1.ripple.com:51234",
+            "https://s2.ripple.com:51234",
+            "https://xrplcluster.com"
+        ];
+
+        // Full exchange wallet data
+        const EXCHANGES = {
+            "upbit": {
+                "raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA": "Upbit1",
+                "rfL1mn4VTCoHdhHhHMwqpShCFUaDBRk6Z5": "Upbit12",
+                "rwa7YXssGVAL9yPKw6QJtCen2UqZbRQqpM": "Upbit13",
+                "rNcAdhSLXBrJ3aZUq22HaNtNEPpB5fR8Ri": "Upbit14",
+                "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": "Upbit15",
+                "rMNUAfSz2spLEbaBwPnGtxTzZCajJifnzH": "Upbit16",
+                "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": "Upbit17",
+                "rs48xReB6gjKtTnTfii93iwUhjhTJsW78B": "Upbit18",
+                "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": "Upbit19",
+                "rLgn612WAgRoZ285YmsQ4t7kb8Ui3csdoU": "Upbit20",
+                "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": "Upbit21",
+                "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": "Upbit22"
+            },
+            "binance": {
+                "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance 1",
+                "rNU4eAowPuixS5ZCWaRL72UUeKgxcKExpK": "Binance 10",
+                "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": "Binance 11",
+                "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance 12",
+                "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance 13",
+                "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": "Binance 14"
+            },
+            "bithumb": {
+                "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb1",
+                "rNTkgxs5WG5mU5Sz26YoDVrHim5Y5ohC7": "Bithumb2",
+                "r9hUMZBc3MWRc4YdsdZgNCW5Qef8wNSXpb": "Bithumb3",
+                "r9LHiNDZvpLoWPoKnbH2JWjFET8zoYT4Y5": "Bithumb4"
+            },
+            "kraken": {
+                "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Kraken1",
+                "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Kraken2",
+                "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Kraken4"
+            },
+            "bitstamp": {
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp1",
+                "rUobSiUpYH2S97Mgb4E7b7HuzQj2uzZ3aD": "Bitstamp2"
+            },
+            "coinbase": {
+                "rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w": "Coinbase1",
+                "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg": "Coinbase2"
+            },
+            "bybit": {
+                "rMrgNBrkE6FdCjWih5VAWkGMrmerrWpiZt": "Bybit 1",
+                "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bybit 4",
+                "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Bybit 6"
+            },
+            "bitfinex": {
+                "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex1"
+            },
+            "sbi": {
+                "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "SBI VC TRADE 4"
+            },
+            "robinhood": {
+                "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood1",
+                "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood2"
+            },
+            "crypto.com": {
+                "r4DymtkgUAh2wqRxVfdd3Xtswzim6eC6c5": "Crypto.com 1",
+                "rPHNKf25y3aqATYfrMv9LQnTRHQUYELXfn": "Crypto.com 2"
+            },
+            "gate.io": {
+                "rHcFoo6a9qT5NHiVn1THQRhsEGcxtYCV4d": "Gate.io 1",
+                "rNnWmrc1EtNRe5SEQEs9pFibcjhpvAiVKF": "Gate.io 3"
+            },
+            "kucoin": {
+                "rNFugeoj3ZN8Wv6xhuLegUBBPXKCyWLRkB": "Kucoin5",
+                "rp4gqz1XdqMsWRZbzPdPAQWw1tg5LuwUVP": "Kucoin8"
+            },
+            "bitrue": {
+                "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue1",
+                "raLPjTYeGezfdb6crXZzcC8RkLBEwbBHJ5": "Bitrue2"
+            },
+            "okx": {
+                "rUzWJkXyEtT8ekSSxkBYPqCvHpngcy6Fks": "Okx"
+            },
+            "gemini": {
+                "raBQUYdAhnnojJQ6Xi3eXztZ74ot24RDq1": "Gemini1"
+            },
+            "coinone": {
+                "rp2diYfVtpbgEMyaoWnuaWgFCAkqCAEg28": "Coinone1"
+            },
+            "korbit": {
+                "rBTjeJu1Rvnbq476Y7PDnvnXUeERV9CxEQ": "Korbit1"
+            },
+            "bitbank": {
+                "rLbKbPyuvs4wc1h13BEPHgbFGsRXMeFGL6": "Bitbank1"
+            },
+            "uphold": {
+                "rMdG3ju8pgyVh29ELPWaDuA74CpWW6Fxns": "Uphold3"
+            },
+            "etoro": {
+                "rsdvR9WZzKszBogBJrpLPE64WWyEW4ffzS": "eToro1"
+            },
+            "mexc": {
+                "rs2dgzYeqYqsk8bvkQR5YPyqsXYcA24MP2": "Mexc"
+            },
+            "bitpanda": {
+                "rUEfYyerfok6Yo38tTTTZKeRefNh9iB1Bd": "Bitpanda1"
+            },
+            "luno": {
+                "rsRy14FvipgqudiGmptJBhr1RtpsgfzKMM": "Luno1"
+            }
+        };
+
+        let currentXRPPrice = null;
+        let exchangeData = {};
+        let walletBalances = {};
+        let holdingsChart = null;
+        let isFetching = false;
+
+        // Fetch XRP price
+        async function fetchXRPPrice() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                if (data.ripple && data.ripple.usd) {
+                    currentXRPPrice = data.ripple.usd;
+                    const change = data.ripple.usd_24h_change || 0;
+                    const changeClass = change >= 0 ? 'positive' : 'negative';
+                    const changeSign = change >= 0 ? '+' : '';
+                    
+                    document.getElementById('xrpPrice').innerHTML = `
+                        <span class="xrp-label">XRP Price</span>
+                        <span class="xrp-value">$${currentXRPPrice.toFixed(4)}</span>
+                        <span class="xrp-change ${changeClass}">${changeSign}${change.toFixed(2)}%</span>
+                    `;
+                    
+                    updateDisplayValues();
+                }
+            } catch (error) {
+                console.error('Error fetching XRP price:', error);
+            }
+        }
+
+        // Fetch single wallet balance
+        async function fetchBalance(address) {
+            for (const url of RIPPLED_URLS) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            method: 'account_info',
+                            params: [{ account: address, ledger_index: 'validated', strict: true }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.result && data.result.account_data) {
+                            return parseInt(data.result.account_data.Balance) / 1000000;
+                        }
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        // Fetch all exchange data
+        async function fetchAllData() {
+            if (isFetching) return;
+            isFetching = true;
+
+            const btn = document.getElementById('fetchBtn');
+            const statusEl = document.getElementById('status');
+            const tableBody = document.getElementById('tableBody');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Fetching...';
+            statusEl.textContent = '● Fetching...';
+            statusEl.style.color = 'var(--accent-orange)';
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="loading-state">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 1rem;">Fetching balances from XRPL...</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText" style="font-size: 0.8rem; margin-top: 0.5rem;">0 / 0</p>
+                    </td>
+                </tr>
+            `;
+
+            exchangeData = {};
+            walletBalances = {};
+            
+            let totalAddresses = 0;
+            let fetchedAddresses = 0;
+
+            for (const wallets of Object.values(EXCHANGES)) {
+                totalAddresses += Object.keys(wallets).length;
+            }
+
+            for (const [exchangeName, wallets] of Object.entries(EXCHANGES)) {
+                let total = 0;
+                walletBalances[exchangeName] = [];
+
+                for (const [address, walletName] of Object.entries(wallets)) {
+                    const balance = await fetchBalance(address);
+                    fetchedAddresses++;
+
+                    const progress = (fetchedAddresses / totalAddresses) * 100;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = `${fetchedAddresses} / ${totalAddresses}`;
+                    document.getElementById('walletsFetched').textContent = `${fetchedAddresses} / ${totalAddresses}`;
+
+                    if (balance !== null) {
+                        total += balance;
+                        walletBalances[exchangeName].push({
+                            name: walletName,
+                            address: address,
+                            balance: balance
+                        });
+                    }
+                }
+
+                exchangeData[exchangeName] = total;
+            }
+
+            updateDisplay();
+            populateExchangeSelect();
+            
+            btn.disabled = false;
+            btn.textContent = '🔄 Fetch Live Data';
+            statusEl.textContent = '● Live';
+            statusEl.style.color = 'var(--accent-green)';
+            isFetching = false;
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        function updateDisplayValues() {
+            const grandTotal = Object.values(exchangeData).reduce((a, b) => a + b, 0);
+            
+            document.getElementById('totalXRP').textContent = formatNumber(grandTotal);
+            if (currentXRPPrice && grandTotal > 0) {
+                document.getElementById('totalValue').textContent = '$' + formatNumber(grandTotal * currentXRPPrice);
+            }
+        }
+
+        function updateDisplay() {
+            const sorted = Object.entries(exchangeData).sort((a, b) => b[1] - a[1]);
+            const grandTotal = sorted.reduce((sum, [_, val]) => sum + val, 0);
+
+            document.getElementById('totalXRP').textContent = formatNumber(grandTotal);
+            document.getElementById('exchangeCount').textContent = sorted.length;
+            document.getElementById('tableCount').textContent = `${sorted.length} exchanges`;
+
+            if (currentXRPPrice) {
+                document.getElementById('totalValue').textContent = '$' + formatNumber(grandTotal * currentXRPPrice);
+            }
+
+            // Update table
+            let rows = '';
+            sorted.forEach(([name, balance], i) => {
+                const share = grandTotal > 0 ? (balance / grandTotal * 100) : 0;
+                const value = currentXRPPrice ? balance * currentXRPPrice : 0;
+                
+                rows += `
+                    <tr>
+                        <td class="rank-cell">#${i + 1}</td>
+                        <td class="exchange-name">${name}</td>
+                        <td>${formatNumber(balance)}</td>
+                        <td>${currentXRPPrice ? '$' + formatNumber(value) : '—'}</td>
+                        <td>${share.toFixed(2)}%</td>
+                    </tr>
+                `;
+            });
+
+            rows += `
+                <tr class="total-row">
+                    <td></td>
+                    <td>TOTAL</td>
+                    <td>${formatNumber(grandTotal)}</td>
+                    <td>${currentXRPPrice ? '$' + formatNumber(grandTotal * currentXRPPrice) : '—'}</td>
+                    <td>100%</td>
+                </tr>
+            `;
+
+            document.getElementById('tableBody').innerHTML = rows;
+            updateChart();
+        }
+
+        function updateChart() {
+            const chartType = document.getElementById('chartType').value;
+            const topN = document.getElementById('topN').value;
+            
+            let sorted = Object.entries(exchangeData).sort((a, b) => b[1] - a[1]);
+            if (topN !== 'all') {
+                sorted = sorted.slice(0, parseInt(topN));
+            }
+
+            const labels = sorted.map(([name]) => name);
+            const data = sorted.map(([_, val]) => val);
+            const colors = [
+                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
+                '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981',
+                '#f59e0b', '#64748b', '#0ea5e9', '#d946ef', '#78716c'
+            ];
+
+            const ctx = document.getElementById('holdingsChart').getContext('2d');
+            
+            if (holdingsChart) {
+                holdingsChart.destroy();
+            }
+
+            holdingsChart = new Chart(ctx, {
+                type: chartType === 'bar' ? 'bar' : chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'XRP Balance',
+                        data: data,
+                        backgroundColor: colors.slice(0, data.length),
+                        borderColor: chartType === 'bar' ? colors.slice(0, data.length) : '#fff',
+                        borderWidth: chartType === 'bar' ? 0 : 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: chartType !== 'bar',
+                            position: 'right',
+                            labels: { color: '#8888a0', font: { size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${formatNumber(ctx.raw)} XRP`
+                            }
+                        }
+                    },
+                    scales: chartType === 'bar' ? {
+                        x: {
+                            ticks: { color: '#8888a0', maxRotation: 45 },
+                            grid: { color: '#2a2a3a' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: '#8888a0',
+                                callback: (val) => formatNumber(val)
+                            },
+                            grid: { color: '#2a2a3a' }
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        function filterTable() {
+            const filter = document.getElementById('filterInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#tableBody tr:not(.total-row)');
+            
+            rows.forEach(row => {
+                const name = row.cells[1]?.textContent.toLowerCase() || '';
+                row.style.display = name.includes(filter) ? '' : 'none';
+            });
+        }
+
+        function populateExchangeSelect() {
+            const select = document.getElementById('exchangeSelect');
+            const sorted = Object.keys(exchangeData).sort();
+            
+            select.innerHTML = '<option value="">Select an exchange...</option>';
+            sorted.forEach(name => {
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        function showWalletDetails() {
+            const exchange = document.getElementById('exchangeSelect').value;
+            const list = document.getElementById('walletList');
+            
+            if (!exchange || !walletBalances[exchange]) {
+                list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Select an exchange</div>';
+                return;
+            }
+
+            const wallets = walletBalances[exchange].sort((a, b) => b.balance - a.balance);
+            
+            if (wallets.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No wallet data available</div>';
+                return;
+            }
+
+            list.innerHTML = wallets.map(w => `
+                <div class="wallet-item">
+                    <div>
+                        <div class="wallet-name">${w.name}</div>
+                        <div class="wallet-address">${w.address}</div>
+                    </div>
+                    <div class="wallet-balance">${formatNumber(w.balance)} XRP</div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        fetchXRPPrice();
+        setInterval(fetchXRPPrice, 30000);
+    </script>
+</body>
+</html>

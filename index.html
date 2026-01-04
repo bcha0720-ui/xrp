@@ -1252,104 +1252,90 @@
             font-size: 0.9rem;
         }
 
-        /* Holdings Chart Styles */
-        .holdings-chart-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .holdings-chart-header {
+        /* Exchange Tab Styles */
+        .exchange-controls-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 1rem;
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .holdings-chart-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            display: flex;
             align-items: center;
-            gap: 0.5rem;
         }
 
-        .holdings-chart-controls {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .holdings-chart-btn {
-            padding: 0.5rem 1rem;
+        .exchange-filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.7rem 1rem;
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .holdings-chart-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent-xrp);
+            border-radius: 8px;
             color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
         }
 
-        .holdings-chart-btn.active {
-            background: var(--accent-xrp-dim);
+        .exchange-filter-input:focus {
+            outline: none;
             border-color: var(--accent-xrp);
-            color: var(--accent-xrp);
         }
 
-        .holdings-chart-container {
-            position: relative;
-            height: 400px;
+        .exchange-filter-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .exchange-info-banner {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-xrp);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .exchange-info-banner a {
+            color: var(--accent-xrp);
+            text-decoration: none;
+        }
+
+        .exchange-info-banner a:hover {
+            text-decoration: underline;
+        }
+
+        .exchange-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .exchange-loading .spinner {
+            width: 40px;
+            height: 40px;
             margin-bottom: 1rem;
         }
 
-        .holdings-chart-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .holdings-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .holdings-legend-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .holdings-legend-color {
-            width: 12px;
-            height: 12px;
+        .exchange-progress {
+            width: 100%;
+            max-width: 300px;
+            height: 6px;
+            background: var(--bg-secondary);
             border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
         }
 
-        .holdings-legend-value {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-primary);
-            font-weight: 500;
+        .exchange-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-xrp), var(--accent-purple));
+            border-radius: 3px;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -1396,6 +1382,10 @@
             <button class="main-tab" onclick="switchMainTab('holdings')">
                 <span class="main-tab-icon">💎</span>
                 Spot ETF XRP Holdings
+            </button>
+            <button class="main-tab" onclick="switchMainTab('exchange')">
+                <span class="main-tab-icon">🏦</span>
+                Exchange Holdings
             </button>
         </div>
 
@@ -1447,24 +1437,6 @@
                 </div>
             </div>
 
-            <!-- Holdings Chart Section -->
-            <div class="holdings-chart-section">
-                <div class="holdings-chart-header">
-                    <div class="holdings-chart-title">
-                        <span>📈</span>
-                        XRP Holdings Over Time
-                    </div>
-                    <div class="holdings-chart-controls">
-                        <button class="holdings-chart-btn active" data-chart-type="xrp" onclick="switchHoldingsChart('xrp')">XRP Holdings</button>
-                        <button class="holdings-chart-btn" data-chart-type="value" onclick="switchHoldingsChart('value')">USD Value</button>
-                    </div>
-                </div>
-                <div class="holdings-chart-container">
-                    <canvas id="holdingsChart"></canvas>
-                </div>
-                <div class="holdings-chart-legend" id="holdingsChartLegend"></div>
-            </div>
-
             <div class="holdings-table-container">
                 <div class="holdings-table-header">
                     <div class="holdings-table-title">
@@ -1482,6 +1454,86 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Exchange Holdings Tab Content -->
+        <div id="exchangeTab" class="tab-content">
+            <div class="holdings-summary">
+                <div class="summary-card highlight">
+                    <div class="summary-label">Total XRP on Exchanges</div>
+                    <div class="summary-value accent" id="exchangeTotalXRP">--</div>
+                </div>
+                <div class="summary-card highlight">
+                    <div class="summary-label">Total Value (USD)</div>
+                    <div class="summary-value accent" id="exchangeTotalValue">--</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Exchanges Tracked</div>
+                    <div class="summary-value" id="exchangeCount">43</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Wallets Tracked</div>
+                    <div class="summary-value" id="walletCount">200+</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Data Status</div>
+                    <div class="summary-value" id="exchangeStatus" style="font-size: 0.9rem;">
+                        <span style="color: var(--accent-xrp);">● Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exchange-controls-bar">
+                <button class="btn btn-refresh" id="fetchExchangeBtn" onclick="fetchExchangeData()">
+                    🔄 Fetch Live Data
+                </button>
+                <a href="exchange.html" target="_blank" class="btn btn-chart">
+                    📊 Full Dashboard
+                </a>
+                <input type="text" id="exchangeFilter" class="exchange-filter-input" placeholder="🔍 Filter exchanges..." onkeyup="filterExchangeTable()">
+            </div>
+
+            <div class="exchange-info-banner">
+                <span>ℹ️</span>
+                <span><strong>Live XRPL Data:</strong> Fetches real-time balances directly from the XRP Ledger. Click "Fetch Live Data" to query all exchange wallets. 
+                For interactive charts and historical comparison, visit the <a href="https://xrpexchange.streamlit.app/" target="_blank" style="color: var(--accent-xrp);">Streamlit App</a>.</span>
+            </div>
+
+            <div class="holdings-table-container">
+                <div class="holdings-table-header">
+                    <div class="holdings-table-title">
+                        <span>🏦</span>
+                        Exchange XRP Holdings
+                    </div>
+                    <span class="group-count" id="exchangeResultCount">0 exchanges loaded</span>
+                </div>
+                <div class="holdings-table-wrapper" style="max-height: 500px;">
+                    <table class="holdings-table" id="exchangeTable">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; min-width: 50px;">Rank</th>
+                                <th style="text-align: left; min-width: 150px;">Exchange</th>
+                                <th style="min-width: 120px;">Balance (XRP)</th>
+                                <th style="min-width: 120px;">Value (USD)</th>
+                                <th style="min-width: 100px;">Market Share</th>
+                                <th style="min-width: 80px;">Wallets</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exchangeTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                    Click "Fetch Live Data" to load exchange balances from the XRP Ledger
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="exchange-info-banner" style="margin-top: 1rem; background: var(--bg-secondary);">
+                <span>📌</span>
+                <span><strong>Note:</strong> Data fetched from XRPL nodes (s1.ripple.com, s2.ripple.com, xrplcluster.com). Some requests may timeout - refresh to retry.</span>
+            </div>
         </div>
 
         <footer>
@@ -1558,7 +1610,7 @@
                 bitwise: { xrp: 132104912, value: 262824043 },
                 franklin: { xrp: 123274697, value: 245256242.88 },
                 grayscale: { xrp: null, value: null },
-                shares21: { xrp: 136925159.19, value: 246367782.25 },
+                shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
                 nciq: { xrp: null, value: null },
                 bitw: { xrp: null, value: null },
@@ -1568,8 +1620,8 @@
             {
                 date: "12/31/2025",
                 canary: { xrp: 175552727, value: 328418423.11 },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: 118387154, value: 215197065.61 },
+                bitwise: { xrp: 118387154, value: 215197065.61 },
+                franklin: { xrp: 136925159.19, value: 246367782.25 },
                 grayscale: { xrp: null, value: null },
                 shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
@@ -1707,281 +1759,7 @@
                 bitw: { xrp: 30843614, value: null },
                 gdlc: { xrp: 14176113, value: null },
                 ezpz: { xrp: 330366, value: 636976 }
-            },
-            {
-                date: "12/15/2025",
-                canary: { xrp: 171651320.69, value: 343704992.08 },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: 91777197.5, value: 173030303.76 },
-                grayscale: { xrp: null, value: null },
-                shares21: { xrp: null, value: null },
-                rex: { xrp: null, value: null },
-                nciq: { xrp: null, value: null },
-                bitw: { xrp: null, value: null },
-                gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null }
-            },
-            {
-  		date: "12/12/2025",
-                canary: { xrp: 170806472.44, value: 344979028.04 },
-                bitwise: { xrp: 104240482.45, value: 208697785.10 },
-                franklin: { xrp: 87432714.78, value: 175047289.60 },
-                grayscale: { xrp: 107679380.77, value: 215496914.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-            {
-  		date: "12/11/2025",
-    		canary: { xrp: 168998494.45, value: 352018456.00 },
-    		bitwise: { xrp: 100321667.32, value: 202633716.52 },
-    		franklin: { xrp: 83088232.06, value: 167824934.64 },
-    		grayscale: { xrp: 106903327.14, value: 216461064.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {	
-    		date: "12/10/2025",
-    		canary: { xrp: 169000809.53, value: 357526113.56 },
-    		bitwise: { xrp: 97858412.09, value: 203872344.26 },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: 105351219.89, value: 217442600.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-            {	
-    		date: "12/9/2025",
-    		canary: { xrp: 169003124.65, value: 352338559.27 },
-    		bitwise: { xrp: 94499427.69, value: 199863454.60 },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-            },
-            {
-  	        date: "12/8/2025",
-    		canary: { xrp: 166130110.94, value: 337172024.75 },
-    		bitwise: { xrp: 93827630.81, value: 195604338.52 },
-    		franklin: { xrp: 78200689.00, value: 163026540.36 },
-    		grayscale: { xrp: 104381152.86, value: 217916115.00 },
-    		shares21: { xrp: 293666.01, value: 612211.41 },
-    		rex: { xrp: 30484262.00, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: 30843614.13, value: null }
-            },
-            {
-    		date: "12/5/2025",
-    		canary: { xrp: 165497950.17, value: 347155947.69 },
-    		bitwise: { xrp: 91812240.18, value: 186318251.45 },
-    		franklin: { xrp: 62994999.47, value: 127838272.22 },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: 256964.03, value: 521467.39 },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-            {
-    		date: "12/4/2025",
-    		canary: { xrp: 163050728.88, value: 356991092.25 },
-    		bitwise:  { xrp: 90692578.71, value: 190260333.18 },
-    		franklin: { xrp: 61908878.79, value: 129876160.45 },
-    		grayscale: { xrp: 103023059.01, value: 217045890.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-            {
-    		date: "12/3/2025",
-    		canary: { xrp: 162413956.75, value: 351249740.82 },
-    		bitwise: { xrp: 88901120.37, value: 194641001.95 },
-    		franklin: { xrp: 59193577.09, value: 129599099.61 },
-    		grayscale: { xrp: 85173825.61, value: 187358142.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: 31454262.00, value: 67601059.18 },
-    		bitw: { xrp: 14176112.75, value: 3647484.00 },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-   	 	date: "12/2/2025",
-    		canary: { xrp: 161351157.49, value: 324690322.59 },
-    		bitwise: { xrp: 87109662.02, value: 188363319.88 },
-    		franklin: { xrp: 57021335.73, value: 123301225.74 },
-    		grayscale: { xrp: 64026364.30, value: 138593133.00 },
-    		shares21: { xrp: 220261.36, value: 476286.55 },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "12/1/2025",
-    		canary: { xrp: 158690770.98, value: 346639994.17 },
-    		bitwise: { xrp: 83414779.18, value: 167832204.03 },
-    		franklin: { xrp: 53219913.35, value: 107079530.05 },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: 220251.36, value: 443170.26 },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-            {
-    		date: "11/28/2025",
-    		canary: { xrp: 155821569.95, value: 346199221.99 },
-    		bitwise: { xrp: 81847253.13, value: 178427011.82 },
-    		franklin: { xrp: 39100344.50, value: 85406491.49 },
-    		grayscale: { xrp: 38028567.82, value: 83255563.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {		
-    		date: "11/26/2025",
-    		canary: { xrp: 151671903.56, value: 331617876.65 },
-    		bitwise: { xrp: 80503659.37, value: 178833244.05 },
-    		franklin: { xrp: 34212801.44, value: 76001343.50 },
-    		grayscale: { xrp: 29436381.00, value: 64297594.51 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/25/2025",
-    		canary: { xrp: 149330703.49, value: 337624027.47 },
-   	   	bitwise: { xrp: 77144674.98, value: 168686089.21 },
-    		franklin: { xrp: 32040560.08, value: 70060529.48 },
-    		grayscale: { xrp: 36088433.75, value: 79394554.00 },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-   		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/24/2025",
-    		canary: { xrp: 146137326.55, value: 283102051.52 },
-    		bitwise: { xrp: 67403620.22, value: 152328137.50 },
-    		franklin: { xrp: 6016355.74, value: 13476637.00 },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/21/2025",
-    		canary: { xrp: 138900072.25, value: 278082806.15 },
-    		bitwise: { xrp: 59565989.97, value: 115360261.46 },
-    		franklin: { xrp: 6017179.98, value: 11673329.00 },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/20/2025",
-    		canary: { xrp: 138582415.26, value: 281877879.88 },
-    		bitwise: { xrp: 53743696.21, value: 107600791.63 },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/19/2025",
-    		canary: { xrp: 132193030.95, value: 295175008.55 },
-    		bitwise: { xrp: 1119660.33, value: 2277445.11 },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/18/2025",
-    		canary: { xrp: 124418674.67, value: 265019864.27 },
-    		bitwise: { xrp: null, value: null },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-   	    {
-    		date: "11/14/2025",
-    		canary: { xrp: 108765777.15, value: 250410904.89 },
-    		bitwise: { xrp: null, value: null },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-    		ezpz: { xrp: null, value: null }
-	    },
-	    {
-    		date: "11/13/2025",
-    		canary: { xrp: 2237132.88, value: 5250000.40 },
-    		bitwise: { xrp: null, value: null },
-    		franklin: { xrp: null, value: null },
-    		grayscale: { xrp: null, value: null },
-    		shares21: { xrp: null, value: null },
-    		rex: { xrp: null, value: null },
-    		nciq: { xrp: null, value: null },
-    		bitw: { xrp: null, value: null },
-    		gdlc: { xrp: null, value: null },
-   	 	ezpz: { xrp: null, value: null }
-	    }
-              
+            }
         ];
 
         // ETF column definitions for the holdings table
@@ -2017,7 +1795,8 @@
                 document.getElementById('holdingsTab').classList.add('active');
                 renderHoldingsTable();
                 updateHoldingsSummary();
-                renderHoldingsChart();
+            } else if (tabName === 'exchange') {
+                document.getElementById('exchangeTab').classList.add('active');
             }
         }
 
@@ -2117,183 +1896,6 @@
         function refreshHoldingsDisplay() {
             renderHoldingsTable();
             updateHoldingsSummary();
-            renderHoldingsChart();
-        }
-
-        // Holdings Chart Variables
-        let holdingsChart = null;
-        let currentHoldingsChartType = 'xrp';
-        
-        const holdingsChartColors = [
-            '#23f7dd', // Canary - XRP accent
-            '#3b82f6', // Bitwise - Blue
-            '#22c55e', // Franklin - Green
-            '#a855f7', // Grayscale - Purple
-            '#f97316', // 21Shares - Orange
-            '#ef4444', // Rex - Red
-            '#eab308', // NCIQ - Yellow
-            '#ec4899', // BITW - Pink
-            '#14b8a6', // GDLC - Teal
-            '#8b5cf6'  // EZPZ - Violet
-        ];
-
-        function switchHoldingsChart(type) {
-            currentHoldingsChartType = type;
-            document.querySelectorAll('.holdings-chart-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.chartType === type);
-            });
-            renderHoldingsChart();
-        }
-
-        function renderHoldingsChart() {
-            const ctx = document.getElementById('holdingsChart');
-            if (!ctx) return;
-
-            // Destroy existing chart
-            if (holdingsChart) {
-                holdingsChart.destroy();
-            }
-
-            // Reverse data to show oldest to newest (left to right)
-            const reversedData = [...holdingsData].reverse();
-            
-            // Extract dates for x-axis
-            const dates = reversedData.map(row => row.date);
-
-            // Build datasets for each ETF
-            const datasets = [];
-            
-            etfColumns.forEach((col, index) => {
-                const data = reversedData.map(row => {
-                    const etfData = row[col.key];
-                    if (!etfData) return null;
-                    return currentHoldingsChartType === 'xrp' ? etfData.xrp : etfData.value;
-                });
-
-                // Only add if there's at least some data
-                const hasData = data.some(v => v !== null && v !== undefined);
-                if (hasData) {
-                    datasets.push({
-                        label: col.name,
-                        data: data,
-                        borderColor: holdingsChartColors[index % holdingsChartColors.length],
-                        backgroundColor: holdingsChartColors[index % holdingsChartColors.length] + '20',
-                        pointBackgroundColor: holdingsChartColors[index % holdingsChartColors.length],
-                        pointBorderColor: holdingsChartColors[index % holdingsChartColors.length],
-                        pointRadius: 2,
-                        pointHoverRadius: 6,
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.3,
-                        spanGaps: true
-                    });
-                }
-            });
-
-            // Sort datasets by latest non-null value (descending)
-            datasets.sort((a, b) => {
-                const aLast = [...a.data].reverse().find(v => v !== null) || 0;
-                const bLast = [...b.data].reverse().find(v => v !== null) || 0;
-                return bLast - aLast;
-            });
-
-            const chartTitle = currentHoldingsChartType === 'xrp' ? 'XRP Holdings' : 'USD Value';
-
-            holdingsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
-                            borderWidth: 1,
-                            titleColor: '#ffffff',
-                            bodyColor: '#8888a0',
-                            padding: 12,
-                            callbacks: {
-                                label: function(context) {
-                                    if (context.raw === null) return null;
-                                    let value = context.raw;
-                                    if (currentHoldingsChartType === 'value') {
-                                        return context.dataset.label + ': $' + formatHoldingsNumber(value);
-                                    } else {
-                                        return context.dataset.label + ': ' + formatHoldingsNumber(value) + ' XRP';
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#8888a0',
-                                maxRotation: 45,
-                                minRotation: 45,
-                                maxTicksLimit: 12
-                            },
-                            grid: {
-                                color: '#2a2a3a'
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: '#8888a0',
-                                callback: function(value) {
-                                    if (currentHoldingsChartType === 'value') {
-                                        return '$' + formatHoldingsNumber(value);
-                                    }
-                                    return formatHoldingsNumber(value);
-                                }
-                            },
-                            grid: {
-                                color: '#2a2a3a'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Render interactive legend
-            const legendHtml = datasets.map((d, i) => {
-                const lastValue = [...d.data].reverse().find(v => v !== null) || 0;
-                const valueStr = currentHoldingsChartType === 'value' 
-                    ? '$' + formatHoldingsNumber(lastValue) 
-                    : formatHoldingsNumber(lastValue) + ' XRP';
-                return `
-                    <div class="holdings-legend-item" onclick="toggleHoldingsDataset(${i})" data-index="${i}">
-                        <div class="holdings-legend-color" style="background: ${d.borderColor}"></div>
-                        <span>${d.label}:</span>
-                        <span class="holdings-legend-value">${valueStr}</span>
-                    </div>
-                `;
-            }).join('');
-            document.getElementById('holdingsChartLegend').innerHTML = legendHtml;
-        }
-
-        function toggleHoldingsDataset(index) {
-            if (!holdingsChart) return;
-            const meta = holdingsChart.getDatasetMeta(index);
-            meta.hidden = !meta.hidden;
-            holdingsChart.update();
-            
-            // Update legend opacity
-            const legendItem = document.querySelector(`.holdings-legend-item[data-index="${index}"]`);
-            if (legendItem) {
-                legendItem.style.opacity = meta.hidden ? '0.4' : '1';
-            }
         }
 
         // CSV Upload handler
@@ -2321,6 +1923,291 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        // =====================================================
+        // EXCHANGE HOLDINGS DATA AND FUNCTIONS
+        // =====================================================
+
+        const RIPPLED_URLS = [
+            "https://s1.ripple.com:51234",
+            "https://s2.ripple.com:51234",
+            "https://xrplcluster.com"
+        ];
+
+        const EXCHANGES = {
+            "upbit": {
+                "raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA": "Upbit1",
+                "rfL1mn4VTCoHdhHhHMwqpShCFUaDBRk6Z5": "Upbit12",
+                "rwa7YXssGVAL9yPKw6QJtCen2UqZbRQqpM": "Upbit13",
+                "rNcAdhSLXBrJ3aZUq22HaNtNEPpB5fR8Ri": "Upbit14",
+                "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": "Upbit15",
+                "rMNUAfSz2spLEbaBwPnGtxTzZCajJifnzH": "Upbit16",
+                "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": "Upbit17",
+                "rs48xReB6gjKtTnTfii93iwUhjhTJsW78B": "Upbit18",
+                "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": "Upbit19",
+                "rLgn612WAgRoZ285YmsQ4t7kb8Ui3csdoU": "Upbit20",
+                "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": "Upbit21",
+                "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": "Upbit22"
+            },
+            "binance": {
+                "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance 1",
+                "rNU4eAowPuixS5ZCWaRL72UUeKgxcKExpK": "Binance 10",
+                "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": "Binance 11",
+                "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance 12",
+                "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance 13",
+                "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": "Binance 14"
+            },
+            "bithumb": {
+                "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb1",
+                "rNTkgxs5WG5mU5Sz26YoDVrHim5Y5ohC7": "Bithumb2",
+                "r9hUMZBc3MWRc4YdsdZgNCW5Qef8wNSXpb": "Bithumb3",
+                "r9LHiNDZvpLoWPoKnbH2JWjFET8zoYT4Y5": "Bithumb4"
+            },
+            "bitso": {
+                "rLSn6Z3T8uCxbcd1oxwfGQN1Fdn5CyGujK": "Bitso 3"
+            },
+            "kraken": {
+                "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Kraken1",
+                "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Kraken2",
+                "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Kraken4"
+            },
+            "bitstamp": {
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp1",
+                "rUobSiUpYH2S97Mgb4E7b7HuzQj2uzZ3aD": "Bitstamp2"
+            },
+            "coinbase": {
+                "rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w": "Coinbase1",
+                "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg": "Coinbase2"
+            },
+            "bybit": {
+                "rMrgNBrkE6FdCjWih5VAWkGMrmerrWpiZt": "Bybit 1",
+                "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bybit 4",
+                "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Bybit 6"
+            },
+            "bitfinex": {
+                "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex1"
+            },
+            "sbi": {
+                "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "SBI VC TRADE 4"
+            },
+            "robinhood": {
+                "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood1",
+                "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood2"
+            },
+            "crypto.com": {
+                "r4DymtkgUAh2wqRxVfdd3Xtswzim6eC6c5": "Crypto.com 1",
+                "rPHNKf25y3aqATYfrMv9LQnTRHQUYELXfn": "Crypto.com 2"
+            },
+            "gate.io": {
+                "rHcFoo6a9qT5NHiVn1THQRhsEGcxtYCV4d": "Gate.io 1",
+                "rNnWmrc1EtNRe5SEQEs9pFibcjhpvAiVKF": "Gate.io 3"
+            },
+            "kucoin": {
+                "rNFugeoj3ZN8Wv6xhuLegUBBPXKCyWLRkB": "Kucoin5",
+                "rp4gqz1XdqMsWRZbzPdPAQWw1tg5LuwUVP": "Kucoin8"
+            },
+            "bitrue": {
+                "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue1",
+                "raLPjTYeGezfdb6crXZzcC8RkLBEwbBHJ5": "Bitrue2"
+            },
+            "okx": {
+                "rUzWJkXyEtT8ekSSxkBYPqCvHpngcy6Fks": "Okx"
+            },
+            "gemini": {
+                "raBQUYdAhnnojJQ6Xi3eXztZ74ot24RDq1": "Gemini1"
+            },
+            "coinone": {
+                "rp2diYfVtpbgEMyaoWnuaWgFCAkqCAEg28": "Coinone1"
+            },
+            "korbit": {
+                "rBTjeJu1Rvnbq476Y7PDnvnXUeERV9CxEQ": "Korbit1"
+            },
+            "bitbank": {
+                "rLbKbPyuvs4wc1h13BEPHgbFGsRXMeFGL6": "Bitbank1"
+            },
+            "uphold": {
+                "rMdG3ju8pgyVh29ELPWaDuA74CpWW6Fxns": "Uphold3"
+            },
+            "etoro": {
+                "rsdvR9WZzKszBogBJrpLPE64WWyEW4ffzS": "eToro1"
+            },
+            "mexc": {
+                "rs2dgzYeqYqsk8bvkQR5YPyqsXYcA24MP2": "Mexc"
+            },
+            "bitpanda": {
+                "rUEfYyerfok6Yo38tTTTZKeRefNh9iB1Bd": "Bitpanda1"
+            },
+            "luno": {
+                "rsRy14FvipgqudiGmptJBhr1RtpsgfzKMM": "Luno1"
+            }
+        };
+
+        let exchangeData = {};
+        let isExchangeFetching = false;
+
+        async function fetchSingleBalance(address) {
+            for (const url of RIPPLED_URLS) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            method: 'account_info',
+                            params: [{
+                                account: address,
+                                ledger_index: 'validated',
+                                strict: true
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.result && data.result.account_data) {
+                            return parseInt(data.result.account_data.Balance) / 1000000;
+                        }
+                    }
+                } catch (error) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        async function fetchExchangeData() {
+            if (isExchangeFetching) return;
+            isExchangeFetching = true;
+
+            const btn = document.getElementById('fetchExchangeBtn');
+            const statusEl = document.getElementById('exchangeStatus');
+            const tableBody = document.getElementById('exchangeTableBody');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Fetching...';
+            statusEl.innerHTML = '<span style="color: var(--accent-orange);">● Fetching...</span>';
+            
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem;">
+                        <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                        <p style="color: var(--text-muted);">Fetching balances from XRPL nodes...</p>
+                        <div class="exchange-progress">
+                            <div class="exchange-progress-bar" id="exchangeProgressBar" style="width: 0%"></div>
+                        </div>
+                        <p id="exchangeProgressText" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">0 / 0</p>
+                    </td>
+                </tr>
+            `;
+
+            exchangeData = {};
+            let totalAddresses = 0;
+            let fetchedAddresses = 0;
+
+            // Count total addresses
+            for (const [exchange, wallets] of Object.entries(EXCHANGES)) {
+                totalAddresses += Object.keys(wallets).length;
+            }
+
+            // Fetch balances for each exchange
+            for (const [exchangeName, wallets] of Object.entries(EXCHANGES)) {
+                let exchangeTotal = 0;
+                let walletCount = 0;
+                let successCount = 0;
+
+                for (const [address, walletName] of Object.entries(wallets)) {
+                    const balance = await fetchSingleBalance(address);
+                    fetchedAddresses++;
+                    
+                    // Update progress
+                    const progress = (fetchedAddresses / totalAddresses) * 100;
+                    document.getElementById('exchangeProgressBar').style.width = progress + '%';
+                    document.getElementById('exchangeProgressText').textContent = 
+                        `${fetchedAddresses} / ${totalAddresses} wallets`;
+
+                    if (balance !== null) {
+                        exchangeTotal += balance;
+                        successCount++;
+                    }
+                    walletCount++;
+                }
+
+                exchangeData[exchangeName] = {
+                    total: exchangeTotal,
+                    walletCount: walletCount,
+                    successCount: successCount
+                };
+            }
+
+            renderExchangeTable();
+            
+            btn.disabled = false;
+            btn.textContent = '🔄 Fetch Live Data';
+            statusEl.innerHTML = '<span style="color: var(--accent-green);">● Live</span>';
+            isExchangeFetching = false;
+        }
+
+        function renderExchangeTable() {
+            const tableBody = document.getElementById('exchangeTableBody');
+            
+            // Sort exchanges by total balance
+            const sortedExchanges = Object.entries(exchangeData)
+                .sort((a, b) => b[1].total - a[1].total);
+
+            // Calculate grand total
+            let grandTotal = sortedExchanges.reduce((sum, [_, data]) => sum + data.total, 0);
+
+            // Update summary
+            document.getElementById('exchangeTotalXRP').textContent = formatHoldingsNumber(grandTotal);
+            if (currentXRPPrice) {
+                document.getElementById('exchangeTotalValue').textContent = 
+                    formatHoldingsCurrency(grandTotal * currentXRPPrice);
+            }
+            document.getElementById('exchangeCount').textContent = sortedExchanges.length;
+            document.getElementById('exchangeResultCount').textContent = 
+                `${sortedExchanges.length} exchanges loaded`;
+
+            // Build table rows
+            let rows = '';
+            sortedExchanges.forEach(([name, data], index) => {
+                const marketShare = grandTotal > 0 ? (data.total / grandTotal * 100) : 0;
+                const valueUSD = currentXRPPrice ? data.total * currentXRPPrice : 0;
+                
+                rows += `
+                    <tr>
+                        <td style="text-align: left; font-weight: 600; color: var(--accent-xrp);">#${index + 1}</td>
+                        <td style="text-align: left; text-transform: capitalize;">${name}</td>
+                        <td>${formatHoldingsNumber(data.total)}</td>
+                        <td>${currentXRPPrice ? formatHoldingsCurrency(valueUSD) : '—'}</td>
+                        <td>${marketShare.toFixed(2)}%</td>
+                        <td>${data.successCount}/${data.walletCount}</td>
+                    </tr>
+                `;
+            });
+
+            // Add total row
+            rows += `
+                <tr class="total-row">
+                    <td></td>
+                    <td style="text-align: left;"><strong>TOTAL</strong></td>
+                    <td><strong>${formatHoldingsNumber(grandTotal)}</strong></td>
+                    <td><strong>${currentXRPPrice ? formatHoldingsCurrency(grandTotal * currentXRPPrice) : '—'}</strong></td>
+                    <td><strong>100%</strong></td>
+                    <td></td>
+                </tr>
+            `;
+
+            tableBody.innerHTML = rows;
+        }
+
+        function filterExchangeTable() {
+            const filter = document.getElementById('exchangeFilter').value.toLowerCase();
+            const rows = document.querySelectorAll('#exchangeTableBody tr:not(.total-row)');
+            
+            rows.forEach(row => {
+                const exchangeName = row.cells[1]?.textContent.toLowerCase() || '';
+                row.style.display = exchangeName.includes(filter) ? '' : 'none';
+            });
         }
 
         // =====================================================
