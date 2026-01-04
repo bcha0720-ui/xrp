@@ -645,338 +645,109 @@
 
         // Full exchange wallet data
         const EXCHANGES = {
-         "robinhood": {
-        "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood1",
-        "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood2"
-    },
-    "bitflyer": {
-        "rpY7bZBkA98P8zds5LdBktAKj9ifekPdkE": "BitFlyer 3",
-        "rhWVCsCXrkwTeLBg6DyDr7abDaHz3zAKmn": "BitFlyer 4"
-    },
-    "bitpoint": {
-        "rwPbLSqTDYwvCsGZEzDTNo3SgzCwEjQdWZ": "BitPoint 1",
-        "rfmMjAXq65hpAxEf1RLNQq6RgYTSVkQUW5": "BitPoint 2"
-    },
-    "bitget": {
-        "rGDreBvnHrX1get7na3J4oowN19ny4GzFn": "Bitget Global"
-    },
-    "bitso": {
-        "rLSn6Z3T8uCxbcd1oxwfGQN1Fdn5CyGujK": "Bitso 3"
-    },
-    "binance": {
-        "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance 1",
-        "rNU4eAowPuixS5ZCWaRL72UUeKgxcKExpK": "Binance 10",
-        "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": "Binance 11",
-        "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance 12",
-        "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance 13",
-        "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": "Binance 14",
-        "rarG6FaeYhnzSKSS5EEPofo4gFsPn2bZKk": "Binance 15",
-        "rs8ZPbYqgecRcDzQpJYAMhSxSi5htsjnza": "Binance 5",
-        "rDAE53VfMvftPB4ogpWGWvzkQxfht6JPxr": "Binance 6",
-        "rfQ9EcLkU6WnNmkS3EwUkFeXeN47Rk8Cvi": "Binance 18",
-        "rBtttd61FExHC68vsZ8dqmS3DfjFEceA1A": "Binance 9",
-        "rLoqMgpjwGEQinYEM623za8c2nC2Uah8v7": "Binance 21",
-        "rQUp2PKzH3vCtKs5H9tsPPE1rTsN6fhjqn": "Binance 22",
-        "rEeEWeP88cpKUddKk37B2EZeiHBGiBXY3": "Binance US 1",
-        "rMvYS27SYs5dXdFsUgpvv1CSrPsCz7ePF5": "Binance US 2",
-        "r3ZVNKgkkT3A7hbEZ8HxnNnLDCCmZiZECV": "Binance US 3",
-        "rPCpZwPKogNodbjRxGDnefVXu9Q9R4PN4Q": "Binance US 4",
-        "rP3mUZyCDzZkTSd1VHoBbFt8HGm8fyq8qV": "Binance 17",
-        "rDecw8UhrZZUiaWc91e571b3TL41MUioh7": "Binance 16",
-        "rJpj1Mv21gJzsbsVnkp1U4nqchZbmZ9pM5": "Binance (XRP-BF2 Reserve)",
-        "rfxbaKNt5SnMw5rPRRm4C53YK76MEnVXro": "Binance Charity2"
-    },
-    "bitpanda": {
-        "rUEfYyerfok6Yo38tTTTZKeRefNh9iB1Bd": "Bitpanda1",
-        "rhVWrjB9EGDeK4zuJ1x2KXSjjSpsDQSaU6": "Bitpanda2",
-        "r3T75fuLjX51mmfb5Sk1kMNuhBgBPJsjza": "Bitpanda3",
-        "rbrCJQZVk6jYra1MPuSvX3Vpe4to9fAvh":  "Bitpanda4"
-    },
-
-    "bitstamp": {
-        "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp1",
-        "rUobSiUpYH2S97Mgb4E7b7HuzQj2uzZ3aD": "Bitstamp2",
-        "rBMFF7vhe2pxYS5wo3dpXMDrbbRudB7hGf": "Bitstamp3",
-        "rEXmdJZRfjXN3XGVdz99dGSZpQyJqUeirE": "Bitstamp"
-    },
-    "bitbank": {
-        "rLbKbPyuvs4wc1h13BEPHgbFGsRXMeFGL6": "Bitbank1",
-        "rw7m3CtVHwGSdhFjV4MyJozmZJv3DYQnsA": "Bitbank2",
-        "rwggnsfxvCmDb3YP9Hs1TaGvrPR7ngrn7Z": "Bitbank3",
-        "r97KeayHuEsDwyU1yPBVtMLLoQr79QcRFe": "Bitbank4"
-    },
-    "bitfinex": {
-        "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex1",
-        "rE3hWEGquaixF2XwirNbA1ds4m55LxNZPk": "Bitfinex2"
-    },
-    "bitrue": {
-        "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue1",
-        "raLPjTYeGezfdb6crXZzcC8RkLBEwbBHJ5": "Bitrue2",
-        "rfKsmLP6sTfVGDvga6rW6XbmSFUzc3G9f3": "Bitrue3",
-        "rNYW2bie6KwUSYhhtcnXWzRy5nLCa1UNCn": "Bitrue Insurance Fund",
-        "r4DbbWjsZQ2hCcxmjncr7MRjpXTBPckGa9": "Bitrue Cold2"
-    },
-    "bithumb": {
-        "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb1",
-        "rNTkgxs5WG5mU5Sz26YoDVrHim5Y5ohC7": "Bithumb2",
-        "r9hUMZBc3MWRc4YdsdZgNCW5Qef8wNSXpb": "Bithumb3",
-        "r9LHiNDZvpLoWPoKnbH2JWjFET8zoYT4Y5": "Bithumb4",
-        "rD7XQw67JWBXuo2WPX2gZRsGKNsDUGTbx5": "Bithumb",
-        "rZcBQae9iSJqFYBpNCfxGLXH7xuEzizxR": "Bithumb10",
-        "rrsSUzrT2mYAMiL46pm7cwn6MmMmxVkEWM": "Bithumb11",
-        "rPyCQm8E5j78PDbrfKF24fRC7qUAk1kDMZ": "Bithumb12",
-        "rw3fRcmn5PJyPKuvtAwHDSpEqoW2JKmKbu": "Bithumb13"
-    },
-    "bitkub": {
-        "rE3Cc3i6163Qzo7oc6avFQAxQE4gyCWhGP": "Bitkub 3"
-    },
-    "BTC Markes": {
-        "r94JFtstbXmyG21h3RHKcNfkAHxAQ6HSGC": "BTC Markets 1",
-        "rL3ggCUKaiR1iywkGW6PACbn3Y8g5edWiY": "BTC Markets 2",
-        "rU7xJs7QmjbiyxpEozNYUFQxaRD5kueY7z": "BTC Markets 3",
-        "rwWZxJQ8R2mvvtaFUJHhF6kfV64atBiPww": "BTC Markets 4",
-        "r3zUhJWabAMMLT5n631r2wDh9RP3dN1bRy": "BTC Markets 5",
-        "rKRYAqMFTTGMZ47eXJVRKcqLJgnPQbXisg": "BTC Markets 6"
-    },
-
-    "bybit": {
-        "rMrgNBrkE6FdCjWih5VAWkGMrmerrWpiZt": "Bybit 1",
-        "rNFKfGBzMspdKfaZdpnEyhkFyw7C1mtQ8x": "Bybit 2",
-        "rJn2zAPdFA193sixJwuFixRkYDUtx3apQh": "Bybit 3",
-        "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bybit 4",
-        "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe": "Bybit 5",
-        "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Bybit 6"
-    },
-    "coincheck": {
-        "rNQEMJA4PsoSrZRn9J6RajAYhcDzzhf8ok": "Coincheck 1",
-        "rwgvfze315jjAAxT2TyyDqAPzL68HpAp6v": "Coincheck 2",
-        "r99QSej32nAcjQAri65vE5ZXjw6xpUQ2Eh": "Coincheck 3"
-    },
-    "coinbase": {
-        "rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w": "Coinbase1",
-        "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg": "Coinbase2",
-        "rUfghnh1VAWajpAmxgrzLPiCXJ7RwdJUgt": "Coinbase3",
-        "rwpTh9DDa52XkM9nTKp2QrJuCGV5d1mQVP": "Coinbase4",
-        "r3YsZdkznVzYBv141qhwXHDWoPUXLdksNw": "Coinbase5",
-        "r4sRyacXpbh4HbagmgfoQq8Q3j8ZJzbZ1J": "Coinbase6",
-        "rUjfTQpvBr6wsGGxMw6sRmRQGG76nvp8Ln": "Coinbase7",
-        "rRmgo6NW1W7GHjC5qEpcpQnq8NE74ZS1P": "Coinbase10",
-        "rHrHuQM3E114yMyPjeULWfQmbwVBrHsBEy": "Coinbase11",
-        "rLBunuhuRY7aUCnDkSQhaf5ewCvdcWUYjR": "Coinbase12",
-        "rDw1Z5BqJejpKCGfncHJ9rwRq2kYLo4sJG": "Coinbase13",
-        "rwnYLUsoBQX3ECa1A5bSKLdbPoHKnqf63J": "Coinbase14",
-        "rsTtGH7a9mom5X8Y9D3kxroXWvA912RgUZ": "Coinbase (Cold 176)",
-        "r9mkuV6bpvok7SZ8Zargiw5KzZHDFbaApy": "Coinbase (Cold 285)",
-        "rNaJVWotxZ9nGTBiHRWR6LR1deXHa8FRLf": "Coinbase (Cold 418)",
-        "rGG4LZruYFJ34PNCi1doapgA1hynz3gxX7": "Coinbase (Cold 125)",
-        "rnVcQzWJP2sJbJF3GgvdAeqveW1V7dT2Vq": "Coinbase (Cold 283)",
-        "r417XbsvuBJpkMC4eHtGpvAHxgC24mb6Nc": "Coinbase (Cold 193)",
-        "rPeuuqP9rNhskesoA3ferKfp6VT5SvLAzU": "Coinbase (Cold 299)",
-        "raMRJ2d3djqwSUBK28W31R7aJQfK21zU1C": "Coinbase (Cold 456)",
-        "rBRaRTaq99U216NSDt7dFRrfzAtZzyrgS6": "Coinbase (Cold 188)",
-        "rsVDKTbUceVQqNKrSzYj8HtkVcS7TuRWSN": "Coinbase (Cold 36)",
-        "rBj8PDBTKKuXWJaWbaEtdkV8hq4oxRWhsB": "Coinbase (Cold 392)",
-        "rMJbEvjzqVeGJHs5ySZvuF2dHhWKx69t6G": "Coinbase (Cold 100)",
-        "rw4rHH5LrTUZ5WDXieCPT14E89PwnmXtoV": "Coinbase (Cold 48)",
-        "rNbMpc8JgLKnXs51KVYAmt4zbDvE8kgQEi": "Coinbase (Cold 232)",
-        "rnaxGortNCoxkWUq18jCGmQDeCrLBmiz42": "Coinbase (Cold 92)",
-        "rMsfxSZfdj3F1vBeVRte6b83LMV4AtZAHX": "Coinbase (Cold 434)",
-        "rf9CWxJKUwHm4eZo3Z8SHi6Z1D6RoqFqqq": "Coinbase (Cold 196)",
-        "rKmcvfZ4AeVCsJDNLZg3Xwbs86F33sC6bR": "Coinbase (Cold 78)",
-        "rnYzsCmvD35kBntkY5g4kf7hStMGKSQfwz": "Coinbase (Cold 149)",
-        "rJQC2RzzALgus6ZZgu34nXnpz67v3bRSzi": "Coinbase (Cold 210)",
-        "r939VcVXx5Zx9wJ1TL61StPEKaqaYf75XQ": "Coinbase (Cold 104)",
-        "r9rg8WT6KPXE8FGYbsGG6YaEG6wrbLxqF9": "Coinbase (Cold 206)",
-        "rGoDpsHfkkSvNatyXHZPiJk7qydd7uahQz": "Coinbase (Cold 183)",
-        "raQ3drgGw2eFHTnck6SZxKe2JhQr8Lm8w1": "Coinbase (Cold 108)",
-        "rnWnrbjNw5Ezdqy51a769Rror8U3xRkYxK": "Coinbase (Cold 137)",
-        "rwTjgH22nenAtDpPWy4g7xPhBqhVU845Az": "Coinbase (Cold 265)",
-        "rBAzrxLFZSqni5K67kPqX3WN7VLDTcUVWJ": "Coinbase (Cold 375)",
-        "rnioNuMG47FKY7sZ82EtKt1kBfD4Lg5M4S": "Coinbase (Cold 122)",
-        "rMAxoQbdkCHYpH9VTmdiyrR1F7T4Yvyk2k": "Coinbase (Cold 400)",
-        "rUejaQ5zgB7fMKhj72SPK7xAdGo6ujx2ca": "Coinbase (Cold 87)",
-        "rGK3t5Ppw46RciqcHtrUtvcvhD7M99HJvU": "Coinbase (Cold 379)",
-        "rUb2Ds39TAXnnbKekuUmJsZk11BaenHWHG": "Coinbase (Cold 353)",
-        "rJZkhPxEbvpyuM1tPV2YfkSgSmFPwP4Af6": "Coinbase (Cold 414)",
-        "r9gGyhLJNhWRUPEXbcGXR7HowrAgQL4i4B": "Coinbase (Cold 155)",
-        "rHCwZG3cNaKSr3aANX36m4McU3pLAj91Jr": "Coinbase (Cold 197)",
-        "rLex7Hn4VFotWPCzE1xXnPtx1GfqTzLnJi": "Coinbase (Cold 394)",
-        "rEe4cm8ZvQSMS4h4Jwuj3RtCVwqATwZ1sK": "Coinbase (Cold 396)",
-        "ram3dNqeea6s9HpyH8ANoFMSTW78Gk3gBv": "Coinbase (Cold 146)",
-        "rGthywLPxJPsmCZaWuA7K6xZ5EYJLjoq7e": "Coinbase (Cold 345)",
-        "rKt48W1Eg5M6DWD1CkDDYioA7Civ8zEjiy": "Coinbase (Cold 324)",
-        "rEEKHC9pyscnFz5hqMEe8dMQY5j1ymLC3Y": "Coinbase (Cold 259)",
-        "rnkzrdCPPHhHTEu5XMfmLw2Z5wq9ZNJxFM": "Coinbase (Cold 333)",
-        "rNdTXdz2fABUprp4LrvknEiqYXkvpzN4kx": "Coinbase (Cold 248)",
-        "rMgdeXXHKpnFi9FUZQgZRc73gDFjVK8PMN": "Coinbase (Cold 290)",
-        "rs4qVgzVsYTeTv9Fh5URf6CDeNn22AxXax": "Coinbase (Cold 43)",
-        "rUFDke2TLvmLQaAH6LZYmURAfQ1SCQDSLt": "Coinbase (Cold 135)",
-        "rJUkHKXn7fonFnYs5aP1igXZ3Y1xzKB1": "Coinbase (Cold 321)",
-        "rL2kYqQW7BThQrEVzf1SgohWnXV7adWfqf": "Coinbase (Cold 298)",
-        "rHvCuXyoLzurq45ZNy91kzDmGJLqjf42Z8": "Coinbase (Cold 74)",
-        "r4VDPsS5yatqpkdBoJxNWh3TWWXTnmR62r": "Coinbase (Cold 31)",
-        "rQrYaxwU6vFvA37maEVcs1hLGgxFDxaKZn": "Coinbase (Cold 395)",
-        "raon8BEsrawPug1yEs8ChX4ccEC4bhbEbw": "Coinbase (Cold 136)",
-        "rNqCrZDNfW3apqmrk94AuAdy35eW5jB2pP": "Coinbase (Cold 181)",
-        "rfJL7vFfPsXLhjTctNJJf443tASrrs1Nap": "Coinbase (Cold 409)",
-        "rME6BCc8wFqLFtD6yGDMChPEpChN59VCym": "Coinbase (Cold 300)",
-        "rNx5iPejwegrf6CXgWNsZMGXgj4C2e2QGo": "Coinbase (Cold 187)",
-        "r4pUXa53aRzH11u2ZrPLk1tuM5mFayXwZM": "Coinbase (Cold 403)",
-        "rKrur5amu1cx5ZMdfZ7QdwTLyQta7dXzWW": "Coinbase (Cold 141)",
-        "rhDUYzz8faQi1NkAkD4UqPGhHVtMML4uY1": "Coinbase (Cold 233)",
-        "rH2JhAxcApv8tEJa62jzGZFYgf77NduFDP": "Coinbase (Cold 143)",
-        "rp8XdQLjn41ao7CNHyorP4hS8fbPbACoEw": "Coinbase (Cold 247)",
-        "rJT8GJhJaiugYSgZW6HuZmaGXYKudNXFbw": "Coinbase (Cold 384)",
-        "rsXm9nBire6zqajappuFPLJuydvHDuqz8g": "Coinbase (Cold 124)",
-        "rhhJhWUpU7A1enRxKAmWqyV5c9Y1xrVQTm": "Coinbase (Cold 157)",
-        "rPQmWocoQACFezEbQmmcRPSEhRxqp1Ksz9": "Coinbase (Cold 302)",
-        "rGCc2ah3xtnizjpH3gd2wQm6R837eaULa4": "Coinbase (Cold 438)",
-        "r9ZMdQ63S8NvgdCyLpfhkdbWDfQ57eKD9c": "CoinbaseCold366"
-    },
-    "coinone": {
-        "rp2diYfVtpbgEMyaoWnuaWgFCAkqCAEg28": "Coinone1",
-        "rPsmHDMkheWZvbAkTA8A9bVnUdadPn7XBK": "Coinone2",
-        "rhuCPEoLFYbpbwyhXioSumPKrnfCi3AXJZ": "Coinone3",
-        "rMksM39efoP4XyAqEjzFUEowwnVbQTh6KW": "Coinone4",
-        "rDKw32dPXHfoeGoD3kVtm76ia1WbxYtU7D": "Coinone5"
-    },
-    "coinjar": {
-        "rPvKH3CoiKnne5wAYphhsWgqAEMf1tRAE7": "Coinjar"
-    },
-    "crypto.com": {
-        "r4DymtkgUAh2wqRxVfdd3Xtswzim6eC6c5": "Crypto.com 1",
-        "rPHNKf25y3aqATYfrMv9LQnTRHQUYELXfn": "Crypto.com 2",
-        "rJmXYcKCGJSayp4sAdp6Eo4CdSFtDVv7WG": "Crypto.com 3",
-        "rKNwXQh9GMjaU8uTqKLECsqyib47g5dMvo": "Crypto.com 4",
-        "rKV8HEL3vLc6q9waTiJcewdRdSFyx67QFb": "Crypto Exchange"
-    },
-    "Doppler Finance": {
-        "rprFy94qJB5riJpMmnPDp3ttmVKfcrFiuq": "Doppler Finance 1",
-        "rEPQxsSVER2r4HeVR4APrVCB45K68rqgp2": "Doppler Finance 2"
-    },
-
-    "firi": {
-        "raJHqa1o57DwjtrLCZjdkMKRtfHnbrwSse": "Firi"
-    },
-    "etoro": {
-        "rsdvR9WZzKszBogBJrpLPE64WWyEW4ffzS": "eToro1",
-        "raQ9yYPNDQwyeqAAX9xJgjjQ7wUtLxJ5JV": "eToro2",
-        "rBMe3zVBLgeh2QN4CeX6B17zwbcN6JEmZB": "eToro3",
-        "rEvwSpejhGTbdAXbxRTpGAzPBQkBRZxN5s": "eToro4",
-        "rM9EyDmjxeukZGT6wfkxncqeM3ABJsro3a": "eToro5"
-    },
-    "gate.io": {
-        "rHcFoo6a9qT5NHiVn1THQRhsEGcxtYCV4d": "Gate.io 1",
-        "rLzxZuZuAHM7k3FzfmhGkXVwScM4QSxoY7": "Gate.io 2",
-        "rNnWmrc1EtNRe5SEQEs9pFibcjhpvAiVKF": "Gate.io 3",
-        "rNu9U5sSouNoFunHp9e9trsLV6pvsSf54z": "Gate.io 4"
-    },
-    "gemini": {
-        "raBQUYdAhnnojJQ6Xi3eXztZ74ot24RDq1": "Gemini1",
-        "raq2gccLh11AwvBrpYcHntUTv4xQNRpyyG": "Gemini2",
-        "rBYpyCjNwBDQFrgEdVfyosSgQS6iL6sTHe": "Gemini3"
-    },
-    "kraken": {
-        "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Kraken1",
-        "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Kraken2",
-        "rGZjPjMkfhAqmc1ssEiT753uAgyftHRo2m": "Kraken3",
-        "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Kraken4",
-        "rEvuKRoEbZSbM5k5Qe5eTD9BixZXsfkxHf": "Kraken5",
-        "rnJrjec2vrTJAAQUTMTjj7U6xdXrk9N4mT": "Kraken6",
-        "rHapXGCL7KXTovvpEqLfDiZ6WV7vMhPWGJ": "Kraken7"
-    },
-    "KuCoin": {
-         "rLpvuHZFE46NUyZH5XaMvmYRJZF7aory7t": "Kucoin11",
-         "rNFugeoj3ZN8Wv6xhuLegUBBPXKCyWLRkB": "Kucoin5",
-         "rBxszqhQkhPALtkSpGuVeqR6hNtZ8xTH3T": "Kucoin7",
-         "rp4gqz1XdqMsWRZbzPdPAQWw1tg5LuwUVP": "Kucoin8"
-    },
-    "luno": {
-        "rsRy14FvipgqudiGmptJBhr1RtpsgfzKMM": "Luno1",
-        "rsbfd5ZYWqy6XXf6hndPbRjDAzfmWc1CeQ": "Luno2"
-    },
-    "mexc": {
-        "rs2dgzYeqYqsk8bvkQR5YPyqsXYcA24MP2": "Mexc"
-    },
-    "mercadobitcoin": {
-        "rnW8je5SsuFjkMSWkgfXvqZH3gLTpXxfFH": "Mercado Bitcoin 1",
-        "rPEPYN8sHU3cytBwVm69qPbVztaoj7wNf": "Mercado Bitcoin 3"
-    },
-    "okx": {
-        "rUzWJkXyEtT8ekSSxkBYPqCvHpngcy6Fks": "Okx"
-    },
-    "paribu": {
-        "rM9e4hDCEu4hY8SESypL9ymM2sMauDCncf": "Paribu 3"
-    },
-    "tradeogre": {
-        "rhsZa1NR9GqA7NtQjDe5HtYWZxPAZ4oGrE": "TradeOgre"
-    },
-    "uphold": {
-        "rQrQMKhcw3WnptGeWiYSwX5Tz3otyJqPnq": "Uphold2",
-        "rMdG3ju8pgyVh29ELPWaDuA74CpWW6Fxns": "Uphold3",
-        "rBEc94rUFfLfTDwwGN7rQGBHc883c2QHhx": "Uphold4",
-        "rsX8cp4aj9grKVD9V1K2ouUBXgYsjgUtBL": "Uphold8",
-        "rErKXcbZj9BKEMih6eH6ExvBoHn9XLnTWe": "Uphold9",
-        "rKe7pZPwdKEubmEDCAu9djJVsQfK4Atmzr": "Uphold11",
-        "rsXT3AQqhHDusFs3nQQuwcA1yXRLZJAXKw": "uphold12"
-    },
-    "upbit": {
-        "raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA": "Upbit1",
-        "rfL1mn4VTCoHdhHhHMwqpShCFUaDBRk6Z5": "Upbit12",
-        "rwa7YXssGVAL9yPKw6QJtCen2UqZbRQqpM": "Upbit13",
-        "rNcAdhSLXBrJ3aZUq22HaNtNEPpB5fR8Ri": "Upbit14",
-        "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": "Upbit15",
-        "rMNUAfSz2spLEbaBwPnGtxTzZCajJifnzH": "Upbit16",
-        "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": "Upbit17",
-        "rs48xReB6gjKtTnTfii93iwUhjhTJsW78B": "Upbit18",
-        "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": "Upbit19",
-        "rLgn612WAgRoZ285YmsQ4t7kb8Ui3csdoU": "Upbit20",
-        "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": "Upbit21",
-        "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": "Upbit22",
-        "rHHQeqjz2QyNj1DVoAbcvfaKLv7RxpHMNE": "Upbit23"
-    },
-     "sbi": {
-        "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "SBI VC TRADE 4",
-        "raSZXZApFg7Nj1B5G6BnhoL6HcTqVMopJ3": "SBI VC Trade 5",
-        "r39uEuRjzLaSgvkjTfcejodbSrXLM3cYnX": "SBI VC Trade 6",
-        "rDDyH5nfvozKZQCwiBrWfcE528sWsBPWET": "SBI VC Trade 1",
-        "rKcVYzVK1f4PhRFjLhWP7QmteG5FpPgRub": "SBI VC Trade 2",
-        "rUaESVd1yLMy5VyoJvwwuqE8ZiCb2PEqBR": "SBI VC Trade 3"
-    },
-
-    "stake": {
-        "rnqZnvzoJjdg7n1P9pmumJ7FQ5wxNH3gYC": "Stake1",
-        "razLtrbzXVXYvViLqUKLh8YenGLJid9ZTW": "Stake2",
-        "rBA7oBScBPccjDcemGhkmCY82v2ZeLa2K2f": "Stake3",
-        "rBndy89HdamJ3UHNekAS6ALjW9WoCE2W5s": "Stake4"
-    },
-    "korbit": {
-        "rBTjeJu1Rvnbq476Y7PDnvnXUeERV9CxEQ": "Korbit1",
-        "rJRarS792K6LTqHsFkZGzM1Ue6G8jZ2AfK": "Korbit2",
-        "rGU8q9qNCCQG2eMgJpLJJ1YFF5JAbntqau": "Korbit3",
-        "r9WGxuEbUSh3ziYt34mBRViPbqVxZmwsu3": "Korbit4",
-        "rNWWbLxbZRKd51NNZCEjoSNovrrx7yiPyt": "Korbit5",
-        "rGq74nAmw1ARejUNLYEBGxiQBaoNtryEe9": "Korbit6",
-        "rsYFhEk4uFvwvvKJomHL7KhdF29r2sw9KD": "Korbit7",
-        "rwnXZEUe7o29SPcWZwnZukR8fdXmFMWHAN": "Korbit8"
-    },
-    "swissbirg": {
-        "rfyE1wqH1YY3u6BcauQwYuoD13GVtJErXq": "SwissBirg 3"
-    },
-    "virtune": {
-        "rnaiDK2aDkDCCoRk3n9oyzbrtBcGPdHL2t": "Virtune"
-    },
-    "Evernorth": {
-        "rsT3yYMkuicxW1hYsy787mg5XHhkz2uQRk": "Evernorth1",
-        "rKXXrAgpkHQN8m4HxAQCYmDCPPUByc9mVq": "Evernorth2",
-        "rKhjV48GdbgxAAfSvusqGNktGwAxnzzXpv": "Evernorth3",
-        "rGJBNGkDeRPNvNJCi57Ht1ncdht9SuctLe": "Evernorth4",
-        "rJX1qoSGYmx5NWJEpsBGKvxmYpGR7mDtop": "Evernorth5", 
-        "rJuyHPDFpfeVhxfxZboTf7BYu1ptGus1v3": "Evernorth6",
-        "rUgQciCPP1AiwQ9f5zstYu9RzVfsKQRGc2": "Evernorth7",
-        "rPhQdyEaz4kcSoYKTAQhvkvdYxWKKw2vSC": "Evernorth8",
-        "rGy4zJtGfGtF7dtjZmBraQTcfZSQgwqpaa": "Evernorth9"
-	};
+            "upbit": {
+                "raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA": "Upbit1",
+                "rfL1mn4VTCoHdhHhHMwqpShCFUaDBRk6Z5": "Upbit12",
+                "rwa7YXssGVAL9yPKw6QJtCen2UqZbRQqpM": "Upbit13",
+                "rNcAdhSLXBrJ3aZUq22HaNtNEPpB5fR8Ri": "Upbit14",
+                "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": "Upbit15",
+                "rMNUAfSz2spLEbaBwPnGtxTzZCajJifnzH": "Upbit16",
+                "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": "Upbit17",
+                "rs48xReB6gjKtTnTfii93iwUhjhTJsW78B": "Upbit18",
+                "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": "Upbit19",
+                "rLgn612WAgRoZ285YmsQ4t7kb8Ui3csdoU": "Upbit20",
+                "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": "Upbit21",
+                "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": "Upbit22"
+            },
+            "binance": {
+                "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance 1",
+                "rNU4eAowPuixS5ZCWaRL72UUeKgxcKExpK": "Binance 10",
+                "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": "Binance 11",
+                "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance 12",
+                "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance 13",
+                "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": "Binance 14"
+            },
+            "bithumb": {
+                "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb1",
+                "rNTkgxs5WG5mU5Sz26YoDVrHim5Y5ohC7": "Bithumb2",
+                "r9hUMZBc3MWRc4YdsdZgNCW5Qef8wNSXpb": "Bithumb3",
+                "r9LHiNDZvpLoWPoKnbH2JWjFET8zoYT4Y5": "Bithumb4"
+            },
+            "kraken": {
+                "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Kraken1",
+                "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Kraken2",
+                "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Kraken4"
+            },
+            "bitstamp": {
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp1",
+                "rUobSiUpYH2S97Mgb4E7b7HuzQj2uzZ3aD": "Bitstamp2"
+            },
+            "coinbase": {
+                "rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w": "Coinbase1",
+                "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg": "Coinbase2"
+            },
+            "bybit": {
+                "rMrgNBrkE6FdCjWih5VAWkGMrmerrWpiZt": "Bybit 1",
+                "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bybit 4",
+                "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Bybit 6"
+            },
+            "bitfinex": {
+                "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex1"
+            },
+            "sbi": {
+                "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "SBI VC TRADE 4"
+            },
+            "robinhood": {
+                "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood1",
+                "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood2"
+            },
+            "crypto.com": {
+                "r4DymtkgUAh2wqRxVfdd3Xtswzim6eC6c5": "Crypto.com 1",
+                "rPHNKf25y3aqATYfrMv9LQnTRHQUYELXfn": "Crypto.com 2"
+            },
+            "gate.io": {
+                "rHcFoo6a9qT5NHiVn1THQRhsEGcxtYCV4d": "Gate.io 1",
+                "rNnWmrc1EtNRe5SEQEs9pFibcjhpvAiVKF": "Gate.io 3"
+            },
+            "kucoin": {
+                "rNFugeoj3ZN8Wv6xhuLegUBBPXKCyWLRkB": "Kucoin5",
+                "rp4gqz1XdqMsWRZbzPdPAQWw1tg5LuwUVP": "Kucoin8"
+            },
+            "bitrue": {
+                "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue1",
+                "raLPjTYeGezfdb6crXZzcC8RkLBEwbBHJ5": "Bitrue2"
+            },
+            "okx": {
+                "rUzWJkXyEtT8ekSSxkBYPqCvHpngcy6Fks": "Okx"
+            },
+            "gemini": {
+                "raBQUYdAhnnojJQ6Xi3eXztZ74ot24RDq1": "Gemini1"
+            },
+            "coinone": {
+                "rp2diYfVtpbgEMyaoWnuaWgFCAkqCAEg28": "Coinone1"
+            },
+            "korbit": {
+                "rBTjeJu1Rvnbq476Y7PDnvnXUeERV9CxEQ": "Korbit1"
+            },
+            "bitbank": {
+                "rLbKbPyuvs4wc1h13BEPHgbFGsRXMeFGL6": "Bitbank1"
+            },
+            "uphold": {
+                "rMdG3ju8pgyVh29ELPWaDuA74CpWW6Fxns": "Uphold3"
+            },
+            "etoro": {
+                "rsdvR9WZzKszBogBJrpLPE64WWyEW4ffzS": "eToro1"
+            },
+            "mexc": {
+                "rs2dgzYeqYqsk8bvkQR5YPyqsXYcA24MP2": "Mexc"
+            },
+            "bitpanda": {
+                "rUEfYyerfok6Yo38tTTTZKeRefNh9iB1Bd": "Bitpanda1"
+            },
+            "luno": {
+                "rsRy14FvipgqudiGmptJBhr1RtpsgfzKMM": "Luno1"
+            }
+        };
 
         let currentXRPPrice = null;
         let exchangeData = {};
