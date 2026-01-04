@@ -1261,6 +1261,58 @@
             align-items: center;
         }
 
+        /* Holdings Chart Section */
+        .holdings-chart-section {
+            margin-bottom: 2rem;
+        }
+
+        .holdings-chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .holdings-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .holdings-chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-type-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .chart-type-btn.active {
+            background: var(--accent-xrp-dim);
+            border-color: var(--accent-xrp);
+            color: var(--accent-xrp);
+        }
+
+        .holdings-chart-wrapper {
+            padding: 1.5rem;
+            height: 350px;
+        }
+
+        .exchange-controls-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
         .exchange-filter-input {
             flex: 1;
             min-width: 200px;
@@ -1437,10 +1489,30 @@
                 </div>
             </div>
 
+            <!-- Holdings Chart Section -->
+            <div class="holdings-chart-section">
+                <div class="holdings-chart-container">
+                    <div class="holdings-chart-header">
+                        <div class="holdings-table-title">
+                            <span>📊</span>
+                            ETF Holdings Distribution
+                        </div>
+                        <div class="holdings-chart-controls">
+                            <button class="btn chart-type-btn active" data-hchart="bar" onclick="switchHoldingsChart('bar')">Bar</button>
+                            <button class="btn chart-type-btn" data-hchart="pie" onclick="switchHoldingsChart('pie')">Pie</button>
+                            <button class="btn chart-type-btn" data-hchart="doughnut" onclick="switchHoldingsChart('doughnut')">Doughnut</button>
+                        </div>
+                    </div>
+                    <div class="holdings-chart-wrapper">
+                        <canvas id="holdingsDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <div class="holdings-table-container">
                 <div class="holdings-table-header">
                     <div class="holdings-table-title">
-                        <span>📊</span>
+                        <span>📋</span>
                         Daily Holdings Data
                     </div>
                     <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
@@ -1759,8 +1831,8 @@
                 bitw: { xrp: 30843614, value: null },
                 gdlc: { xrp: 14176113, value: null },
                 ezpz: { xrp: 330366, value: 636976 }
-            },
-             {
+             },
+               {
                 date: "12/15/2025",
                 canary: { xrp: 171651320.69, value: 343704992.08 },
                 bitwise: { xrp: null, value: null },
@@ -2032,8 +2104,7 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            }
-
+            },
         ];
 
         // ETF column definitions for the holdings table
@@ -2069,6 +2140,10 @@
                 document.getElementById('holdingsTab').classList.add('active');
                 renderHoldingsTable();
                 updateHoldingsSummary();
+                // Render chart after a small delay to ensure canvas is visible
+                setTimeout(() => {
+                    renderHoldingsChart();
+                }, 100);
             } else if (tabName === 'exchange') {
                 document.getElementById('exchangeTab').classList.add('active');
             }
@@ -2170,6 +2245,133 @@
         function refreshHoldingsDisplay() {
             renderHoldingsTable();
             updateHoldingsSummary();
+            renderHoldingsChart();
+        }
+
+        // Holdings Distribution Chart
+        let holdingsDistributionChart = null;
+        let currentHoldingsChartType = 'bar';
+
+        function switchHoldingsChart(type) {
+            currentHoldingsChartType = type;
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.hchart === type);
+            });
+            renderHoldingsChart();
+        }
+
+        function getLatestETFHoldings() {
+            const holdings = [];
+            
+            etfColumns.forEach(col => {
+                for (const row of holdingsData) {
+                    const data = row[col.key];
+                    if (data && data.xrp) {
+                        holdings.push({
+                            name: col.name,
+                            ticker: col.ticker,
+                            xrp: data.xrp,
+                            value: data.value || (currentXRPPrice ? data.xrp * currentXRPPrice : 0)
+                        });
+                        break;
+                    }
+                }
+            });
+            
+            return holdings.sort((a, b) => b.xrp - a.xrp);
+        }
+
+        function renderHoldingsChart() {
+            const canvas = document.getElementById('holdingsDistributionChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const holdings = getLatestETFHoldings();
+            
+            if (holdings.length === 0) return;
+
+            // Destroy existing chart
+            if (holdingsDistributionChart) {
+                holdingsDistributionChart.destroy();
+            }
+
+            const labels = holdings.map(h => h.ticker);
+            const data = holdings.map(h => h.xrp);
+            const colors = [
+                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+            ];
+
+            const chartConfig = {
+                type: currentHoldingsChartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'XRP Holdings',
+                        data: data,
+                        backgroundColor: currentHoldingsChartType === 'bar' 
+                            ? colors.slice(0, data.length).map(c => c + '80')
+                            : colors.slice(0, data.length),
+                        borderColor: colors.slice(0, data.length),
+                        borderWidth: currentHoldingsChartType === 'bar' ? 2 : 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: currentHoldingsChartType !== 'bar',
+                            position: 'right',
+                            labels: {
+                                color: '#8888a0',
+                                font: { size: 11 },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            titleColor: '#ffffff',
+                            bodyColor: '#8888a0',
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    const holding = holdings[context.dataIndex];
+                                    const xrpFormatted = formatHoldingsNumber(context.raw);
+                                    let label = `${holding.name}: ${xrpFormatted} XRP`;
+                                    if (currentXRPPrice) {
+                                        const value = context.raw * currentXRPPrice;
+                                        label += ` ($${formatHoldingsNumber(value)})`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: currentHoldingsChartType === 'bar' ? {
+                        x: {
+                            ticks: { 
+                                color: '#8888a0',
+                                font: { size: 11 }
+                            },
+                            grid: { color: '#2a2a3a' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8888a0',
+                                callback: function(value) {
+                                    return formatHoldingsNumber(value);
+                                }
+                            },
+                            grid: { color: '#2a2a3a' }
+                        }
+                    } : {}
+                }
+            };
+
+            holdingsDistributionChart = new Chart(ctx, chartConfig);
         }
 
         // CSV Upload handler
@@ -2210,7 +2412,7 @@
         ];
 
         const EXCHANGES = {
-            "robinhood": {
+         "robinhood": {
         "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood1",
         "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood2"
     },
@@ -2540,9 +2742,8 @@
         "rJuyHPDFpfeVhxfxZboTf7BYu1ptGus1v3": "Evernorth6",
         "rUgQciCPP1AiwQ9f5zstYu9RzVfsKQRGc2": "Evernorth7",
         "rPhQdyEaz4kcSoYKTAQhvkvdYxWKKw2vSC": "Evernorth8",
-        "rGy4zJtGfGtF7dtjZmBraQTcfZSQgwqpaa": "Evernorth9" 
-	   }
-        };
+        "rGy4zJtGfGtF7dtjZmBraQTcfZSQgwqpaa": "Evernorth9"
+	};
 
         let exchangeData = {};
         let isExchangeFetching = false;
