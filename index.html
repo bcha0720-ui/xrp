@@ -1389,6 +1389,522 @@
             border-radius: 3px;
             transition: width 0.3s ease;
         }
+
+        /* ============================================
+           NEW UI/UX IMPROVEMENTS
+           ============================================ */
+
+        /* Dashboard Overview Section */
+        .dashboard-overview {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+            border: 2px solid var(--accent-xrp);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-overview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(35, 247, 221, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .dashboard-overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-overview-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-xrp);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 250px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .dashboard-metric {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .dashboard-metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        .dashboard-metric-value.animated {
+            transition: all 0.5s ease;
+        }
+
+        .dashboard-metric-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .dashboard-metric-change.positive {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+        }
+
+        .dashboard-metric-change.negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+        }
+
+        .dashboard-pie-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-pie-chart {
+            width: 200px;
+            height: 200px;
+        }
+
+        .dashboard-pie-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .pie-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pie-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Animated Number Counter */
+        .counter-value {
+            display: inline-block;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0.5; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .counter-animate {
+            animation: countUp 0.5s ease forwards;
+        }
+
+        /* Holdings Trend Chart */
+        .trend-chart-section {
+            margin-bottom: 2rem;
+        }
+
+        .trend-chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .trend-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .trend-chart-wrapper {
+            padding: 1.5rem;
+            height: 300px;
+        }
+
+        /* Daily Change Indicators */
+        .change-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .change-indicator.positive {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+        }
+
+        .change-indicator.negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+        }
+
+        .change-indicator.neutral {
+            background: rgba(136, 136, 160, 0.15);
+            color: var(--text-muted);
+        }
+
+        /* Mini Sparkline */
+        .sparkline-container {
+            width: 60px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Exchange Charts Grid */
+        .exchange-charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1000px) {
+            .exchange-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .exchange-chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .exchange-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .exchange-chart-wrapper {
+            padding: 1rem;
+            height: 280px;
+        }
+
+        /* Treemap styles */
+        .treemap-container {
+            padding: 1rem;
+            height: 280px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-content: flex-start;
+        }
+
+        .treemap-item {
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .treemap-item:hover {
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .treemap-item-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+        }
+
+        .treemap-item-value {
+            font-size: 0.65rem;
+            color: rgba(0, 0, 0, 0.6);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Top Dominance Section */
+        .dominance-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .dominance-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dominance-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dominance-bar-label {
+            width: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .dominance-bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dominance-bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.8s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 0.75rem;
+        }
+
+        .dominance-bar-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dominance-bar-percent {
+            width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Comparison Mode */
+        .comparison-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .comparison-toggle:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .comparison-toggle.active {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        /* Chart Export Button */
+        .chart-export-btn {
+            padding: 0.4rem 0.8rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-export-btn:hover {
+            border-color: var(--accent-xrp);
+            color: var(--accent-xrp);
+        }
+
+        /* Fullscreen Chart Modal */
+        .fullscreen-chart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .fullscreen-chart-overlay.active {
+            display: flex;
+        }
+
+        .fullscreen-chart-container {
+            width: 100%;
+            max-width: 1400px;
+            height: 80vh;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .fullscreen-chart-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .fullscreen-chart-close:hover {
+            color: var(--text-primary);
+        }
+
+        .fullscreen-chart-canvas {
+            width: 100%;
+            height: calc(100% - 60px);
+        }
+
+        /* Horizontal Bar Chart adjustments */
+        .horizontal-bar-wrapper {
+            padding: 1rem;
+            height: 350px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-xrp);
+            transform: scale(1.1);
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #e8e8ec;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f0f0f4;
+            --border: #d0d0d8;
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a5a70;
+            --text-muted: #8888a0;
+        }
+
+        body.light-mode .bg-grid {
+            background-image: 
+                linear-gradient(rgba(35, 247, 221, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(35, 247, 221, 0.08) 1px, transparent 1px);
+        }
+
+        body.light-mode .bg-glow {
+            background: radial-gradient(circle at 30% 20%, rgba(35, 247, 221, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+        }
+
+        /* Tooltip Styles */
+        .custom-tooltip {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-xrp);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-tooltip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-tooltip-value {
+            color: var(--accent-xrp);
+            font-family: 'JetBrains Mono', monospace;
+        }
     </style>
 </head>
 <body>
@@ -1424,6 +1940,59 @@
                 <div class="auto-refresh-info" id="autoRefreshInfo">Auto-refresh: every 5 minutes</div>
             </div>
         </header>
+
+        <!-- Dashboard Overview Section -->
+        <div class="dashboard-overview">
+            <div class="dashboard-overview-header">
+                <div class="dashboard-overview-title">
+                    <span>📊</span> Market Overview
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                    🌓
+                </button>
+            </div>
+            <div class="dashboard-grid">
+                <div class="dashboard-metrics">
+                    <div class="dashboard-metric">
+                        <div class="dashboard-metric-label">Total XRP in Spot ETFs</div>
+                        <div class="dashboard-metric-value animated" id="dashboardETFXRP">--</div>
+                        <div class="dashboard-metric-change positive" id="dashboardETFChange">
+                            <span>↑</span> <span>Loading...</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-metric">
+                        <div class="dashboard-metric-label">ETF Value (USD)</div>
+                        <div class="dashboard-metric-value animated" id="dashboardETFValue">--</div>
+                    </div>
+                    <div class="dashboard-metric">
+                        <div class="dashboard-metric-label">XRP on Exchanges</div>
+                        <div class="dashboard-metric-value animated" id="dashboardExchangeXRP">--</div>
+                        <div class="dashboard-metric-change neutral" id="dashboardExchangeChange">
+                            <span>→</span> <span>Click Exchange tab</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-metric">
+                        <div class="dashboard-metric-label">Exchange Value (USD)</div>
+                        <div class="dashboard-metric-value animated" id="dashboardExchangeValue">--</div>
+                    </div>
+                </div>
+                <div class="dashboard-pie-container">
+                    <div class="dashboard-pie-chart">
+                        <canvas id="dashboardPieChart"></canvas>
+                    </div>
+                    <div class="dashboard-pie-legend">
+                        <div class="pie-legend-item">
+                            <div class="pie-legend-dot" style="background: #23f7dd;"></div>
+                            <span>ETFs</span>
+                        </div>
+                        <div class="pie-legend-item">
+                            <div class="pie-legend-dot" style="background: #a855f7;"></div>
+                            <span>Exchanges</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Tab Navigation -->
         <div class="main-tabs">
@@ -1489,7 +2058,26 @@
                 </div>
             </div>
 
-            <!-- Holdings Chart Section -->
+            <!-- Holdings Trend Chart (Historical) -->
+            <div class="trend-chart-section">
+                <div class="trend-chart-container">
+                    <div class="trend-chart-header">
+                        <div class="holdings-table-title">
+                            <span>📈</span>
+                            Holdings Trend Over Time
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button class="chart-export-btn" onclick="exportChart('trendChart')">📥 Export</button>
+                            <button class="chart-export-btn" onclick="openFullscreenChart('trend')">⛶ Fullscreen</button>
+                        </div>
+                    </div>
+                    <div class="trend-chart-wrapper">
+                        <canvas id="holdingsTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holdings Distribution Chart Section -->
             <div class="holdings-chart-section">
                 <div class="holdings-chart-container">
                     <div class="holdings-chart-header">
@@ -1497,10 +2085,13 @@
                             <span>📊</span>
                             ETF Holdings Distribution
                         </div>
-                        <div class="holdings-chart-controls">
-                            <button class="btn chart-type-btn active" data-hchart="bar" onclick="switchHoldingsChart('bar')">Bar</button>
-                            <button class="btn chart-type-btn" data-hchart="pie" onclick="switchHoldingsChart('pie')">Pie</button>
-                            <button class="btn chart-type-btn" data-hchart="doughnut" onclick="switchHoldingsChart('doughnut')">Doughnut</button>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <div class="holdings-chart-controls">
+                                <button class="btn chart-type-btn active" data-hchart="bar" onclick="switchHoldingsChart('bar')">Bar</button>
+                                <button class="btn chart-type-btn" data-hchart="pie" onclick="switchHoldingsChart('pie')">Pie</button>
+                                <button class="btn chart-type-btn" data-hchart="doughnut" onclick="switchHoldingsChart('doughnut')">Doughnut</button>
+                            </div>
+                            <button class="chart-export-btn" onclick="exportChart('distributionChart')">📥 Export</button>
                         </div>
                     </div>
                     <div class="holdings-chart-wrapper">
@@ -1565,10 +2156,72 @@
                 <input type="text" id="exchangeFilter" class="exchange-filter-input" placeholder="🔍 Filter exchanges..." onkeyup="filterExchangeTable()">
             </div>
 
+            <!-- Exchange Charts Grid -->
+            <div class="exchange-charts-grid">
+                <!-- Horizontal Bar Chart -->
+                <div class="exchange-chart-card">
+                    <div class="exchange-chart-header">
+                        <div class="holdings-table-title">
+                            <span>📊</span>
+                            Top 10 Exchanges
+                        </div>
+                        <button class="chart-export-btn" onclick="exportChart('exchangeBarChart')">📥 Export</button>
+                    </div>
+                    <div class="horizontal-bar-wrapper">
+                        <canvas id="exchangeHorizontalBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Market Dominance Donut -->
+                <div class="exchange-chart-card">
+                    <div class="exchange-chart-header">
+                        <div class="holdings-table-title">
+                            <span>🎯</span>
+                            Market Dominance
+                        </div>
+                    </div>
+                    <div class="exchange-chart-wrapper">
+                        <canvas id="exchangeDominanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treemap Visualization -->
+            <div class="exchange-chart-card" style="margin-bottom: 1.5rem;">
+                <div class="exchange-chart-header">
+                    <div class="holdings-table-title">
+                        <span>🗺️</span>
+                        Holdings Treemap
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Size = Market Share</span>
+                </div>
+                <div class="treemap-container" id="exchangeTreemap">
+                    <div style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;">
+                        Loading treemap...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Dominance Bars -->
+            <div class="exchange-chart-card dominance-section" style="margin-bottom: 1.5rem;">
+                <div class="exchange-chart-header">
+                    <div class="holdings-table-title">
+                        <span>📶</span>
+                        Top 5 Market Share
+                    </div>
+                </div>
+                <div style="padding: 1.25rem;">
+                    <div class="dominance-bars" id="dominanceBars">
+                        <div style="color: var(--text-muted); text-align: center; padding: 1rem;">
+                            Load exchange data to see dominance bars
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="exchange-info-banner">
                 <span>ℹ️</span>
-                <span><strong>Live XRPL Data:</strong> Fetches real-time balances directly from the XRP Ledger. Click "Fetch Live Data" to query all exchange wallets. 
-                For interactive charts and historical comparison, visit the <a href="https://xrpexchange.streamlit.app/" target="_blank" style="color: var(--accent-xrp);">Streamlit App</a>.</span>
+                <span><strong>Live XRPL Data:</strong> Fetches real-time balances directly from the XRP Ledger. Data auto-loads when you visit this tab and is cached for 5 minutes.</span>
             </div>
 
             <div class="holdings-table-container">
@@ -1653,6 +2306,17 @@
                     Follow @chachakobe4er
                 </a>
                 <button class="popup-later" onclick="closePopup()">Maybe later</button>
+            </div>
+        </div>
+
+        <!-- Fullscreen Chart Modal -->
+        <div class="fullscreen-chart-overlay" id="fullscreenChartOverlay">
+            <div class="fullscreen-chart-container">
+                <button class="fullscreen-chart-close" onclick="closeFullscreenChart()">×</button>
+                <h2 style="margin-bottom: 1rem; color: var(--accent-xrp);" id="fullscreenChartTitle">Chart</h2>
+                <div class="fullscreen-chart-canvas">
+                    <canvas id="fullscreenChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -2140,15 +2804,22 @@
                 document.getElementById('holdingsTab').classList.add('active');
                 renderHoldingsTable();
                 updateHoldingsSummary();
-                // Render chart after a small delay to ensure canvas is visible
+                // Render charts after a small delay to ensure canvas is visible
                 setTimeout(() => {
                     renderHoldingsChart();
+                    renderHoldingsTrendChart();
+                    updateDashboardOverview();
                 }, 100);
             } else if (tabName === 'exchange') {
                 document.getElementById('exchangeTab').classList.add('active');
                 // Auto-load exchange data if not already loaded
                 if (Object.keys(exchangeData).length === 0 && !isExchangeFetching) {
                     fetchExchangeData();
+                } else if (Object.keys(exchangeData).length > 0) {
+                    // Re-render charts if data already exists
+                    setTimeout(() => {
+                        renderExchangeCharts();
+                    }, 100);
                 }
             }
         }
@@ -2250,6 +2921,8 @@
             renderHoldingsTable();
             updateHoldingsSummary();
             renderHoldingsChart();
+            renderHoldingsTrendChart();
+            updateDashboardOverview();
         }
 
         // Holdings Distribution Chart
@@ -2377,6 +3050,569 @@
 
             holdingsDistributionChart = new Chart(ctx, chartConfig);
         }
+
+        // =====================================================
+        // NEW UI/UX ENHANCEMENT FUNCTIONS
+        // =====================================================
+
+        // Dashboard Overview Chart
+        let dashboardPieChart = null;
+
+        function updateDashboardOverview() {
+            // Get ETF totals
+            let etfTotalXRP = 0;
+            etfColumns.forEach(col => {
+                for (const row of holdingsData) {
+                    const data = row[col.key];
+                    if (data && data.xrp) {
+                        etfTotalXRP += data.xrp;
+                        break;
+                    }
+                }
+            });
+
+            // Get Exchange totals
+            let exchangeTotalXRP = 0;
+            if (Object.keys(exchangeData).length > 0) {
+                for (const data of Object.values(exchangeData)) {
+                    exchangeTotalXRP += data.total || 0;
+                }
+            }
+
+            // Update dashboard metrics with animation
+            animateValue('dashboardETFXRP', etfTotalXRP);
+            if (currentXRPPrice) {
+                animateValue('dashboardETFValue', etfTotalXRP * currentXRPPrice, true);
+            }
+            
+            if (exchangeTotalXRP > 0) {
+                animateValue('dashboardExchangeXRP', exchangeTotalXRP);
+                if (currentXRPPrice) {
+                    animateValue('dashboardExchangeValue', exchangeTotalXRP * currentXRPPrice, true);
+                }
+                document.getElementById('dashboardExchangeChange').innerHTML = 
+                    `<span style="color: var(--accent-green);">● Live data loaded</span>`;
+            }
+
+            // Render pie chart
+            renderDashboardPie(etfTotalXRP, exchangeTotalXRP);
+        }
+
+        function animateValue(elementId, value, isCurrency = false) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            el.classList.add('counter-animate');
+            
+            const formatted = isCurrency 
+                ? '$' + formatHoldingsNumber(value) 
+                : formatHoldingsNumber(value);
+            
+            el.textContent = formatted;
+            
+            setTimeout(() => {
+                el.classList.remove('counter-animate');
+            }, 500);
+        }
+
+        function renderDashboardPie(etfXRP, exchangeXRP) {
+            const canvas = document.getElementById('dashboardPieChart');
+            if (!canvas) return;
+
+            if (dashboardPieChart) {
+                dashboardPieChart.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // If no exchange data yet, show only ETF
+            const data = exchangeXRP > 0 
+                ? [etfXRP, exchangeXRP] 
+                : [etfXRP, 0];
+
+            dashboardPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ETFs', 'Exchanges'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#23f7dd', '#a855f7'],
+                        borderColor: ['#23f7dd', '#a855f7'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return formatHoldingsNumber(context.raw) + ' XRP';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Holdings Trend Chart (Historical)
+        let holdingsTrendChart = null;
+
+        function renderHoldingsTrendChart() {
+            const canvas = document.getElementById('holdingsTrendChart');
+            if (!canvas) return;
+
+            if (holdingsTrendChart) {
+                holdingsTrendChart.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // Prepare data - reverse to show chronological order
+            const reversedData = [...holdingsData].reverse();
+            const labels = reversedData.map(row => row.date);
+            
+            // Calculate total XRP for each date
+            const totals = reversedData.map(row => {
+                let total = 0;
+                etfColumns.forEach(col => {
+                    if (row[col.key] && row[col.key].xrp) {
+                        total += row[col.key].xrp;
+                    }
+                });
+                return total;
+            });
+
+            // Get data for each ETF
+            const datasets = [];
+            const colors = [
+                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+            ];
+
+            etfColumns.forEach((col, index) => {
+                const data = reversedData.map(row => {
+                    return row[col.key]?.xrp || null;
+                });
+                
+                // Only add if there's some data
+                if (data.some(v => v !== null)) {
+                    datasets.push({
+                        label: col.ticker,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        spanGaps: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    });
+                }
+            });
+
+            holdingsTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#8888a0',
+                                font: { size: 10 },
+                                boxWidth: 12,
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            titleColor: '#ffffff',
+                            bodyColor: '#8888a0',
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.raw === null) return null;
+                                    return `${context.dataset.label}: ${formatHoldingsNumber(context.raw)} XRP`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8888a0', font: { size: 10 } },
+                            grid: { color: '#2a2a3a' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8888a0',
+                                callback: (value) => formatHoldingsNumber(value)
+                            },
+                            grid: { color: '#2a2a3a' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exchange Charts
+        let exchangeHorizontalBarChart = null;
+        let exchangeDominanceChart = null;
+
+        function renderExchangeCharts() {
+            if (Object.keys(exchangeData).length === 0) return;
+
+            renderExchangeHorizontalBar();
+            renderExchangeDominanceDonut();
+            renderExchangeTreemap();
+            renderDominanceBars();
+            updateDashboardOverview();
+        }
+
+        function renderExchangeHorizontalBar() {
+            const canvas = document.getElementById('exchangeHorizontalBarChart');
+            if (!canvas) return;
+
+            if (exchangeHorizontalBarChart) {
+                exchangeHorizontalBarChart.destroy();
+            }
+
+            const sorted = Object.entries(exchangeData)
+                .sort((a, b) => b[1].total - a[1].total)
+                .slice(0, 10);
+
+            const labels = sorted.map(([name]) => name);
+            const data = sorted.map(([_, d]) => d.total);
+            const colors = [
+                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+            ];
+
+            const ctx = canvas.getContext('2d');
+            exchangeHorizontalBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'XRP Balance',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: (ctx) => formatHoldingsNumber(ctx.raw) + ' XRP'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#8888a0',
+                                callback: (v) => formatHoldingsNumber(v)
+                            },
+                            grid: { color: '#2a2a3a' }
+                        },
+                        y: {
+                            ticks: { color: '#8888a0', font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderExchangeDominanceDonut() {
+            const canvas = document.getElementById('exchangeDominanceChart');
+            if (!canvas) return;
+
+            if (exchangeDominanceChart) {
+                exchangeDominanceChart.destroy();
+            }
+
+            const sorted = Object.entries(exchangeData)
+                .sort((a, b) => b[1].total - a[1].total);
+            
+            const top5 = sorted.slice(0, 5);
+            const othersTotal = sorted.slice(5).reduce((sum, [_, d]) => sum + d.total, 0);
+
+            const labels = [...top5.map(([name]) => name), 'Others'];
+            const data = [...top5.map(([_, d]) => d.total), othersTotal];
+            const colors = ['#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6', '#64748b'];
+
+            const ctx = canvas.getContext('2d');
+            exchangeDominanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: '#16161f',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '50%',
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                                color: '#8888a0',
+                                font: { size: 10 },
+                                padding: 8,
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: (ctx) => {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = ((ctx.raw / total) * 100).toFixed(1);
+                                    return `${formatHoldingsNumber(ctx.raw)} XRP (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderExchangeTreemap() {
+            const container = document.getElementById('exchangeTreemap');
+            if (!container) return;
+
+            const sorted = Object.entries(exchangeData)
+                .sort((a, b) => b[1].total - a[1].total)
+                .slice(0, 15);
+
+            const total = sorted.reduce((sum, [_, d]) => sum + d.total, 0);
+            const colors = [
+                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
+                '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981'
+            ];
+
+            let html = '';
+            sorted.forEach(([name, data], index) => {
+                const share = (data.total / total) * 100;
+                const size = Math.max(60, Math.sqrt(share) * 35);
+                const color = colors[index % colors.length];
+                
+                html += `
+                    <div class="treemap-item" 
+                         style="background: ${color}; width: ${size}px; height: ${size}px; flex: 0 0 ${size}px;"
+                         title="${name}: ${formatHoldingsNumber(data.total)} XRP (${share.toFixed(1)}%)">
+                        <div class="treemap-item-name">${name.slice(0, 8)}</div>
+                        <div class="treemap-item-value">${share.toFixed(1)}%</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderDominanceBars() {
+            const container = document.getElementById('dominanceBars');
+            if (!container) return;
+
+            const sorted = Object.entries(exchangeData)
+                .sort((a, b) => b[1].total - a[1].total)
+                .slice(0, 5);
+
+            const total = Object.values(exchangeData).reduce((sum, d) => sum + d.total, 0);
+            const colors = ['#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6'];
+
+            let html = '';
+            sorted.forEach(([name, data], index) => {
+                const share = (data.total / total) * 100;
+                const color = colors[index];
+                
+                html += `
+                    <div class="dominance-bar-item">
+                        <div class="dominance-bar-label">${name}</div>
+                        <div class="dominance-bar-track">
+                            <div class="dominance-bar-fill" style="width: ${share}%; background: ${color};">
+                                <span class="dominance-bar-value">${formatHoldingsNumber(data.total)}</span>
+                            </div>
+                        </div>
+                        <div class="dominance-bar-percent">${share.toFixed(1)}%</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // Chart Export Function
+        function exportChart(chartId) {
+            let canvas;
+            switch(chartId) {
+                case 'trendChart':
+                    canvas = document.getElementById('holdingsTrendChart');
+                    break;
+                case 'distributionChart':
+                    canvas = document.getElementById('holdingsDistributionChart');
+                    break;
+                case 'exchangeBarChart':
+                    canvas = document.getElementById('exchangeHorizontalBarChart');
+                    break;
+                default:
+                    return;
+            }
+
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = `${chartId}_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Fullscreen Chart
+        let fullscreenChartInstance = null;
+
+        function openFullscreenChart(type) {
+            const overlay = document.getElementById('fullscreenChartOverlay');
+            const canvas = document.getElementById('fullscreenChart');
+            const title = document.getElementById('fullscreenChartTitle');
+            
+            overlay.classList.add('active');
+            
+            if (fullscreenChartInstance) {
+                fullscreenChartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            if (type === 'trend') {
+                title.textContent = '📈 Holdings Trend Over Time';
+                
+                const reversedData = [...holdingsData].reverse();
+                const labels = reversedData.map(row => row.date);
+                const colors = [
+                    '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
+                    '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+                ];
+                
+                const datasets = [];
+                etfColumns.forEach((col, index) => {
+                    const data = reversedData.map(row => row[col.key]?.xrp || null);
+                    if (data.some(v => v !== null)) {
+                        datasets.push({
+                            label: col.name,
+                            data: data,
+                            borderColor: colors[index % colors.length],
+                            backgroundColor: colors[index % colors.length] + '20',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            spanGaps: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 8
+                        });
+                    }
+                });
+
+                fullscreenChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#8888a0', font: { size: 12 } }
+                            },
+                            tooltip: {
+                                backgroundColor: '#16161f',
+                                borderColor: '#23f7dd',
+                                borderWidth: 1,
+                                titleFont: { size: 14 },
+                                bodyFont: { size: 12 },
+                                padding: 15
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#8888a0' }, grid: { color: '#2a2a3a' } },
+                            y: { 
+                                ticks: { 
+                                    color: '#8888a0',
+                                    callback: (v) => formatHoldingsNumber(v)
+                                }, 
+                                grid: { color: '#2a2a3a' } 
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function closeFullscreenChart() {
+            document.getElementById('fullscreenChartOverlay').classList.remove('active');
+            if (fullscreenChartInstance) {
+                fullscreenChartInstance.destroy();
+                fullscreenChartInstance = null;
+            }
+        }
+
+        // Close fullscreen on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeFullscreenChart();
+            }
+        });
 
         // CSV Upload handler
         function handleCSVUpload(event) {
@@ -2923,6 +4159,9 @@
             `;
 
             tableBody.innerHTML = rows;
+            
+            // Render exchange charts
+            renderExchangeCharts();
         }
 
         function filterExchangeTable() {
@@ -3522,9 +4761,15 @@
             fetchData();
             startAutoRefresh();
             
+            // Initialize dashboard overview after a delay
+            setTimeout(() => {
+                updateDashboardOverview();
+            }, 1000);
+            
             // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
+                updateDashboardOverview();
             }, 10000);
 
             // Show popup after 5 seconds if not recently closed
