@@ -4448,13 +4448,16 @@
 
             let grandTotalShares = 0;
             let grandTotalDollars = 0;
+            
+            // Collect all ETFs for ranking
+            let allETFs = [];
 
             // Render in specified order
             for (const groupName of groupOrder) {
                 const etfs = groups[groupName] || [];
                 const groupInfo = groupIcons[groupName] || { icon: '📋', class: 'index' };
                 
-                // Calculate group totals
+                // Calculate group totals and collect ETFs
                 let groupTotalShares = 0;
                 let groupTotalDollars = 0;
 
@@ -4462,10 +4465,26 @@
                     const periodData = etf[currentPeriod] || etf.daily || {};
                     groupTotalShares += periodData.shares || 0;
                     groupTotalDollars += periodData.dollars || 0;
+                    
+                    // Add to all ETFs list for ranking
+                    allETFs.push({
+                        symbol: etf.symbol,
+                        price: etf.price,
+                        shares: periodData.shares || 0,
+                        dollars: periodData.dollars || 0,
+                        group: groupName
+                    });
                 });
 
                 grandTotalShares += groupTotalShares;
                 grandTotalDollars += groupTotalDollars;
+                
+                // Sort ETFs by volume (dollars) within each group
+                const sortedETFs = [...etfs].sort((a, b) => {
+                    const aData = a[currentPeriod] || a.daily || {};
+                    const bData = b[currentPeriod] || b.daily || {};
+                    return (bData.dollars || 0) - (aData.dollars || 0);
+                });
 
                 html += `
                     <div class="etf-group">
@@ -4480,6 +4499,7 @@
                             <table>
                                 <thead>
                                     <tr>
+                                        <th style="width: 50px;">#</th>
                                         <th>Symbol</th>
                                         <th class="right">Price</th>
                                         <th class="right">Volume (Shares)</th>
@@ -4489,19 +4509,22 @@
                                 <tbody>
                 `;
 
-                if (etfs.length === 0) {
+                if (sortedETFs.length === 0) {
                     html += `
                         <tr>
-                            <td colspan="4" class="no-data">No data available for this group</td>
+                            <td colspan="5" class="no-data">No data available for this group</td>
                         </tr>
                     `;
                 } else {
-                    for (const etf of etfs) {
+                    sortedETFs.forEach((etf, index) => {
                         const periodData = etf[currentPeriod] || etf.daily || {};
                         const desc = descriptions[etf.symbol] || etf.description || '';
+                        const rank = index + 1;
+                        const rankColor = rank === 1 ? 'var(--accent-xrp)' : rank === 2 ? 'var(--accent-purple)' : rank === 3 ? 'var(--accent-orange)' : 'var(--text-muted)';
                         
                         html += `
                             <tr>
+                                <td style="text-align: center; font-weight: 700; color: ${rankColor};">${rank}</td>
                                 <td>
                                     <div class="symbol-cell">
                                         <div>
@@ -4521,11 +4544,12 @@
                                 </td>
                             </tr>
                         `;
-                    }
+                    });
 
                     // Add total row for each group
                     html += `
                         <tr class="total-row">
+                            <td></td>
                             <td>
                                 <div class="symbol-badge">TOTAL</div>
                             </td>
@@ -4549,6 +4573,73 @@
             }
 
             html += '</div>';
+            
+            // Sort all ETFs by volume for top rankings
+            allETFs.sort((a, b) => b.dollars - a.dollars);
+            const top10 = allETFs.slice(0, 10);
+            
+            // Top Volume Rankings Section
+            html += `
+                <div class="etf-group" style="border: 2px solid var(--accent-xrp); margin-top: 2rem;">
+                    <div class="group-header" style="background: linear-gradient(135deg, var(--bg-secondary), var(--accent-xrp-dim));">
+                        <div class="group-title">
+                            <div class="group-icon spot" style="background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));">🏆</div>
+                            <span class="group-name">Top 10 ETFs by Volume (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})</span>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">Rank</th>
+                                    <th>Symbol</th>
+                                    <th>Category</th>
+                                    <th class="right">Price</th>
+                                    <th class="right">Volume ($)</th>
+                                    <th class="right">Market Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            top10.forEach((etf, index) => {
+                const rank = index + 1;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                const rankStyle = rank <= 3 ? 'font-size: 1.2rem;' : 'color: var(--text-muted); font-weight: 600;';
+                const marketShare = grandTotalDollars > 0 ? ((etf.dollars / grandTotalDollars) * 100).toFixed(2) : 0;
+                const desc = descriptions[etf.symbol] || '';
+                
+                html += `
+                    <tr>
+                        <td style="text-align: center; ${rankStyle}">${medal}</td>
+                        <td>
+                            <div class="symbol-cell">
+                                <div>
+                                    <div class="symbol-badge">${etf.symbol}</div>
+                                    <div class="symbol-desc">${desc}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary); font-size: 0.85rem;">${etf.group}</td>
+                        <td class="volume-cell">
+                            <span class="price">$${etf.price.toFixed(2)}</span>
+                        </td>
+                        <td class="volume-cell">
+                            <div class="volume-shares" style="color: var(--accent-xrp);">${formatCurrency(etf.dollars)}</div>
+                        </td>
+                        <td class="volume-cell">
+                            <div class="volume-shares">${marketShare}%</div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
 
             // Grand Total Section
             html += `
