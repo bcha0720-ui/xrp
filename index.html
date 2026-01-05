@@ -1998,7 +1998,7 @@
         <div class="dashboard-overview">
             <div class="dashboard-overview-header">
                 <div class="dashboard-overview-title">
-                    <span>📊</span> Market Overview
+                    <span>📊</span> XRP Holdings - Exchange & SPOT ETFs
                 </div>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
                     🌓
@@ -4048,7 +4048,7 @@
         let exchangeData = {};
         let isExchangeFetching = false;
         let exchangeDataTimestamp = null;
-        const EXCHANGE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+        const EXCHANGE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
 
         async function fetchSingleBalance(address) {
             for (const url of RIPPLED_URLS) {
@@ -4086,9 +4086,13 @@
                 if (cacheAge < EXCHANGE_CACHE_DURATION) {
                     // Use cached data
                     renderExchangeTable();
-                    const remainingMins = Math.ceil((EXCHANGE_CACHE_DURATION - cacheAge) / 60000);
+                    const remainingMs = EXCHANGE_CACHE_DURATION - cacheAge;
+                    const remainingMins = Math.ceil(remainingMs / 60000);
+                    const displayTime = remainingMins > 60 
+                        ? `${Math.floor(remainingMins / 60)}h ${remainingMins % 60}m` 
+                        : `${remainingMins}m`;
                     document.getElementById('exchangeStatus').innerHTML = 
-                        `<span style="color: var(--accent-green);">● Cached (${remainingMins}m)</span>`;
+                        `<span style="color: var(--accent-green);">● Cached (${displayTime})</span>`;
                     return;
                 }
             }
@@ -4825,11 +4829,27 @@
                 updateDashboardOverview();
             }, 1000);
             
+            // Auto pre-fetch exchange data in background after 3 seconds
+            setTimeout(() => {
+                if (Object.keys(exchangeData).length === 0 && !isExchangeFetching) {
+                    console.log('Pre-fetching exchange data in background...');
+                    fetchExchangeData();
+                }
+            }, 3000);
+            
             // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
                 updateDashboardOverview();
             }, 10000);
+            
+            // Auto-refresh exchange data every hour
+            setInterval(() => {
+                if (!isExchangeFetching) {
+                    console.log('Auto-refreshing exchange data...');
+                    fetchExchangeData(true);
+                }
+            }, 60 * 60 * 1000); // 1 hour
 
             // Show popup after 5 seconds if not recently closed
             if (shouldShowPopup()) {
