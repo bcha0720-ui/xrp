@@ -2218,10 +2218,6 @@
                 <span class="main-tab-icon">📰</span>
                 News
             </button>
-            <button class="main-tab" onclick="switchMainTab('portfolio')">
-                <span class="main-tab-icon">💼</span>
-                Portfolio
-            </button>
             <button class="main-tab" onclick="switchMainTab('insights')">
                 <span class="main-tab-icon">🤖</span>
                 AI Insights
@@ -2592,173 +2588,6 @@
 
                 <div class="news-load-more">
                     <button class="btn" onclick="loadMoreNews()">Load More News</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Portfolio Tab Content -->
-        <div id="portfolioTab" class="tab-content">
-            <div class="portfolio-container">
-                <div class="portfolio-header">
-                    <h2 class="section-title"><span>💼</span> My Portfolio</h2>
-                    <button class="btn btn-refresh" onclick="savePortfolio()">💾 Save Portfolio</button>
-                </div>
-
-                <!-- Portfolio Summary -->
-                <div class="portfolio-summary">
-                    <div class="portfolio-card highlight">
-                        <div class="portfolio-card-label">Total Value</div>
-                        <div class="portfolio-card-value" id="portfolioTotalValue">$0.00</div>
-                        <div class="portfolio-card-change positive" id="portfolioChange">+0.00%</div>
-                    </div>
-                    <div class="portfolio-card">
-                        <div class="portfolio-card-label">Total XRP</div>
-                        <div class="portfolio-card-value" id="portfolioTotalXRP">0</div>
-                    </div>
-                    <div class="portfolio-card">
-                        <div class="portfolio-card-label">Avg. Buy Price</div>
-                        <div class="portfolio-card-value" id="portfolioAvgPrice">$0.00</div>
-                    </div>
-                    <div class="portfolio-card">
-                        <div class="portfolio-card-label">Profit/Loss</div>
-                        <div class="portfolio-card-value" id="portfolioPnL">$0.00</div>
-                    </div>
-                </div>
-
-                <!-- Add Holdings Form -->
-                <div class="add-holding-section">
-                    <h3><span>➕</span> Add Holding</h3>
-                    <div class="add-holding-form">
-                        <div class="form-group">
-                            <label>Asset</label>
-                            <select id="holdingAsset">
-                                <option value="XRP">XRP</option>
-                                <option value="XXRP">XXRP ETF</option>
-                                <option value="XRPH">XRPH ETF</option>
-                                <option value="XRPI">XRPI ETF</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" id="holdingAmount" placeholder="0.00" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>Buy Price ($)</label>
-                            <input type="number" id="holdingPrice" placeholder="0.00" step="0.0001">
-                        </div>
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="holdingDate">
-                        </div>
-                        <button class="btn btn-refresh" onclick="addHolding()">Add to Portfolio</button>
-                    </div>
-                </div>
-
-                <!-- Holdings List -->
-                <div class="holdings-list-section">
-                    <h3><span>📋</span> My Holdings</h3>
-                    <div class="holdings-list" id="portfolioHoldingsList">
-                        <div class="empty-portfolio">
-                            <span>💼</span>
-                            <p>No holdings yet. Add your first holding above!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- What If Calculator -->
-                <div class="calculator-section">
-                    <h3><span>🧮</span> What If Calculator</h3>
-                    <div class="calculator-form">
-                        <div class="form-group">
-                            <label>If I invested</label>
-                            <input type="number" id="calcInvestment" placeholder="1000" value="1000">
-                        </div>
-                        <div class="form-group">
-                            <label>At price ($)</label>
-                            <input type="number" id="calcBuyPrice" placeholder="0.50" value="0.50" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label>Current price ($)</label>
-                            <input type="number" id="calcCurrentPrice" placeholder="2.00" step="0.01">
-                        </div>
-                        <button class="btn" onclick="calculateWhatIf()">Calculate</button>
-                    </div>
-                    <div class="calculator-result" id="calcResult">
-                        <div class="calc-result-item">
-                            <span>XRP Purchased:</span>
-                            <strong id="calcXRP">0</strong>
-                        </div>
-                        <div class="calc-result-item">
-                            <span>Current Value:</span>
-                            <strong id="calcValue">$0</strong>
-                        </div>
-                        <div class="calc-result-item">
-                            <span>Profit/Loss:</span>
-                            <strong id="calcProfit">$0</strong>
-                        </div>
-                        <div class="calc-result-item">
-                            <span>ROI:</span>
-                            <strong id="calcROI">0%</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gamification Section -->
-                <div class="gamification-section">
-                    <h3><span>🎮</span> Achievements & Stats</h3>
-                    <div class="streak-counter">
-                        <div class="streak-icon">🔥</div>
-                        <div class="streak-info">
-                            <div class="streak-count" id="streakCount">0</div>
-                            <div class="streak-label">Day Streak</div>
-                        </div>
-                    </div>
-                    <div class="achievements-grid" id="achievementsGrid">
-                        <div class="achievement unlocked">
-                            <span class="achievement-icon">🌟</span>
-                            <span class="achievement-name">First Visit</span>
-                        </div>
-                        <div class="achievement" id="achPortfolio">
-                            <span class="achievement-icon">💼</span>
-                            <span class="achievement-name">Portfolio Pro</span>
-                        </div>
-                        <div class="achievement" id="achWeekStreak">
-                            <span class="achievement-icon">🔥</span>
-                            <span class="achievement-name">7 Day Streak</span>
-                        </div>
-                        <div class="achievement" id="achWhale">
-                            <span class="achievement-icon">🐋</span>
-                            <span class="achievement-name">XRP Whale</span>
-                        </div>
-                        <div class="achievement" id="achPredictor">
-                            <span class="achievement-icon">🔮</span>
-                            <span class="achievement-name">Price Prophet</span>
-                        </div>
-                        <div class="achievement" id="achDiamond">
-                            <span class="achievement-icon">💎</span>
-                            <span class="achievement-name">Diamond Hands</span>
-                        </div>
-                    </div>
-
-                    <!-- Price Prediction Game -->
-                    <div class="prediction-game">
-                        <h4><span>🔮</span> Price Prediction Game</h4>
-                        <p class="prediction-desc">Predict tomorrow's XRP price and earn points!</p>
-                        <div class="prediction-form">
-                            <input type="number" id="pricePrediction" placeholder="Enter your prediction" step="0.01">
-                            <button class="btn" onclick="submitPrediction()">Submit Prediction</button>
-                        </div>
-                        <div class="prediction-stats">
-                            <div class="pred-stat">
-                                <span>Your Score:</span>
-                                <strong id="predictionScore">0</strong>
-                            </div>
-                            <div class="pred-stat">
-                                <span>Accuracy:</span>
-                                <strong id="predictionAccuracy">--%</strong>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -3473,11 +3302,6 @@
                 }
             } else if (tabName === 'news') {
                 document.getElementById('newsTab').classList.add('active');
-            } else if (tabName === 'portfolio') {
-                document.getElementById('portfolioTab').classList.add('active');
-                loadPortfolio();
-                updatePortfolioDisplay();
-                updateStreak();
             } else if (tabName === 'insights') {
                 document.getElementById('insightsTab').classList.add('active');
                 setTimeout(() => {
