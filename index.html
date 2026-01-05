@@ -1998,7 +1998,7 @@
         <div class="dashboard-overview">
             <div class="dashboard-overview-header">
                 <div class="dashboard-overview-title">
-                    <span>📊</span> XRP Holdings by Exchange & ETFs
+                    <span>📊</span> Market Overview
                 </div>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
                     🌓
@@ -2010,7 +2010,7 @@
                         <div class="dashboard-metric-label">Total XRP in Spot ETFs</div>
                         <div class="dashboard-metric-value animated" id="dashboardETFXRP">--</div>
                         <div class="dashboard-metric-change positive" id="dashboardETFChange">
-                            <span>↑</span> <span>Loading...</span>
+                            <span>●</span> <span>Live Data</span>
                         </div>
                     </div>
                     <div class="dashboard-metric">
@@ -3112,13 +3112,15 @@
         let dashboardPieChart = null;
 
         function updateDashboardOverview() {
-            // Get ETF totals
+            // Get ETF totals and count active ETFs
             let etfTotalXRP = 0;
+            let activeETFCount = 0;
             etfColumns.forEach(col => {
                 for (const row of holdingsData) {
                     const data = row[col.key];
                     if (data && data.xrp) {
                         etfTotalXRP += data.xrp;
+                        activeETFCount++;
                         break;
                     }
                 }
@@ -3138,13 +3140,17 @@
                 animateValue('dashboardETFValue', etfTotalXRP * currentXRPPrice, true);
             }
             
+            // Update ETF change indicator to show active count
+            document.getElementById('dashboardETFChange').innerHTML = 
+                `<span style="color: var(--accent-green);">●</span> <span>${activeETFCount} Active ETFs</span>`;
+            
             if (exchangeTotalXRP > 0) {
                 animateValue('dashboardExchangeXRP', exchangeTotalXRP);
                 if (currentXRPPrice) {
                     animateValue('dashboardExchangeValue', exchangeTotalXRP * currentXRPPrice, true);
                 }
                 document.getElementById('dashboardExchangeChange').innerHTML = 
-                    `<span style="color: var(--accent-green);">● Live data loaded</span>`;
+                    `<span style="color: var(--accent-green);">●</span> <span>Live data loaded</span>`;
             }
 
             // Render pie chart
