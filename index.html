@@ -1958,6 +1958,159 @@
             color: var(--accent-xrp);
             font-family: 'JetBrains Mono', monospace;
         }
+
+        /* ============================================
+           NEWS TAB STYLES
+           ============================================ */
+        .news-container { padding: 0; }
+        .news-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .section-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+        .news-filters { display: flex; gap: 0.5rem; }
+
+        .calendar-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; }
+        .calendar-header { margin-bottom: 1rem; }
+        .calendar-header h3 { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .calendar-events { display: flex; flex-direction: column; gap: 1rem; }
+        .calendar-event { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--accent-xrp); transition: transform 0.2s ease; }
+        .calendar-event:hover { transform: translateX(5px); }
+        .event-date { display: flex; flex-direction: column; align-items: center; min-width: 50px; }
+        .event-day { font-size: 1.5rem; font-weight: 700; color: var(--accent-xrp); }
+        .event-month { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); }
+        .event-details { flex: 1; }
+        .event-title { font-weight: 600; margin-bottom: 0.25rem; }
+        .event-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .event-tag { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .tag-important { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .tag-report { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+        .tag-market { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
+
+        .news-feed { display: flex; flex-direction: column; gap: 1rem; }
+        .news-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; transition: all 0.3s ease; cursor: pointer; }
+        .news-item:hover { border-color: var(--accent-xrp); transform: translateY(-3px); }
+        .news-source { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .source-icon { font-size: 1rem; }
+        .source-name { font-weight: 600; font-size: 0.85rem; }
+        .news-time { color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
+        .news-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.4; }
+        .news-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.75rem; }
+        .news-tags { display: flex; gap: 0.5rem; }
+        .news-tag { background: var(--accent-xrp-dim); color: var(--accent-xrp); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .news-load-more { text-align: center; margin-top: 1.5rem; }
+
+        /* ============================================
+           PORTFOLIO TAB STYLES
+           ============================================ */
+        .portfolio-container { padding: 0; }
+        .portfolio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .portfolio-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .portfolio-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; transition: all 0.3s ease; }
+        .portfolio-card:hover { transform: translateY(-3px); border-color: var(--accent-xrp); }
+        .portfolio-card.highlight { border-color: var(--accent-xrp); background: linear-gradient(135deg, var(--bg-card), var(--accent-xrp-dim)); }
+        .portfolio-card-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .portfolio-card-value { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .portfolio-card-change { font-size: 0.85rem; margin-top: 0.5rem; }
+        .portfolio-card-change.positive { color: var(--accent-green); }
+        .portfolio-card-change.negative { color: var(--accent-red); }
+
+        .add-holding-section, .holdings-list-section, .calculator-section, .gamification-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .add-holding-section h3, .holdings-list-section h3, .calculator-section h3, .gamification-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .add-holding-form, .calculator-form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px; flex: 1; }
+        .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+        .form-group input, .form-group select { padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent-xrp); }
+
+        .holdings-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .holding-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; }
+        .holding-asset { font-weight: 600; min-width: 60px; }
+        .holding-amount { font-family: 'JetBrains Mono', monospace; }
+        .holding-value { margin-left: auto; text-align: right; }
+        .holding-pnl { font-size: 0.85rem; }
+        .holding-pnl.positive { color: var(--accent-green); }
+        .holding-pnl.negative { color: var(--accent-red); }
+        .holding-delete { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 1.2rem; opacity: 0.6; transition: opacity 0.2s; }
+        .holding-delete:hover { opacity: 1; }
+        .empty-portfolio { text-align: center; padding: 2rem; color: var(--text-muted); }
+        .empty-portfolio span { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        .calculator-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; }
+        .calc-result-item { display: flex; justify-content: space-between; }
+        .calc-result-item span { color: var(--text-muted); }
+        .calc-result-item strong { font-family: 'JetBrains Mono', monospace; }
+
+        /* Gamification Styles */
+        .streak-counter { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: linear-gradient(135deg, var(--accent-orange), #ff6b35); border-radius: 12px; margin-bottom: 1.5rem; }
+        .streak-icon { font-size: 2.5rem; }
+        .streak-count { font-size: 2rem; font-weight: 700; }
+        .streak-label { font-size: 0.85rem; opacity: 0.9; }
+        .achievements-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .achievement { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; opacity: 0.4; transition: all 0.3s ease; }
+        .achievement.unlocked { opacity: 1; background: linear-gradient(135deg, var(--bg-secondary), var(--accent-xrp-dim)); border: 1px solid var(--accent-xrp); }
+        .achievement-icon { font-size: 2rem; }
+        .achievement-name { font-size: 0.75rem; text-align: center; color: var(--text-muted); }
+        .achievement.unlocked .achievement-name { color: var(--text-primary); }
+
+        .prediction-game { padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
+        .prediction-game h4 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .prediction-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+        .prediction-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .prediction-form input { flex: 1; padding: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); }
+        .prediction-stats { display: flex; gap: 2rem; }
+        .pred-stat { display: flex; gap: 0.5rem; }
+        .pred-stat span { color: var(--text-muted); }
+
+        /* ============================================
+           AI INSIGHTS TAB STYLES
+           ============================================ */
+        .insights-container { padding: 0; }
+        .insights-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+
+        .sentiment-section, .ai-summary-section, .ma-section, .comparison-section, .key-metrics-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .sentiment-section h3, .ai-summary-section h3, .ma-section h3, .comparison-section h3, .key-metrics-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        .sentiment-gauge { margin-bottom: 1rem; }
+        .gauge-container { height: 20px; background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-green)); border-radius: 10px; position: relative; overflow: hidden; }
+        .gauge-fill { position: absolute; top: 0; left: 0; height: 100%; background: rgba(0,0,0,0.6); border-radius: 10px 0 0 10px; transition: width 0.5s ease; }
+        .gauge-labels { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted); }
+        .sentiment-score { text-align: center; font-size: 1.1rem; }
+
+        .ai-summary-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; line-height: 1.7; }
+        .ai-summary-card p { margin-bottom: 1rem; }
+        .ai-summary-card ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        .ai-summary-card li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        .ai-disclaimer { font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; padding: 0.75rem; background: rgba(249, 115, 22, 0.1); border-radius: 8px; }
+
+        .ma-chart-container { height: 250px; margin-bottom: 1.5rem; }
+        .ma-indicators { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .ma-indicator { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; }
+        .ma-label { font-size: 0.8rem; color: var(--text-muted); }
+        .ma-value { font-size: 1.2rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .ma-signal { font-size: 0.75rem; font-weight: 600; }
+        .ma-signal.bullish { color: var(--accent-green); }
+        .ma-signal.bearish { color: var(--accent-red); }
+
+        .comparison-selectors { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; justify-content: center; flex-wrap: wrap; }
+        .comparison-selectors select { padding: 0.75rem 1.5rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 1rem; cursor: pointer; }
+        .vs-badge { background: var(--accent-purple); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; }
+        .comparison-chart-container { height: 250px; margin-bottom: 1.5rem; }
+        .comparison-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .comp-stat { background: var(--bg-secondary); border-radius: 10px; padding: 1rem; }
+        .comp-stat-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .comp-stat-values { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .comp-val-1 { color: var(--accent-xrp); }
+        .comp-val-2 { color: var(--accent-orange); }
+        .comp-stat-values .positive { color: var(--accent-green) !important; }
+        .comp-stat-values .negative { color: var(--accent-red) !important; }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .metric-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.25rem; text-align: center; transition: all 0.3s ease; }
+        .metric-card:hover { transform: translateY(-3px); }
+        .metric-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .metric-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .metric-value { font-size: 1.3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .metric-value.positive { color: var(--accent-green); }
+        .metric-value.negative { color: var(--accent-red); }
+        .metric-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
     </style>
 </head>
 <body>
@@ -2048,18 +2201,30 @@
         </div>
 
         <!-- Main Tab Navigation -->
-        <div class="main-tabs">
+        <div class="main-tabs" style="flex-wrap: wrap;">
             <button class="main-tab active" onclick="switchMainTab('trading')">
                 <span class="main-tab-icon">📈</span>
-                ETF Trading Volume
+                ETF Trading
             </button>
             <button class="main-tab" onclick="switchMainTab('holdings')">
                 <span class="main-tab-icon">💎</span>
-                Spot ETF XRP Holdings
+                ETF Holdings
             </button>
             <button class="main-tab" onclick="switchMainTab('exchange')">
                 <span class="main-tab-icon">🏦</span>
-                Exchange Holdings
+                Exchange
+            </button>
+            <button class="main-tab" onclick="switchMainTab('news')">
+                <span class="main-tab-icon">📰</span>
+                News
+            </button>
+            <button class="main-tab" onclick="switchMainTab('portfolio')">
+                <span class="main-tab-icon">💼</span>
+                Portfolio
+            </button>
+            <button class="main-tab" onclick="switchMainTab('insights')">
+                <span class="main-tab-icon">🤖</span>
+                AI Insights
             </button>
         </div>
 
@@ -2311,6 +2476,438 @@
             <div class="exchange-info-banner" style="margin-top: 1rem; background: var(--bg-secondary);">
                 <span>📌</span>
                 <span><strong>Note:</strong> Data fetched from XRPL nodes (s1.ripple.com, s2.ripple.com, xrplcluster.com). Some requests may timeout - refresh to retry.</span>
+            </div>
+        </div>
+
+        <!-- News Tab Content -->
+        <div id="newsTab" class="tab-content">
+            <div class="news-container">
+                <div class="news-header">
+                    <h2 class="section-title"><span>📰</span> Crypto News Feed</h2>
+                    <div class="news-filters">
+                        <button class="btn active" data-news="xrp" onclick="filterNews('xrp')">XRP</button>
+                        <button class="btn" data-news="crypto" onclick="filterNews('crypto')">Crypto</button>
+                        <button class="btn" data-news="etf" onclick="filterNews('etf')">ETFs</button>
+                        <button class="btn" data-news="all" onclick="filterNews('all')">All</button>
+                    </div>
+                </div>
+                
+                <!-- Calendar Section -->
+                <div class="calendar-section">
+                    <div class="calendar-header">
+                        <h3><span>📅</span> Upcoming Events</h3>
+                    </div>
+                    <div class="calendar-events" id="calendarEvents">
+                        <div class="calendar-event">
+                            <div class="event-date">
+                                <span class="event-day">15</span>
+                                <span class="event-month">JAN</span>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">SEC ETF Decision Deadline</div>
+                                <div class="event-desc">Final deadline for XRP spot ETF approval decisions</div>
+                            </div>
+                            <div class="event-tag tag-important">Important</div>
+                        </div>
+                        <div class="calendar-event">
+                            <div class="event-date">
+                                <span class="event-day">20</span>
+                                <span class="event-month">JAN</span>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">Ripple Q4 Report</div>
+                                <div class="event-desc">Quarterly XRP markets report release</div>
+                            </div>
+                            <div class="event-tag tag-report">Report</div>
+                        </div>
+                        <div class="calendar-event">
+                            <div class="event-date">
+                                <span class="event-day">28</span>
+                                <span class="event-month">JAN</span>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">FOMC Meeting</div>
+                                <div class="event-desc">Federal Reserve interest rate decision</div>
+                            </div>
+                            <div class="event-tag tag-market">Market</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div class="news-feed" id="newsFeed">
+                    <div class="news-item">
+                        <div class="news-source">
+                            <span class="source-icon">🔵</span>
+                            <span class="source-name">CoinDesk</span>
+                            <span class="news-time">2 hours ago</span>
+                        </div>
+                        <h3 class="news-title">XRP ETF Trading Volume Hits New Record</h3>
+                        <p class="news-summary">Spot XRP ETFs saw unprecedented trading activity as institutional interest continues to grow...</p>
+                        <div class="news-tags">
+                            <span class="news-tag">XRP</span>
+                            <span class="news-tag">ETF</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-source">
+                            <span class="source-icon">🟠</span>
+                            <span class="source-name">Cointelegraph</span>
+                            <span class="news-time">4 hours ago</span>
+                        </div>
+                        <h3 class="news-title">Ripple Partners with Major Bank for Cross-Border Payments</h3>
+                        <p class="news-summary">New partnership announcement signals growing adoption of RippleNet technology...</p>
+                        <div class="news-tags">
+                            <span class="news-tag">Ripple</span>
+                            <span class="news-tag">Partnership</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-source">
+                            <span class="source-icon">🟢</span>
+                            <span class="source-name">The Block</span>
+                            <span class="news-time">6 hours ago</span>
+                        </div>
+                        <h3 class="news-title">Bitcoin ETFs See $500M Inflows Amid Market Rally</h3>
+                        <p class="news-summary">Institutional investors continue to pour money into cryptocurrency ETF products...</p>
+                        <div class="news-tags">
+                            <span class="news-tag">Bitcoin</span>
+                            <span class="news-tag">ETF</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-source">
+                            <span class="source-icon">🔴</span>
+                            <span class="source-name">Bloomberg</span>
+                            <span class="news-time">8 hours ago</span>
+                        </div>
+                        <h3 class="news-title">SEC Commissioner Signals Positive Stance on Crypto ETFs</h3>
+                        <p class="news-summary">Recent statements suggest regulatory clarity may be coming for additional crypto products...</p>
+                        <div class="news-tags">
+                            <span class="news-tag">SEC</span>
+                            <span class="news-tag">Regulation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="news-load-more">
+                    <button class="btn" onclick="loadMoreNews()">Load More News</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Tab Content -->
+        <div id="portfolioTab" class="tab-content">
+            <div class="portfolio-container">
+                <div class="portfolio-header">
+                    <h2 class="section-title"><span>💼</span> My Portfolio</h2>
+                    <button class="btn btn-refresh" onclick="savePortfolio()">💾 Save Portfolio</button>
+                </div>
+
+                <!-- Portfolio Summary -->
+                <div class="portfolio-summary">
+                    <div class="portfolio-card highlight">
+                        <div class="portfolio-card-label">Total Value</div>
+                        <div class="portfolio-card-value" id="portfolioTotalValue">$0.00</div>
+                        <div class="portfolio-card-change positive" id="portfolioChange">+0.00%</div>
+                    </div>
+                    <div class="portfolio-card">
+                        <div class="portfolio-card-label">Total XRP</div>
+                        <div class="portfolio-card-value" id="portfolioTotalXRP">0</div>
+                    </div>
+                    <div class="portfolio-card">
+                        <div class="portfolio-card-label">Avg. Buy Price</div>
+                        <div class="portfolio-card-value" id="portfolioAvgPrice">$0.00</div>
+                    </div>
+                    <div class="portfolio-card">
+                        <div class="portfolio-card-label">Profit/Loss</div>
+                        <div class="portfolio-card-value" id="portfolioPnL">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Add Holdings Form -->
+                <div class="add-holding-section">
+                    <h3><span>➕</span> Add Holding</h3>
+                    <div class="add-holding-form">
+                        <div class="form-group">
+                            <label>Asset</label>
+                            <select id="holdingAsset">
+                                <option value="XRP">XRP</option>
+                                <option value="XXRP">XXRP ETF</option>
+                                <option value="XRPH">XRPH ETF</option>
+                                <option value="XRPI">XRPI ETF</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="holdingAmount" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Buy Price ($)</label>
+                            <input type="number" id="holdingPrice" placeholder="0.00" step="0.0001">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="holdingDate">
+                        </div>
+                        <button class="btn btn-refresh" onclick="addHolding()">Add to Portfolio</button>
+                    </div>
+                </div>
+
+                <!-- Holdings List -->
+                <div class="holdings-list-section">
+                    <h3><span>📋</span> My Holdings</h3>
+                    <div class="holdings-list" id="portfolioHoldingsList">
+                        <div class="empty-portfolio">
+                            <span>💼</span>
+                            <p>No holdings yet. Add your first holding above!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What If Calculator -->
+                <div class="calculator-section">
+                    <h3><span>🧮</span> What If Calculator</h3>
+                    <div class="calculator-form">
+                        <div class="form-group">
+                            <label>If I invested</label>
+                            <input type="number" id="calcInvestment" placeholder="1000" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>At price ($)</label>
+                            <input type="number" id="calcBuyPrice" placeholder="0.50" value="0.50" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Current price ($)</label>
+                            <input type="number" id="calcCurrentPrice" placeholder="2.00" step="0.01">
+                        </div>
+                        <button class="btn" onclick="calculateWhatIf()">Calculate</button>
+                    </div>
+                    <div class="calculator-result" id="calcResult">
+                        <div class="calc-result-item">
+                            <span>XRP Purchased:</span>
+                            <strong id="calcXRP">0</strong>
+                        </div>
+                        <div class="calc-result-item">
+                            <span>Current Value:</span>
+                            <strong id="calcValue">$0</strong>
+                        </div>
+                        <div class="calc-result-item">
+                            <span>Profit/Loss:</span>
+                            <strong id="calcProfit">$0</strong>
+                        </div>
+                        <div class="calc-result-item">
+                            <span>ROI:</span>
+                            <strong id="calcROI">0%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gamification Section -->
+                <div class="gamification-section">
+                    <h3><span>🎮</span> Achievements & Stats</h3>
+                    <div class="streak-counter">
+                        <div class="streak-icon">🔥</div>
+                        <div class="streak-info">
+                            <div class="streak-count" id="streakCount">0</div>
+                            <div class="streak-label">Day Streak</div>
+                        </div>
+                    </div>
+                    <div class="achievements-grid" id="achievementsGrid">
+                        <div class="achievement unlocked">
+                            <span class="achievement-icon">🌟</span>
+                            <span class="achievement-name">First Visit</span>
+                        </div>
+                        <div class="achievement" id="achPortfolio">
+                            <span class="achievement-icon">💼</span>
+                            <span class="achievement-name">Portfolio Pro</span>
+                        </div>
+                        <div class="achievement" id="achWeekStreak">
+                            <span class="achievement-icon">🔥</span>
+                            <span class="achievement-name">7 Day Streak</span>
+                        </div>
+                        <div class="achievement" id="achWhale">
+                            <span class="achievement-icon">🐋</span>
+                            <span class="achievement-name">XRP Whale</span>
+                        </div>
+                        <div class="achievement" id="achPredictor">
+                            <span class="achievement-icon">🔮</span>
+                            <span class="achievement-name">Price Prophet</span>
+                        </div>
+                        <div class="achievement" id="achDiamond">
+                            <span class="achievement-icon">💎</span>
+                            <span class="achievement-name">Diamond Hands</span>
+                        </div>
+                    </div>
+
+                    <!-- Price Prediction Game -->
+                    <div class="prediction-game">
+                        <h4><span>🔮</span> Price Prediction Game</h4>
+                        <p class="prediction-desc">Predict tomorrow's XRP price and earn points!</p>
+                        <div class="prediction-form">
+                            <input type="number" id="pricePrediction" placeholder="Enter your prediction" step="0.01">
+                            <button class="btn" onclick="submitPrediction()">Submit Prediction</button>
+                        </div>
+                        <div class="prediction-stats">
+                            <div class="pred-stat">
+                                <span>Your Score:</span>
+                                <strong id="predictionScore">0</strong>
+                            </div>
+                            <div class="pred-stat">
+                                <span>Accuracy:</span>
+                                <strong id="predictionAccuracy">--%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Tab Content -->
+        <div id="insightsTab" class="tab-content">
+            <div class="insights-container">
+                <div class="insights-header">
+                    <h2 class="section-title"><span>🤖</span> AI Market Insights</h2>
+                    <button class="btn btn-refresh" onclick="generateInsights()">🔄 Refresh Insights</button>
+                </div>
+
+                <!-- Market Sentiment -->
+                <div class="sentiment-section">
+                    <h3><span>📊</span> Market Sentiment</h3>
+                    <div class="sentiment-gauge">
+                        <div class="gauge-container">
+                            <div class="gauge-fill" id="sentimentGauge" style="width: 65%;"></div>
+                        </div>
+                        <div class="gauge-labels">
+                            <span>Bearish</span>
+                            <span>Neutral</span>
+                            <span>Bullish</span>
+                        </div>
+                    </div>
+                    <div class="sentiment-score">
+                        <span>Current Sentiment:</span>
+                        <strong id="sentimentText" style="color: var(--accent-green);">Bullish (65/100)</strong>
+                    </div>
+                </div>
+
+                <!-- AI Summary -->
+                <div class="ai-summary-section">
+                    <h3><span>📝</span> Daily AI Summary</h3>
+                    <div class="ai-summary-card" id="aiSummary">
+                        <p><strong>XRP Market Overview:</strong> The XRP market shows strong bullish momentum with ETF trading volumes reaching new highs. Institutional interest continues to grow as spot ETFs gain mainstream adoption.</p>
+                        <p><strong>Key Observations:</strong></p>
+                        <ul>
+                            <li>ETF trading volume up 15% from yesterday</li>
+                            <li>Exchange holdings decreased by 2.3% (bullish signal)</li>
+                            <li>On-chain activity showing accumulation patterns</li>
+                            <li>Technical indicators suggest support at $1.95</li>
+                        </ul>
+                        <p><strong>Outlook:</strong> Short-term bullish with potential resistance at $2.50. Monitor SEC announcements for potential catalysts.</p>
+                    </div>
+                    <div class="ai-disclaimer">
+                        ⚠️ AI-generated analysis for informational purposes only. Not financial advice.
+                    </div>
+                </div>
+
+                <!-- Moving Averages -->
+                <div class="ma-section">
+                    <h3><span>📈</span> Moving Averages & Trends</h3>
+                    <div class="ma-chart-container">
+                        <canvas id="maChart"></canvas>
+                    </div>
+                    <div class="ma-indicators">
+                        <div class="ma-indicator">
+                            <span class="ma-label">7-Day MA</span>
+                            <span class="ma-value" id="ma7">$2.05</span>
+                            <span class="ma-signal bullish">↑ Above</span>
+                        </div>
+                        <div class="ma-indicator">
+                            <span class="ma-label">30-Day MA</span>
+                            <span class="ma-value" id="ma30">$1.92</span>
+                            <span class="ma-signal bullish">↑ Above</span>
+                        </div>
+                        <div class="ma-indicator">
+                            <span class="ma-label">90-Day MA</span>
+                            <span class="ma-value" id="ma90">$1.45</span>
+                            <span class="ma-signal bullish">↑ Above</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Tool -->
+                <div class="comparison-section">
+                    <h3><span>⚖️</span> ETF Comparison Tool</h3>
+                    <div class="comparison-selectors">
+                        <select id="compareETF1" onchange="updateComparison()">
+                            <option value="XRP">XRP</option>
+                            <option value="BTC">Bitcoin ETFs</option>
+                            <option value="ETH">Ethereum ETFs</option>
+                        </select>
+                        <span class="vs-badge">VS</span>
+                        <select id="compareETF2" onchange="updateComparison()">
+                            <option value="BTC">Bitcoin ETFs</option>
+                            <option value="XRP">XRP</option>
+                            <option value="ETH">Ethereum ETFs</option>
+                        </select>
+                    </div>
+                    <div class="comparison-chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                    <div class="comparison-stats" id="comparisonStats">
+                        <div class="comp-stat">
+                            <div class="comp-stat-label">Daily Volume</div>
+                            <div class="comp-stat-values">
+                                <span class="comp-val-1">$125M</span>
+                                <span class="comp-val-2">$2.1B</span>
+                            </div>
+                        </div>
+                        <div class="comp-stat">
+                            <div class="comp-stat-label">7D Change</div>
+                            <div class="comp-stat-values">
+                                <span class="comp-val-1 positive">+12.5%</span>
+                                <span class="comp-val-2 positive">+8.2%</span>
+                            </div>
+                        </div>
+                        <div class="comp-stat">
+                            <div class="comp-stat-label">AUM</div>
+                            <div class="comp-stat-values">
+                                <span class="comp-val-1">$1.5B</span>
+                                <span class="comp-val-2">$28B</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="key-metrics-section">
+                    <h3><span>🎯</span> Key Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">📊</div>
+                            <div class="metric-label">Volume Trend</div>
+                            <div class="metric-value positive">+15.2%</div>
+                            <div class="metric-desc">vs 7-day avg</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🏦</div>
+                            <div class="metric-label">Exchange Flow</div>
+                            <div class="metric-value negative">-2.3M XRP</div>
+                            <div class="metric-desc">Net outflow (bullish)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">💹</div>
+                            <div class="metric-label">RSI (14)</div>
+                            <div class="metric-value">58</div>
+                            <div class="metric-desc">Neutral zone</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🎯</div>
+                            <div class="metric-label">Support Level</div>
+                            <div class="metric-value">$1.95</div>
+                            <div class="metric-desc">Strong support</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2874,6 +3471,19 @@
                         renderExchangeCharts();
                     }, 100);
                 }
+            } else if (tabName === 'news') {
+                document.getElementById('newsTab').classList.add('active');
+            } else if (tabName === 'portfolio') {
+                document.getElementById('portfolioTab').classList.add('active');
+                loadPortfolio();
+                updatePortfolioDisplay();
+                updateStreak();
+            } else if (tabName === 'insights') {
+                document.getElementById('insightsTab').classList.add('active');
+                setTimeout(() => {
+                    renderMAChart();
+                    renderComparisonChart();
+                }, 100);
             }
         }
 
@@ -4909,6 +5519,415 @@
             }
         });
 
+        // =====================================================
+        // NEWS TAB FUNCTIONS
+        // =====================================================
+        let currentNewsFilter = 'xrp';
+
+        function filterNews(category) {
+            currentNewsFilter = category;
+            document.querySelectorAll('.news-filters .btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.news === category);
+            });
+            // In a real app, this would fetch/filter news from an API
+            console.log('Filtering news by:', category);
+        }
+
+        function loadMoreNews() {
+            // In a real app, this would load more news items
+            alert('In production, this would load more news from RSS feeds and news APIs like CryptoPanic, CoinDesk API, etc.');
+        }
+
+        // =====================================================
+        // PORTFOLIO TAB FUNCTIONS
+        // =====================================================
+        let portfolio = [];
+
+        function loadPortfolio() {
+            const saved = localStorage.getItem('xrp_portfolio');
+            if (saved) {
+                portfolio = JSON.parse(saved);
+            }
+            renderPortfolioList();
+        }
+
+        function savePortfolio() {
+            localStorage.setItem('xrp_portfolio', JSON.stringify(portfolio));
+            checkAchievements();
+            alert('Portfolio saved!');
+        }
+
+        function addHolding() {
+            const asset = document.getElementById('holdingAsset').value;
+            const amount = parseFloat(document.getElementById('holdingAmount').value);
+            const price = parseFloat(document.getElementById('holdingPrice').value);
+            const date = document.getElementById('holdingDate').value;
+
+            if (!amount || !price) {
+                alert('Please enter amount and price');
+                return;
+            }
+
+            portfolio.push({
+                id: Date.now(),
+                asset,
+                amount,
+                buyPrice: price,
+                date: date || new Date().toISOString().split('T')[0]
+            });
+
+            // Clear form
+            document.getElementById('holdingAmount').value = '';
+            document.getElementById('holdingPrice').value = '';
+            
+            savePortfolio();
+            renderPortfolioList();
+            updatePortfolioDisplay();
+        }
+
+        function removeHolding(id) {
+            portfolio = portfolio.filter(h => h.id !== id);
+            savePortfolio();
+            renderPortfolioList();
+            updatePortfolioDisplay();
+        }
+
+        function renderPortfolioList() {
+            const container = document.getElementById('portfolioHoldingsList');
+            
+            if (portfolio.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-portfolio">
+                        <span>💼</span>
+                        <p>No holdings yet. Add your first holding above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            portfolio.forEach(holding => {
+                const currentPrice = holding.asset === 'XRP' ? currentXRPPrice : currentXRPPrice; // Simplified
+                const currentValue = holding.amount * currentPrice;
+                const costBasis = holding.amount * holding.buyPrice;
+                const pnl = currentValue - costBasis;
+                const pnlPercent = costBasis > 0 ? ((pnl / costBasis) * 100).toFixed(2) : 0;
+                const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+
+                html += `
+                    <div class="holding-item">
+                        <div class="holding-asset">${holding.asset}</div>
+                        <div class="holding-amount">${holding.amount.toLocaleString()}</div>
+                        <div class="holding-value">
+                            <div>$${currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <div class="holding-pnl ${pnlClass}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPercent}%)</div>
+                        </div>
+                        <button class="holding-delete" onclick="removeHolding(${holding.id})">×</button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updatePortfolioDisplay() {
+            let totalValue = 0;
+            let totalCost = 0;
+            let totalXRP = 0;
+
+            portfolio.forEach(holding => {
+                const currentPrice = holding.asset === 'XRP' ? currentXRPPrice : currentXRPPrice;
+                totalValue += holding.amount * currentPrice;
+                totalCost += holding.amount * holding.buyPrice;
+                if (holding.asset === 'XRP') totalXRP += holding.amount;
+            });
+
+            const pnl = totalValue - totalCost;
+            const pnlPercent = totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(2) : 0;
+            const avgPrice = totalXRP > 0 ? (totalCost / totalXRP) : 0;
+
+            document.getElementById('portfolioTotalValue').textContent = '$' + totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('portfolioTotalXRP').textContent = totalXRP.toLocaleString();
+            document.getElementById('portfolioAvgPrice').textContent = '$' + avgPrice.toFixed(4);
+            document.getElementById('portfolioPnL').textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+            document.getElementById('portfolioPnL').style.color = pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            
+            const changeEl = document.getElementById('portfolioChange');
+            changeEl.textContent = (pnl >= 0 ? '+' : '') + pnlPercent + '%';
+            changeEl.className = 'portfolio-card-change ' + (pnl >= 0 ? 'positive' : 'negative');
+        }
+
+        function calculateWhatIf() {
+            const investment = parseFloat(document.getElementById('calcInvestment').value) || 0;
+            const buyPrice = parseFloat(document.getElementById('calcBuyPrice').value) || 0;
+            const currentPrice = parseFloat(document.getElementById('calcCurrentPrice').value) || currentXRPPrice;
+
+            if (buyPrice <= 0) {
+                alert('Please enter a valid buy price');
+                return;
+            }
+
+            const xrpPurchased = investment / buyPrice;
+            const currentValue = xrpPurchased * currentPrice;
+            const profit = currentValue - investment;
+            const roi = ((profit / investment) * 100).toFixed(2);
+
+            document.getElementById('calcXRP').textContent = xrpPurchased.toLocaleString(undefined, {maximumFractionDigits: 2});
+            document.getElementById('calcValue').textContent = '$' + currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('calcProfit').textContent = (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2);
+            document.getElementById('calcProfit').style.color = profit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            document.getElementById('calcROI').textContent = roi + '%';
+            document.getElementById('calcROI').style.color = profit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+        }
+
+        // Gamification Functions
+        function updateStreak() {
+            const lastVisit = localStorage.getItem('last_visit_date');
+            const today = new Date().toDateString();
+            let streak = parseInt(localStorage.getItem('visit_streak') || '0');
+
+            if (lastVisit !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastVisit === yesterday.toDateString()) {
+                    streak++;
+                } else if (lastVisit !== today) {
+                    streak = 1;
+                }
+                
+                localStorage.setItem('last_visit_date', today);
+                localStorage.setItem('visit_streak', streak);
+            }
+
+            document.getElementById('streakCount').textContent = streak;
+            checkAchievements();
+        }
+
+        function checkAchievements() {
+            const streak = parseInt(localStorage.getItem('visit_streak') || '0');
+            
+            // Week streak achievement
+            if (streak >= 7) {
+                document.getElementById('achWeekStreak')?.classList.add('unlocked');
+            }
+            
+            // Portfolio pro achievement
+            if (portfolio.length >= 1) {
+                document.getElementById('achPortfolio')?.classList.add('unlocked');
+            }
+            
+            // Whale achievement (10000+ XRP)
+            const totalXRP = portfolio.reduce((sum, h) => sum + (h.asset === 'XRP' ? h.amount : 0), 0);
+            if (totalXRP >= 10000) {
+                document.getElementById('achWhale')?.classList.add('unlocked');
+            }
+        }
+
+        function submitPrediction() {
+            const prediction = parseFloat(document.getElementById('pricePrediction').value);
+            if (!prediction) {
+                alert('Please enter a prediction');
+                return;
+            }
+
+            const predictions = JSON.parse(localStorage.getItem('price_predictions') || '[]');
+            predictions.push({
+                date: new Date().toISOString(),
+                prediction,
+                actualPrice: null
+            });
+            localStorage.setItem('price_predictions', JSON.stringify(predictions));
+            
+            alert('Prediction submitted! Check back tomorrow to see your score.');
+            document.getElementById('pricePrediction').value = '';
+        }
+
+        // =====================================================
+        // AI INSIGHTS TAB FUNCTIONS
+        // =====================================================
+        let maChart = null;
+        let comparisonChart = null;
+
+        function generateInsights() {
+            // Simulated AI insight generation
+            const sentiments = ['Bullish', 'Slightly Bullish', 'Neutral', 'Slightly Bearish', 'Bearish'];
+            const sentiment = sentiments[Math.floor(Math.random() * 3)]; // Bias towards bullish
+            const score = 50 + Math.floor(Math.random() * 30);
+            
+            document.getElementById('sentimentGauge').style.width = (100 - score) + '%';
+            document.getElementById('sentimentText').textContent = `${sentiment} (${score}/100)`;
+            document.getElementById('sentimentText').style.color = score > 60 ? 'var(--accent-green)' : score < 40 ? 'var(--accent-red)' : 'var(--accent-orange)';
+            
+            alert('AI insights refreshed! In production, this would call an AI API for real analysis.');
+        }
+
+        function renderMAChart() {
+            const canvas = document.getElementById('maChart');
+            if (!canvas) return;
+
+            if (maChart) maChart.destroy();
+
+            const ctx = canvas.getContext('2d');
+            
+            // Generate sample MA data
+            const labels = [];
+            const priceData = [];
+            const ma7Data = [];
+            const ma30Data = [];
+            
+            let price = currentXRPPrice || 2.0;
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                
+                price = price * (1 + (Math.random() - 0.48) * 0.05);
+                priceData.push(price);
+            }
+
+            // Calculate MAs
+            for (let i = 0; i < priceData.length; i++) {
+                if (i >= 6) {
+                    const ma7 = priceData.slice(i - 6, i + 1).reduce((a, b) => a + b, 0) / 7;
+                    ma7Data.push(ma7);
+                } else {
+                    ma7Data.push(null);
+                }
+                
+                if (i >= 29) {
+                    const ma30 = priceData.slice(i - 29, i + 1).reduce((a, b) => a + b, 0) / 30;
+                    ma30Data.push(ma30);
+                } else {
+                    ma30Data.push(null);
+                }
+            }
+
+            maChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'XRP Price',
+                            data: priceData,
+                            borderColor: '#23f7dd',
+                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '7-Day MA',
+                            data: ma7Data,
+                            borderColor: '#a855f7',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: '30-Day MA',
+                            data: ma30Data,
+                            borderColor: '#f97316',
+                            borderWidth: 2,
+                            borderDash: [10, 5],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#a0a0c0' }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } },
+                        y: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } }
+                    }
+                }
+            });
+
+            // Update MA values
+            const latestPrice = priceData[priceData.length - 1];
+            const latest7MA = ma7Data[ma7Data.length - 1];
+            const latest30MA = ma30Data[ma30Data.length - 1];
+            
+            document.getElementById('ma7').textContent = '$' + latest7MA.toFixed(4);
+            document.getElementById('ma30').textContent = '$' + latest30MA.toFixed(4);
+        }
+
+        function renderComparisonChart() {
+            const canvas = document.getElementById('comparisonChart');
+            if (!canvas) return;
+
+            if (comparisonChart) comparisonChart.destroy();
+
+            const ctx = canvas.getContext('2d');
+            
+            // Sample comparison data
+            const labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'XRP ETFs',
+                            data: [85, 110, 125, 145],
+                            backgroundColor: '#23f7dd80',
+                            borderColor: '#23f7dd',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'BTC ETFs',
+                            data: [1800, 2100, 1950, 2200],
+                            backgroundColor: '#f9731680',
+                            borderColor: '#f97316',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#a0a0c0' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ctx.dataset.label + ': $' + ctx.raw + 'M'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } },
+                        y: { 
+                            ticks: { 
+                                color: '#707085',
+                                callback: (v) => '$' + v + 'M'
+                            }, 
+                            grid: { color: '#2a2a3a' } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateComparison() {
+            renderComparisonChart();
+        }
+
         // Auto-connect on page load
         window.addEventListener('DOMContentLoaded', () => {
             fetchXRPPrice();
@@ -4928,10 +5947,22 @@
                 }
             }, 3000);
             
+            // Load portfolio and update streak
+            loadPortfolio();
+            updateStreak();
+            
+            // Set current price in calculator
+            setTimeout(() => {
+                if (currentXRPPrice) {
+                    document.getElementById('calcCurrentPrice').value = currentXRPPrice.toFixed(4);
+                }
+            }, 2000);
+            
             // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
                 updateDashboardOverview();
+                updatePortfolioDisplay();
             }, 10000);
             
             // Auto-refresh exchange data every hour
