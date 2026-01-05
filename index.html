@@ -5728,6 +5728,74 @@
             insightsData.sentiment = Math.max(0, Math.min(100, score));
         }
 
+        async function fetchClaudeInsights() {
+            // Get ETF totals
+            let etfTotal = 0;
+            etfColumns.forEach(col => {
+                for (const row of holdingsData) {
+                    if (row[col.key]?.xrp) {
+                        etfTotal += row[col.key].xrp;
+                        break;
+                    }
+                }
+            });
+            
+            // Get exchange totals
+            let exchangeTotal = 0;
+            Object.values(exchangeData).forEach(data => {
+                exchangeTotal += data.total || 0;
+            });
+
+            // Get ETF volume from cached data
+            let etfVolume = 0;
+            if (cachedData && cachedData.data) {
+                const xrpETFs = cachedData.data['XRP Spot ETFs'] || [];
+                xrpETFs.forEach(etf => {
+                    etfVolume += (etf.daily?.dollars || 0);
+                });
+            }
+
+            const marketData = {
+                currentPrice: currentXRPPrice || 0,
+                priceChange24h: insightsData.priceChange24h,
+                priceChange7d: insightsData.priceChange7d,
+                priceChange30d: insightsData.priceChange30d,
+                volume24h: insightsData.volume24h,
+                ma7: insightsData.ma7,
+                ma30: insightsData.ma30,
+                ma90: insightsData.ma90,
+                etfHoldings: etfTotal,
+                exchangeHoldings: exchangeTotal,
+                etfVolume: etfVolume,
+                sentimentScore: insightsData.sentiment
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/ai-insights`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ marketData })
+                });
+
+                if (!response.ok) throw new Error('API request failed');
+
+                const data = await response.json();
+                
+                if (data.success && data.analysis) {
+                    return {
+                        success: true,
+                        analysis: data.analysis,
+                        cached: data.cached || false
+                    };
+                }
+                
+                throw new Error('Invalid response');
+            } catch (error) {
+                console.log('Claude API unavailable, using fallback:', error.message);
+                return { success: false };
+            }
+        }
+
         function generateAISummary() {
             const sentiment = insightsData.sentiment;
             const change24h = insightsData.priceChange24h;
@@ -5803,7 +5871,7 @@
             btn.textContent = '⏳ Loading...';
             
             try {
-                // Fetch real data
+                // Fetch real market data first
                 await Promise.all([
                     fetchXRPPriceHistory(),
                     fetchXRPMarketData()
@@ -5813,16 +5881,38 @@
                 calculateMovingAverages();
                 calculateSentiment();
                 
-                // Update UI
+                // Update UI components that don't need Claude
                 updateSentimentGauge();
-                generateAISummary();
                 renderMAChart();
                 updateKeyMetrics();
+                renderComparisonChart();
+                
+                // Try to get Claude AI analysis
+                btn.textContent = '🤖 AI Analyzing...';
+                const claudeResult = await fetchClaudeInsights();
+                
+                if (claudeResult.success) {
+                    // Use Claude's analysis - format it nicely
+                    const formattedAnalysis = claudeResult.analysis
+                        .split('\n\n')
+                        .map(para => `<p>${para}</p>`)
+                        .join('');
+                    
+                    document.getElementById('aiSummary').innerHTML = formattedAnalysis + 
+                        `<div style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+                            🤖 Analysis by Claude AI ${claudeResult.cached ? '(cached)' : ''}
+                        </div>`;
+                } else {
+                    // Fallback to template-based summary
+                    generateAISummary();
+                }
                 
                 btn.textContent = '🔄 Refresh Insights';
             } catch (error) {
                 console.error('Error generating insights:', error);
                 btn.textContent = '❌ Error - Retry';
+                // Still try to show fallback summary
+                generateAISummary();
             } finally {
                 btn.disabled = false;
             }
