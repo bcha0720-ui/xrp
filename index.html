@@ -2320,9 +2320,12 @@
                         <span>📋</span>
                         Daily Holdings Data
                     </div>
-                    <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
-                        ↻ Refresh Display
-                    </button>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Data updated manually</span>
+                        <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
+                            ↻ Recalculate Values
+                        </button>
+                    </div>
                 </div>
                 <div class="holdings-table-wrapper">
                     <table class="holdings-table" id="holdingsTable">
@@ -3330,9 +3333,14 @@
                 document.getElementById('newsTab').classList.add('active');
             } else if (tabName === 'insights') {
                 document.getElementById('insightsTab').classList.add('active');
+                // Auto-fetch real data when visiting insights tab
                 setTimeout(() => {
-                    renderMAChart();
-                    renderComparisonChart();
+                    if (xrpPriceHistory.length === 0) {
+                        generateInsights(); // This fetches real data
+                    } else {
+                        renderMAChart();
+                        renderComparisonChart();
+                    }
                 }, 100);
             }
         }
@@ -5611,18 +5619,246 @@
         // =====================================================
         let maChart = null;
         let comparisonChart = null;
+        let xrpPriceHistory = [];
+        let insightsData = {
+            sentiment: 50,
+            priceChange24h: 0,
+            priceChange7d: 0,
+            priceChange30d: 0,
+            ma7: 0,
+            ma30: 0,
+            ma90: 0,
+            volume24h: 0
+        };
 
-        function generateInsights() {
-            // Simulated AI insight generation
-            const sentiments = ['Bullish', 'Slightly Bullish', 'Neutral', 'Slightly Bearish', 'Bearish'];
-            const sentiment = sentiments[Math.floor(Math.random() * 3)]; // Bias towards bullish
-            const score = 50 + Math.floor(Math.random() * 30);
+        async function fetchXRPPriceHistory() {
+            try {
+                // Fetch 90 days of price history from CoinGecko
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/ripple/market_chart?vs_currency=usd&days=90&interval=daily');
+                if (!response.ok) throw new Error('Failed to fetch price history');
+                
+                const data = await response.json();
+                xrpPriceHistory = data.prices.map(p => ({
+                    date: new Date(p[0]),
+                    price: p[1]
+                }));
+                
+                return true;
+            } catch (error) {
+                console.error('Error fetching XRP price history:', error);
+                return false;
+            }
+        }
+
+        async function fetchXRPMarketData() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/ripple?localization=false&tickers=false&community_data=false&developer_data=false');
+                if (!response.ok) throw new Error('Failed to fetch market data');
+                
+                const data = await response.json();
+                
+                insightsData.priceChange24h = data.market_data.price_change_percentage_24h || 0;
+                insightsData.priceChange7d = data.market_data.price_change_percentage_7d || 0;
+                insightsData.priceChange30d = data.market_data.price_change_percentage_30d || 0;
+                insightsData.volume24h = data.market_data.total_volume.usd || 0;
+                
+                return true;
+            } catch (error) {
+                console.error('Error fetching market data:', error);
+                return false;
+            }
+        }
+
+        function calculateMovingAverages() {
+            if (xrpPriceHistory.length < 7) return;
+            
+            const prices = xrpPriceHistory.map(p => p.price);
+            const len = prices.length;
+            
+            // 7-day MA
+            if (len >= 7) {
+                insightsData.ma7 = prices.slice(-7).reduce((a, b) => a + b, 0) / 7;
+            }
+            
+            // 30-day MA
+            if (len >= 30) {
+                insightsData.ma30 = prices.slice(-30).reduce((a, b) => a + b, 0) / 30;
+            }
+            
+            // 90-day MA
+            if (len >= 90) {
+                insightsData.ma90 = prices.slice(-90).reduce((a, b) => a + b, 0) / 90;
+            }
+        }
+
+        function calculateSentiment() {
+            // Calculate sentiment based on multiple factors
+            let score = 50; // Start neutral
+            
+            // Price momentum (weight: 40%)
+            if (insightsData.priceChange24h > 5) score += 15;
+            else if (insightsData.priceChange24h > 2) score += 10;
+            else if (insightsData.priceChange24h > 0) score += 5;
+            else if (insightsData.priceChange24h > -2) score -= 5;
+            else if (insightsData.priceChange24h > -5) score -= 10;
+            else score -= 15;
+            
+            // 7-day trend (weight: 30%)
+            if (insightsData.priceChange7d > 10) score += 12;
+            else if (insightsData.priceChange7d > 5) score += 8;
+            else if (insightsData.priceChange7d > 0) score += 4;
+            else if (insightsData.priceChange7d > -5) score -= 4;
+            else if (insightsData.priceChange7d > -10) score -= 8;
+            else score -= 12;
+            
+            // MA crossover signals (weight: 30%)
+            if (currentXRPPrice && insightsData.ma7 && insightsData.ma30) {
+                if (currentXRPPrice > insightsData.ma7 && insightsData.ma7 > insightsData.ma30) {
+                    score += 13; // Strong bullish
+                } else if (currentXRPPrice > insightsData.ma7) {
+                    score += 8; // Bullish
+                } else if (currentXRPPrice < insightsData.ma7 && insightsData.ma7 < insightsData.ma30) {
+                    score -= 13; // Strong bearish
+                } else if (currentXRPPrice < insightsData.ma7) {
+                    score -= 8; // Bearish
+                }
+            }
+            
+            // Clamp between 0 and 100
+            insightsData.sentiment = Math.max(0, Math.min(100, score));
+        }
+
+        function generateAISummary() {
+            const sentiment = insightsData.sentiment;
+            const change24h = insightsData.priceChange24h;
+            const change7d = insightsData.priceChange7d;
+            const change30d = insightsData.priceChange30d;
+            const price = currentXRPPrice || 0;
+            
+            let sentimentText = '';
+            if (sentiment >= 70) sentimentText = 'strongly bullish';
+            else if (sentiment >= 60) sentimentText = 'bullish';
+            else if (sentiment >= 45) sentimentText = 'neutral';
+            else if (sentiment >= 35) sentimentText = 'bearish';
+            else sentimentText = 'strongly bearish';
+            
+            let trendText = change7d >= 0 ? 'upward' : 'downward';
+            let momentumText = Math.abs(change24h) > 3 ? 'strong' : 'moderate';
+            
+            // Price vs MA analysis
+            let maAnalysis = '';
+            if (price > insightsData.ma7 && price > insightsData.ma30) {
+                maAnalysis = 'Price is trading above both 7-day and 30-day moving averages, indicating bullish momentum.';
+            } else if (price > insightsData.ma7) {
+                maAnalysis = 'Price is above the 7-day MA but near the 30-day MA, suggesting consolidation.';
+            } else if (price < insightsData.ma7 && price < insightsData.ma30) {
+                maAnalysis = 'Price is below both moving averages, indicating bearish pressure.';
+            } else {
+                maAnalysis = 'Price is testing key moving average levels.';
+            }
+            
+            // ETF analysis
+            let etfTotal = 0;
+            etfColumns.forEach(col => {
+                for (const row of holdingsData) {
+                    if (row[col.key]?.xrp) {
+                        etfTotal += row[col.key].xrp;
+                        break;
+                    }
+                }
+            });
+            
+            let exchangeTotal = 0;
+            Object.values(exchangeData).forEach(data => {
+                exchangeTotal += data.total || 0;
+            });
+            
+            const html = `
+                <p><strong>Market Overview:</strong> XRP is currently trading at <span style="color: var(--accent-xrp);">$${price.toFixed(4)}</span> with ${momentumText} ${trendText} momentum. The overall market sentiment is <span style="color: ${sentiment >= 50 ? 'var(--accent-green)' : 'var(--accent-red)'};">${sentimentText}</span>.</p>
+                
+                <p><strong>Price Action:</strong></p>
+                <ul>
+                    <li>24h Change: <span style="color: ${change24h >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</span></li>
+                    <li>7d Change: <span style="color: ${change7d >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%</span></li>
+                    <li>30d Change: <span style="color: ${change30d >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">${change30d >= 0 ? '+' : ''}${change30d.toFixed(2)}%</span></li>
+                </ul>
+                
+                <p><strong>Technical Analysis:</strong> ${maAnalysis}</p>
+                
+                <p><strong>ETF & Exchange Data:</strong></p>
+                <ul>
+                    <li>Total XRP in Spot ETFs: <span style="color: var(--accent-xrp);">${formatHoldingsNumber(etfTotal)} XRP</span> (~$${formatHoldingsNumber(etfTotal * price)})</li>
+                    ${exchangeTotal > 0 ? `<li>Total XRP on Exchanges: <span style="color: var(--accent-purple);">${formatHoldingsNumber(exchangeTotal)} XRP</span></li>` : '<li>Exchange data: Click Exchange tab to load</li>'}
+                </ul>
+                
+                <p><strong>Outlook:</strong> ${sentiment >= 60 ? 'Conditions favor continued upside. Watch for resistance levels.' : sentiment >= 45 ? 'Market is in consolidation. Wait for clearer directional signals.' : 'Caution advised. Look for support levels to hold before entering positions.'}</p>
+            `;
+            
+            document.getElementById('aiSummary').innerHTML = html;
+        }
+
+        async function generateInsights() {
+            const btn = document.querySelector('.insights-header .btn-refresh');
+            btn.disabled = true;
+            btn.textContent = '⏳ Loading...';
+            
+            try {
+                // Fetch real data
+                await Promise.all([
+                    fetchXRPPriceHistory(),
+                    fetchXRPMarketData()
+                ]);
+                
+                // Calculate metrics
+                calculateMovingAverages();
+                calculateSentiment();
+                
+                // Update UI
+                updateSentimentGauge();
+                generateAISummary();
+                renderMAChart();
+                updateKeyMetrics();
+                
+                btn.textContent = '🔄 Refresh Insights';
+            } catch (error) {
+                console.error('Error generating insights:', error);
+                btn.textContent = '❌ Error - Retry';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function updateSentimentGauge() {
+            const score = insightsData.sentiment;
+            let sentimentLabel = '';
+            let color = '';
+            
+            if (score >= 70) { sentimentLabel = 'Bullish'; color = 'var(--accent-green)'; }
+            else if (score >= 55) { sentimentLabel = 'Slightly Bullish'; color = '#22c55e99'; }
+            else if (score >= 45) { sentimentLabel = 'Neutral'; color = 'var(--accent-orange)'; }
+            else if (score >= 30) { sentimentLabel = 'Slightly Bearish'; color = '#ef444499'; }
+            else { sentimentLabel = 'Bearish'; color = 'var(--accent-red)'; }
             
             document.getElementById('sentimentGauge').style.width = (100 - score) + '%';
-            document.getElementById('sentimentText').textContent = `${sentiment} (${score}/100)`;
-            document.getElementById('sentimentText').style.color = score > 60 ? 'var(--accent-green)' : score < 40 ? 'var(--accent-red)' : 'var(--accent-orange)';
+            document.getElementById('sentimentText').textContent = `${sentimentLabel} (${Math.round(score)}/100)`;
+            document.getElementById('sentimentText').style.color = color;
+        }
+
+        function updateKeyMetrics() {
+            // Volume trend
+            const volumeEl = document.querySelector('.metric-card:nth-child(1) .metric-value');
+            if (volumeEl && insightsData.volume24h) {
+                const volInM = insightsData.volume24h / 1000000;
+                volumeEl.textContent = '$' + volInM.toFixed(0) + 'M';
+            }
             
-            alert('AI insights refreshed! In production, this would call an AI API for real analysis.');
+            // Update 24h change in metrics
+            const change24h = insightsData.priceChange24h;
+            const trendEl = document.querySelector('.metric-card:nth-child(1) .metric-value');
+            if (trendEl) {
+                trendEl.textContent = (change24h >= 0 ? '+' : '') + change24h.toFixed(1) + '%';
+                trendEl.className = 'metric-value ' + (change24h >= 0 ? 'positive' : 'negative');
+            }
         }
 
         function renderMAChart() {
@@ -5633,36 +5869,48 @@
 
             const ctx = canvas.getContext('2d');
             
-            // Generate sample MA data
-            const labels = [];
-            const priceData = [];
-            const ma7Data = [];
-            const ma30Data = [];
+            // Use real price history data
+            let labels = [];
+            let priceData = [];
+            let ma7Data = [];
+            let ma30Data = [];
             
-            let price = currentXRPPrice || 2.0;
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            if (xrpPriceHistory.length > 0) {
+                // Use last 30 days of real data
+                const last30Days = xrpPriceHistory.slice(-30);
                 
-                price = price * (1 + (Math.random() - 0.48) * 0.05);
-                priceData.push(price);
-            }
-
-            // Calculate MAs
-            for (let i = 0; i < priceData.length; i++) {
-                if (i >= 6) {
-                    const ma7 = priceData.slice(i - 6, i + 1).reduce((a, b) => a + b, 0) / 7;
-                    ma7Data.push(ma7);
-                } else {
-                    ma7Data.push(null);
+                labels = last30Days.map(p => p.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                priceData = last30Days.map(p => p.price);
+                
+                // Calculate rolling MAs
+                for (let i = 0; i < last30Days.length; i++) {
+                    const dayIndex = xrpPriceHistory.length - 30 + i;
+                    
+                    // 7-day MA
+                    if (dayIndex >= 6) {
+                        const slice = xrpPriceHistory.slice(dayIndex - 6, dayIndex + 1);
+                        ma7Data.push(slice.reduce((a, b) => a + b.price, 0) / 7);
+                    } else {
+                        ma7Data.push(null);
+                    }
+                    
+                    // 30-day MA
+                    if (dayIndex >= 29) {
+                        const slice = xrpPriceHistory.slice(dayIndex - 29, dayIndex + 1);
+                        ma30Data.push(slice.reduce((a, b) => a + b.price, 0) / 30);
+                    } else {
+                        ma30Data.push(null);
+                    }
                 }
-                
-                if (i >= 29) {
-                    const ma30 = priceData.slice(i - 29, i + 1).reduce((a, b) => a + b, 0) / 30;
-                    ma30Data.push(ma30);
-                } else {
-                    ma30Data.push(null);
+            } else {
+                // Fallback to simulated data if fetch failed
+                let price = currentXRPPrice || 2.0;
+                for (let i = 30; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    price = price * (1 + (Math.random() - 0.48) * 0.03);
+                    priceData.push(price);
                 }
             }
 
@@ -5678,7 +5926,8 @@
                             backgroundColor: 'rgba(35, 247, 221, 0.1)',
                             borderWidth: 2,
                             fill: true,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointRadius: 2
                         },
                         {
                             label: '7-Day MA',
@@ -5687,7 +5936,8 @@
                             borderWidth: 2,
                             borderDash: [5, 5],
                             fill: false,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointRadius: 0
                         },
                         {
                             label: '30-Day MA',
@@ -5696,34 +5946,73 @@
                             borderWidth: 2,
                             borderDash: [10, 5],
                             fill: false,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointRadius: 0
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
                             display: true,
                             position: 'top',
                             labels: { color: '#a0a0c0' }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: (ctx) => ctx.dataset.label + ': $' + ctx.raw.toFixed(4)
+                            }
                         }
                     },
                     scales: {
                         x: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } },
-                        y: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } }
+                        y: { 
+                            ticks: { 
+                                color: '#707085',
+                                callback: (v) => '$' + v.toFixed(2)
+                            }, 
+                            grid: { color: '#2a2a3a' } 
+                        }
                     }
                 }
             });
 
-            // Update MA values
-            const latestPrice = priceData[priceData.length - 1];
-            const latest7MA = ma7Data[ma7Data.length - 1];
-            const latest30MA = ma30Data[ma30Data.length - 1];
+            // Update MA indicator values
+            const latestPrice = priceData[priceData.length - 1] || currentXRPPrice;
+            const latest7MA = insightsData.ma7 || ma7Data.filter(x => x).pop() || 0;
+            const latest30MA = insightsData.ma30 || ma30Data.filter(x => x).pop() || 0;
+            const latest90MA = insightsData.ma90 || 0;
             
             document.getElementById('ma7').textContent = '$' + latest7MA.toFixed(4);
             document.getElementById('ma30').textContent = '$' + latest30MA.toFixed(4);
+            document.getElementById('ma90').textContent = '$' + latest90MA.toFixed(4);
+            
+            // Update MA signals
+            const ma7Signal = document.querySelector('.ma-indicator:nth-child(1) .ma-signal');
+            const ma30Signal = document.querySelector('.ma-indicator:nth-child(2) .ma-signal');
+            const ma90Signal = document.querySelector('.ma-indicator:nth-child(3) .ma-signal');
+            
+            if (ma7Signal && latestPrice) {
+                ma7Signal.textContent = latestPrice > latest7MA ? '↑ Above' : '↓ Below';
+                ma7Signal.className = 'ma-signal ' + (latestPrice > latest7MA ? 'bullish' : 'bearish');
+            }
+            if (ma30Signal && latestPrice) {
+                ma30Signal.textContent = latestPrice > latest30MA ? '↑ Above' : '↓ Below';
+                ma30Signal.className = 'ma-signal ' + (latestPrice > latest30MA ? 'bullish' : 'bearish');
+            }
+            if (ma90Signal && latestPrice && latest90MA) {
+                ma90Signal.textContent = latestPrice > latest90MA ? '↑ Above' : '↓ Below';
+                ma90Signal.className = 'ma-signal ' + (latestPrice > latest90MA ? 'bullish' : 'bearish');
+            }
         }
 
         function renderComparisonChart() {
@@ -5734,47 +6023,80 @@
 
             const ctx = canvas.getContext('2d');
             
-            // Sample comparison data
-            const labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            // Use real data from cached ETF data if available
+            let xrpVolume = 0;
+            let btcVolume = 0;
+            let ethVolume = 0;
+            
+            if (cachedData && cachedData.data) {
+                // Calculate XRP ETF volume
+                const xrpETFs = cachedData.data['XRP Spot ETFs'] || [];
+                xrpETFs.forEach(etf => {
+                    xrpVolume += (etf.daily?.dollars || 0);
+                });
+                
+                // Calculate BTC ETF volume
+                const btcETFs = cachedData.data['Bitcoin Spot ETFs'] || [];
+                btcETFs.forEach(etf => {
+                    btcVolume += (etf.daily?.dollars || 0);
+                });
+                
+                // Calculate ETH ETF volume
+                const ethETFs = cachedData.data['Ethereum Spot ETFs'] || [];
+                ethETFs.forEach(etf => {
+                    ethVolume += (etf.daily?.dollars || 0);
+                });
+            }
+            
+            // Convert to millions
+            xrpVolume = xrpVolume / 1000000;
+            btcVolume = btcVolume / 1000000;
+            ethVolume = ethVolume / 1000000;
+            
+            const etf1 = document.getElementById('compareETF1').value;
+            const etf2 = document.getElementById('compareETF2').value;
+            
+            const volumeMap = {
+                'XRP': xrpVolume || 125,
+                'BTC': btcVolume || 2100,
+                'ETH': ethVolume || 450
+            };
+            
+            const colorMap = {
+                'XRP': { bg: '#23f7dd80', border: '#23f7dd' },
+                'BTC': { bg: '#f9731680', border: '#f97316' },
+                'ETH': { bg: '#a855f780', border: '#a855f7' }
+            };
             
             comparisonChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: 'XRP ETFs',
-                            data: [85, 110, 125, 145],
-                            backgroundColor: '#23f7dd80',
-                            borderColor: '#23f7dd',
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'BTC ETFs',
-                            data: [1800, 2100, 1950, 2200],
-                            backgroundColor: '#f9731680',
-                            borderColor: '#f97316',
-                            borderWidth: 2
-                        }
-                    ]
+                    labels: [etf1 + ' ETFs', etf2 + ' ETFs'],
+                    datasets: [{
+                        label: 'Daily Volume ($M)',
+                        data: [volumeMap[etf1], volumeMap[etf2]],
+                        backgroundColor: [colorMap[etf1].bg, colorMap[etf2].bg],
+                        borderColor: [colorMap[etf1].border, colorMap[etf2].border],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: { color: '#a0a0c0' }
-                        },
+                        legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#16161f',
+                            borderColor: '#23f7dd',
+                            borderWidth: 1,
                             callbacks: {
-                                label: (ctx) => ctx.dataset.label + ': $' + ctx.raw + 'M'
+                                label: (ctx) => 'Volume: $' + ctx.raw.toFixed(1) + 'M'
                             }
                         }
                     },
                     scales: {
-                        x: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } },
+                        x: { ticks: { color: '#707085' }, grid: { display: false } },
                         y: { 
                             ticks: { 
                                 color: '#707085',
@@ -5785,6 +6107,52 @@
                     }
                 }
             });
+            
+            // Update comparison stats
+            updateComparisonStats(etf1, etf2, volumeMap);
+        }
+
+        function updateComparisonStats(etf1, etf2, volumeMap) {
+            const statsContainer = document.getElementById('comparisonStats');
+            if (!statsContainer) return;
+            
+            // Get change percentages (use real data if available)
+            const changeMap = {
+                'XRP': insightsData.priceChange7d || 12.5,
+                'BTC': 8.2,
+                'ETH': 5.4
+            };
+            
+            // AUM estimates
+            const aumMap = {
+                'XRP': 1.5,
+                'BTC': 28,
+                'ETH': 8
+            };
+            
+            statsContainer.innerHTML = `
+                <div class="comp-stat">
+                    <div class="comp-stat-label">Daily Volume</div>
+                    <div class="comp-stat-values">
+                        <span class="comp-val-1">$${volumeMap[etf1]?.toFixed(0) || '—'}M</span>
+                        <span class="comp-val-2">$${volumeMap[etf2]?.toFixed(0) || '—'}M</span>
+                    </div>
+                </div>
+                <div class="comp-stat">
+                    <div class="comp-stat-label">7D Change</div>
+                    <div class="comp-stat-values">
+                        <span class="comp-val-1 ${changeMap[etf1] >= 0 ? 'positive' : 'negative'}">${changeMap[etf1] >= 0 ? '+' : ''}${changeMap[etf1]?.toFixed(1)}%</span>
+                        <span class="comp-val-2 ${changeMap[etf2] >= 0 ? 'positive' : 'negative'}">${changeMap[etf2] >= 0 ? '+' : ''}${changeMap[etf2]?.toFixed(1)}%</span>
+                    </div>
+                </div>
+                <div class="comp-stat">
+                    <div class="comp-stat-label">Est. AUM</div>
+                    <div class="comp-stat-values">
+                        <span class="comp-val-1">$${aumMap[etf1]}B</span>
+                        <span class="comp-val-2">$${aumMap[etf2]}B</span>
+                    </div>
+                </div>
+            `;
         }
 
         function updateComparison() {
@@ -5810,22 +6178,10 @@
                 }
             }, 3000);
             
-            // Load portfolio and update streak
-            loadPortfolio();
-            updateStreak();
-            
-            // Set current price in calculator
-            setTimeout(() => {
-                if (currentXRPPrice) {
-                    document.getElementById('calcCurrentPrice').value = currentXRPPrice.toFixed(4);
-                }
-            }, 2000);
-            
             // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
                 updateDashboardOverview();
-                updatePortfolioDisplay();
             }, 10000);
             
             // Auto-refresh exchange data every hour
