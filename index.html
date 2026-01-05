@@ -28,8 +28,8 @@
             --bg-card-hover: #1a1a25;
             --border: #2a2a3a;
             --text-primary: #ffffff;
-            --text-secondary: #8888a0;
-            --text-muted: #5a5a70;
+            --text-secondary: #a0a0c0; /* Improved contrast */
+            --text-muted: #707085;      /* Improved contrast */
             --accent-xrp: #23f7dd;
             --accent-xrp-dim: rgba(35, 247, 221, 0.15);
             --accent-green: #22c55e;
@@ -39,12 +39,8 @@
             --accent-orange: #f97316;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--bg-primary);
@@ -648,7 +644,7 @@
 
             header {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 1.5rem;
                 text-align: center;
             }
 
@@ -672,6 +668,30 @@
 
             .api-input-group {
                 flex-direction: column;
+            }
+
+            .dashboard-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-metric-value {
+                font-size: 1.4rem;
+            }
+
+            .main-tabs {
+                flex-direction: column;
+            }
+
+            .main-tab {
+                padding: 0.8rem;
+            }
+
+            .holdings-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .exchange-charts-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -1045,6 +1065,12 @@
             border-radius: 12px;
             padding: 1.25rem;
             text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-xrp);
         }
 
         .summary-card.highlight {
@@ -1084,7 +1110,7 @@
             align-items: center;
             padding: 1.25rem 1.5rem;
             background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--accent-xrp);
         }
 
         .holdings-table-title {
@@ -1112,14 +1138,14 @@
             top: 0;
             background: var(--bg-secondary);
             z-index: 10;
-            padding: 0.75rem 1rem;
+            padding: 1rem;
             text-align: right;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--accent-xrp);
             white-space: nowrap;
         }
 
@@ -1138,10 +1164,10 @@
         }
 
         .holdings-table td {
-            padding: 0.75rem 1rem;
+            padding: 1rem;
             border-bottom: 1px solid var(--border);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             text-align: right;
         }
 
@@ -1271,6 +1297,12 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .holdings-chart-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .holdings-chart-header {
@@ -1279,7 +1311,7 @@
             align-items: center;
             padding: 1rem 1.5rem;
             background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--accent-xrp);
             flex-wrap: wrap;
             gap: 1rem;
         }
@@ -1403,6 +1435,7 @@
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(35, 247, 221, 0.1);
         }
 
         .dashboard-overview::before {
@@ -1455,6 +1488,13 @@
             border-radius: 12px;
             padding: 1.25rem;
             position: relative;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .dashboard-metric:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-xrp);
         }
 
         .dashboard-metric-label {
@@ -1470,6 +1510,7 @@
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
             color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .dashboard-metric-value.animated {
@@ -1551,6 +1592,12 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .trend-chart-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .trend-chart-header {
@@ -1559,7 +1606,7 @@
             align-items: center;
             padding: 1rem 1.5rem;
             background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--accent-xrp);
             flex-wrap: wrap;
             gap: 1rem;
         }
@@ -1622,6 +1669,12 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .exchange-chart-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .exchange-chart-header {
@@ -1630,7 +1683,7 @@
             align-items: center;
             padding: 1rem 1.5rem;
             background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--accent-xrp);
         }
 
         .exchange-chart-wrapper {
@@ -1662,7 +1715,7 @@
         }
 
         .treemap-item:hover {
-            transform: scale(1.02);
+            transform: scale(1.05);
             z-index: 10;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
