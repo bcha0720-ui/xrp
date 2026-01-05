@@ -1556,8 +1556,8 @@
             </div>
 
             <div class="exchange-controls-bar">
-                <button class="btn btn-refresh" id="fetchExchangeBtn" onclick="fetchExchangeData()">
-                    🔄 Fetch Live Data
+                <button class="btn btn-refresh" id="fetchExchangeBtn" onclick="fetchExchangeData(true)">
+                    🔄 Refresh Data
                 </button>
                 <a href="exchange.html" target="_blank" class="btn btn-chart">
                     📊 Full Dashboard
@@ -2146,6 +2146,10 @@
                 }, 100);
             } else if (tabName === 'exchange') {
                 document.getElementById('exchangeTab').classList.add('active');
+                // Auto-load exchange data if not already loaded
+                if (Object.keys(exchangeData).length === 0 && !isExchangeFetching) {
+                    fetchExchangeData();
+                }
             }
         }
 
@@ -2748,6 +2752,8 @@
 
         let exchangeData = {};
         let isExchangeFetching = false;
+        let exchangeDataTimestamp = null;
+        const EXCHANGE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
         async function fetchSingleBalance(address) {
             for (const url of RIPPLED_URLS) {
@@ -2778,7 +2784,20 @@
             return null;
         }
 
-        async function fetchExchangeData() {
+        async function fetchExchangeData(forceRefresh = false) {
+            // Check if we have cached data that's still valid
+            if (!forceRefresh && exchangeDataTimestamp && Object.keys(exchangeData).length > 0) {
+                const cacheAge = Date.now() - exchangeDataTimestamp;
+                if (cacheAge < EXCHANGE_CACHE_DURATION) {
+                    // Use cached data
+                    renderExchangeTable();
+                    const remainingMins = Math.ceil((EXCHANGE_CACHE_DURATION - cacheAge) / 60000);
+                    document.getElementById('exchangeStatus').innerHTML = 
+                        `<span style="color: var(--accent-green);">● Cached (${remainingMins}m)</span>`;
+                    return;
+                }
+            }
+
             if (isExchangeFetching) return;
             isExchangeFetching = true;
 
@@ -2844,8 +2863,11 @@
 
             renderExchangeTable();
             
+            // Save timestamp for cache
+            exchangeDataTimestamp = Date.now();
+            
             btn.disabled = false;
-            btn.textContent = '🔄 Fetch Live Data';
+            btn.textContent = '🔄 Refresh Data';
             statusEl.innerHTML = '<span style="color: var(--accent-green);">● Live</span>';
             isExchangeFetching = false;
         }
