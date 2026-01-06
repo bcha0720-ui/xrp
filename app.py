@@ -189,6 +189,64 @@ Be concise and professional."""
             return jsonify({'success': True, 'analysis': ai_cache['data'], 'cached': True, 'stale': True})
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    if not anthropic_client:
+        return jsonify({'success': False, 'error': 'AI not available'}), 503
+    try:
+        data = request.get_json()
+        question = data.get('question', '')
+        market_data = data.get('marketData', {})
+        chat_history = data.get('chatHistory', [])
+        
+        # Build context with market data
+        context = f"""You are an XRP market assistant. Be helpful, concise, and friendly. Use emojis occasionally.
+
+Current XRP Market Data:
+- Price: ${market_data.get('currentPrice', 0):.4f}
+- 24h Change: {market_data.get('priceChange24h', 0):.2f}%
+- 7d Change: {market_data.get('priceChange7d', 0):.2f}%
+- 30d Change: {market_data.get('priceChange30d', 0):.2f}%
+- 7-Day MA: ${market_data.get('ma7', 0):.4f}
+- 30-Day MA: ${market_data.get('ma30', 0):.4f}
+- Market Sentiment: {market_data.get('sentiment', 50)}/100
+- 24h Volume: ${market_data.get('volume24h', 0):,.0f}
+
+XRP Spot ETFs trading in US: GXRP (Grayscale), XRP (Bitwise), XRPC (Canary), XRPZ (Franklin), TOXR (21Shares), XRPR (REX-Osprey)
+
+Guidelines:
+- Keep responses under 150 words
+- Use bullet points for lists
+- Include specific numbers from the data
+- Add disclaimer for investment advice
+- Be conversational and helpful"""
+
+        # Build messages with history
+        messages = []
+        for msg in chat_history[-4:]:  # Last 4 messages for context
+            role = "user" if msg.get('role') == 'user' else "assistant"
+            messages.append({"role": role, "content": msg.get('content', '')})
+        
+        messages.append({"role": "user", "content": question})
+        
+        response = anthropic_client.messages.create(
+            model="claude-3-5-haiku-20241022",
+            max_tokens=500,
+            system=context,
+            messages=messages
+        )
+        
+        reply = response.content[0].text
+        
+        # Format for HTML display
+        reply = reply.replace('\n\n', '<br><br>').replace('\n', '<br>')
+        reply = reply.replace('**', '<strong>').replace('**', '</strong>')
+        
+        return jsonify({'success': True, 'reply': reply})
+    except Exception as e:
+        logging.error(f"Chat error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/ai-insights/health', methods=['GET'])
 def ai_health():
     return jsonify({

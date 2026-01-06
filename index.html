@@ -7231,14 +7231,64 @@
             const price = currentXRPPrice || 0;
             const change24h = insightsData.priceChange24h || 0;
             const change7d = insightsData.priceChange7d || 0;
+            const change30d = insightsData.priceChange30d || 0;
             const ma7 = insightsData.ma7 || 0;
             const ma30 = insightsData.ma30 || 0;
+            const ma90 = insightsData.ma90 || 0;
             const sentiment = insightsData.sentiment || 50;
+            const volume24h = insightsData.volume24h || 0;
             
+            // Try Claude AI first
+            try {
+                const response = await fetchClaudeChatResponse(question, {
+                    currentPrice: price,
+                    priceChange24h: change24h,
+                    priceChange7d: change7d,
+                    priceChange30d: change30d,
+                    ma7: ma7,
+                    ma30: ma30,
+                    ma90: ma90,
+                    sentiment: sentiment,
+                    volume24h: volume24h
+                });
+                
+                if (response.success) {
+                    return response.reply;
+                }
+            } catch (error) {
+                console.log('Claude AI not available, using local response');
+            }
+            
+            // Fallback to local responses if Claude unavailable
+            return generateLocalResponse(question, { price, change24h, change7d, ma7, ma30, sentiment });
+        }
+        
+        async function fetchClaudeChatResponse(question, marketData) {
+            const API_URL = window.API_URL || 'https://xrp-gtve.onrender.com';
+            
+            const response = await fetch(`${API_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question: question,
+                    marketData: marketData,
+                    chatHistory: chatHistory.slice(-6) // Last 6 messages for context
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Chat API not available');
+            }
+            
+            return await response.json();
+        }
+        
+        function generateLocalResponse(question, data) {
+            const { price, change24h, change7d, ma7, ma30, sentiment } = data;
             const q = question.toLowerCase();
             
             // Price questions
-            if (q.includes('price') || q.includes('cost') || q.includes('worth')) {
+            if (q.includes('price') || q.includes('cost') || q.includes('worth') || q.includes('trading')) {
                 return `📊 <strong>XRP is currently trading at $${price.toFixed(4)}</strong><br><br>
                     • 24h Change: <span style="color: ${change24h >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</span><br>
                     • 7d Change: <span style="color: ${change7d >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%</span><br>
@@ -7247,7 +7297,7 @@
             }
             
             // Buy/sell questions
-            if (q.includes('buy') || q.includes('sell') || q.includes('should i')) {
+            if (q.includes('buy') || q.includes('sell') || q.includes('should i') || q.includes('invest')) {
                 let advice = '';
                 if (sentiment >= 65 && price > ma7 && price > ma30) {
                     advice = `📈 <strong>Technical Setup: BULLISH</strong><br><br>
@@ -7261,79 +7311,100 @@
                         Current conditions suggest patience:<br>
                         • Price is ${price < ma30 ? 'below' : 'near'} key MAs ⚠️<br>
                         • Sentiment: ${sentiment}/100 ⚠️<br><br>
-                        <em>Consider waiting for price to reclaim the 30-day MA ($${ma30.toFixed(4)}) before adding positions. This could be an accumulation zone for long-term believers.</em>`;
+                        <em>Consider waiting for price to reclaim the 30-day MA ($${ma30.toFixed(4)}) before adding positions.</em>`;
                 } else {
                     advice = `📊 <strong>Technical Setup: NEUTRAL</strong><br><br>
                         Mixed signals currently:<br>
                         • Price: $${price.toFixed(4)}<br>
                         • Sentiment: ${sentiment}/100 (Neutral)<br><br>
-                        <em>No strong directional bias. Good time to set alerts for breakout levels and stick to your investment plan.</em>`;
+                        <em>No strong directional bias. Good time to set alerts for breakout levels.</em>`;
                 }
                 return advice + `<br><br>⚠️ <em>Not financial advice. Always DYOR.</em>`;
             }
             
             // Support/resistance questions
-            if (q.includes('support') || q.includes('resistance') || q.includes('level')) {
+            if (q.includes('support') || q.includes('resistance') || q.includes('level') || q.includes('target')) {
                 const support = Math.min(ma7, ma30) * 0.98;
                 const resistance = price * 1.15;
                 return `🎯 <strong>Key Price Levels</strong><br><br>
-                    <span style="color: var(--accent-green)">🛡️ Support Levels:</span><br>
-                    • Strong: $${support.toFixed(2)}<br>
-                    • 7-Day MA: $${ma7.toFixed(4)}<br>
-                    • 30-Day MA: $${ma30.toFixed(4)}<br><br>
-                    <span style="color: var(--accent-red)">🎯 Resistance Levels:</span><br>
-                    • Near-term: $${(price * 1.10).toFixed(2)}<br>
-                    • Target: $${resistance.toFixed(2)}<br><br>
+                    <span style="color: var(--accent-green)">🛡️ Support:</span> $${support.toFixed(2)} / $${ma30.toFixed(4)}<br>
+                    <span style="color: var(--accent-red)">🎯 Resistance:</span> $${(price * 1.10).toFixed(2)} / $${resistance.toFixed(2)}<br><br>
                     <em>Watch for volume confirmation at these levels.</em>`;
             }
             
             // Sentiment questions
-            if (q.includes('sentiment') || q.includes('mood') || q.includes('feeling')) {
+            if (q.includes('sentiment') || q.includes('mood') || q.includes('feeling') || q.includes('bullish') || q.includes('bearish')) {
                 let sentimentEmoji = sentiment >= 65 ? '🟢' : (sentiment >= 45 ? '🟡' : '🔴');
                 let sentimentWord = sentiment >= 65 ? 'Bullish' : (sentiment >= 45 ? 'Neutral' : 'Bearish');
-                return `${sentimentEmoji} <strong>Market Sentiment: ${sentimentWord}</strong><br><br>
-                    • Score: ${sentiment}/100<br>
-                    • 24h Change: ${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%<br>
-                    • 7d Change: ${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%<br>
+                return `${sentimentEmoji} <strong>Market Sentiment: ${sentimentWord} (${sentiment}/100)</strong><br><br>
                     • Price vs MA7: ${price > ma7 ? 'Above ✅' : 'Below ⚠️'}<br>
-                    • Price vs MA30: ${price > ma30 ? 'Above ✅' : 'Below ⚠️'}<br><br>
-                    <em>Sentiment is calculated from price action, moving averages, and volume trends.</em>`;
+                    • Price vs MA30: ${price > ma30 ? 'Above ✅' : 'Below ⚠️'}<br>
+                    • 7d Momentum: ${change7d >= 0 ? 'Positive 📈' : 'Negative 📉'}`;
             }
             
             // ETF questions
-            if (q.includes('etf') || q.includes('holdings') || q.includes('institutional')) {
+            if (q.includes('etf') || q.includes('holdings') || q.includes('institutional') || q.includes('grayscale') || q.includes('bitwise')) {
                 return `🏦 <strong>XRP ETF Overview</strong><br><br>
-                    US Spot ETFs are now live and trading:<br>
+                    US Spot ETFs now trading:<br>
                     • <strong>GXRP</strong> - Grayscale (lowest fees)<br>
                     • <strong>XRP</strong> - Bitwise (highest volume)<br>
                     • <strong>XRPC</strong> - Canary Capital<br>
                     • <strong>XRPZ</strong> - Franklin<br>
                     • <strong>TOXR</strong> - 21Shares<br>
                     • <strong>XRPR</strong> - REX-Osprey<br><br>
-                    Check the <strong>ETF Holdings</strong> tab for daily inflow/outflow data.`;
+                    Check the <strong>ETF Holdings</strong> tab for details.`;
             }
             
             // Technical analysis
-            if (q.includes('technical') || q.includes('analysis') || q.includes('ta') || q.includes('indicator')) {
+            if (q.includes('technical') || q.includes('analysis') || q.includes('ta') || q.includes('indicator') || q.includes('ma') || q.includes('moving')) {
                 const signal = (price > ma7 && price > ma30) ? 'BULLISH' : ((price < ma7 && price < ma30) ? 'BEARISH' : 'NEUTRAL');
-                return `📈 <strong>Technical Analysis Summary</strong><br><br>
-                    <strong>Overall Signal: ${signal}</strong><br><br>
+                return `📈 <strong>Technical Analysis: ${signal}</strong><br><br>
                     • Price: $${price.toFixed(4)}<br>
                     • 7-Day MA: $${ma7.toFixed(4)} (${price > ma7 ? 'Above ✅' : 'Below ❌'})<br>
                     • 30-Day MA: $${ma30.toFixed(4)} (${price > ma30 ? 'Above ✅' : 'Below ❌'})<br>
                     • Trend: ${change7d >= 0 ? 'Uptrend 📈' : 'Downtrend 📉'}<br><br>
-                    ${ma7 > ma30 ? '✅ Golden Cross pattern (7MA > 30MA) - Bullish' : '⚠️ Watch for Golden Cross formation'}`;
+                    ${ma7 > ma30 ? '✅ Golden Cross (7MA > 30MA) - Bullish' : '⚠️ Watch for Golden Cross'}`;
             }
             
-            // Default response
-            return `I can help you with:<br><br>
-                • <strong>"What's the current price?"</strong> - Live XRP price<br>
-                • <strong>"Should I buy now?"</strong> - Market analysis<br>
-                • <strong>"Support levels?"</strong> - Key price levels<br>
-                • <strong>"Market sentiment?"</strong> - Overall mood<br>
-                • <strong>"ETF info"</strong> - ETF holdings data<br>
-                • <strong>"Technical analysis"</strong> - TA summary<br><br>
-                Try asking one of these! 😊`;
+            // News/events
+            if (q.includes('news') || q.includes('event') || q.includes('happening') || q.includes('update')) {
+                return `📰 <strong>Latest Updates</strong><br><br>
+                    • XRP Spot ETFs are actively trading in the US<br>
+                    • Institutional adoption continues to grow<br>
+                    • Check the <strong>News</strong> tab for detailed headlines<br><br>
+                    <em>AI News Analysis available in the News tab!</em>`;
+            }
+            
+            // Ripple/XRP questions
+            if (q.includes('ripple') || q.includes('xrp') || q.includes('what is')) {
+                return `💎 <strong>About XRP</strong><br><br>
+                    XRP is a digital asset built for payments. Key facts:<br>
+                    • Created by Ripple Labs<br>
+                    • Fast transactions (~3-5 seconds)<br>
+                    • Low fees (~$0.0002)<br>
+                    • Used by banks & financial institutions<br>
+                    • Current price: <strong>$${price.toFixed(4)}</strong>`;
+            }
+            
+            // Prediction questions
+            if (q.includes('predict') || q.includes('future') || q.includes('moon') || q.includes('when') || q.includes('will it')) {
+                return `🔮 <strong>Price Outlook</strong><br><br>
+                    Based on current technicals:<br>
+                    • <span style="color: var(--accent-green)">Bullish target:</span> $${(price * 1.3).toFixed(2)} - $${(price * 1.5).toFixed(2)}<br>
+                    • <span style="color: var(--accent-blue)">Base case:</span> $${(price * 0.95).toFixed(2)} - $${(price * 1.15).toFixed(2)}<br>
+                    • <span style="color: var(--accent-red)">Support:</span> $${(Math.min(ma7, ma30) * 0.95).toFixed(2)}<br><br>
+                    ⚠️ <em>Predictions are speculative. Markets are unpredictable!</em>`;
+            }
+            
+            // Help/default
+            return `🤖 I can answer questions about:<br><br>
+                💰 <strong>Price</strong> - "What's the price?" "How is XRP doing?"<br>
+                📈 <strong>Analysis</strong> - "Technical analysis" "Should I buy?"<br>
+                🎯 <strong>Levels</strong> - "Support levels?" "Price targets?"<br>
+                📊 <strong>Sentiment</strong> - "Market mood?" "Bullish or bearish?"<br>
+                🏦 <strong>ETFs</strong> - "ETF info" "Institutional holdings"<br>
+                🔮 <strong>Outlook</strong> - "Price prediction?" "Future?"<br><br>
+                <em>Ask me anything! 😊</em>`;
         }
 
         // =====================================================
