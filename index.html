@@ -2065,8 +2065,71 @@
         .insights-container { padding: 0; }
         .insights-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
 
-        .sentiment-section, .ai-summary-section, .ma-section, .comparison-section, .key-metrics-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .sentiment-section h3, .ai-summary-section h3, .ma-section h3, .comparison-section h3, .key-metrics-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .sentiment-section, .ai-summary-section, .ma-section, .comparison-section, .key-metrics-section, .scenarios-section, .ta-explanation-section, .etf-guide-section, .daily-briefing-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .sentiment-section h3, .ai-summary-section h3, .ma-section h3, .comparison-section h3, .key-metrics-section h3, .scenarios-section h3, .ta-explanation-section h3, .etf-guide-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        /* Daily Briefing Card */
+        .briefing-card { background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1)); border: 1px solid var(--accent-xrp); border-radius: 16px; padding: 1.5rem; }
+        .briefing-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .briefing-icon { font-size: 1.5rem; }
+        .briefing-title { font-weight: 700; font-size: 1.2rem; color: var(--accent-xrp); }
+        .briefing-date { margin-left: auto; font-size: 0.85rem; color: var(--text-muted); }
+        .briefing-content { margin-bottom: 1rem; }
+        .briefing-main { font-size: 1.1rem; line-height: 1.6; }
+        .briefing-quick-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .quick-stat { display: flex; flex-direction: column; }
+        .quick-label { font-size: 0.75rem; color: var(--text-muted); }
+        .quick-value { font-size: 1.1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent-xrp); }
+
+        /* Price Scenarios */
+        .scenarios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .scenario-card { border-radius: 12px; padding: 1.25rem; position: relative; overflow: hidden; }
+        .scenario-card.bullish { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .scenario-card.base { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .scenario-card.bearish { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .scenario-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .scenario-icon { font-size: 1.25rem; }
+        .scenario-title { font-weight: 600; font-size: 0.95rem; }
+        .scenario-card.bullish .scenario-title { color: var(--accent-green); }
+        .scenario-card.base .scenario-title { color: var(--accent-blue); }
+        .scenario-card.bearish .scenario-title { color: var(--accent-red); }
+        .scenario-price { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; }
+        .scenario-card.bullish .scenario-price { color: var(--accent-green); }
+        .scenario-card.base .scenario-price { color: var(--accent-blue); }
+        .scenario-card.bearish .scenario-price { color: var(--accent-red); }
+        .scenario-condition { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.4; }
+        .scenario-probability { font-size: 0.8rem; color: var(--text-muted); }
+        .scenario-probability span { font-weight: 700; color: var(--text-primary); }
+
+        /* Technical Analysis Explanation */
+        .ta-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; }
+        .ta-signal-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1rem; }
+        .ta-signal-badge.bullish { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+        .ta-signal-badge.bearish { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .ta-signal-badge.neutral { background: rgba(249, 115, 22, 0.2); color: var(--accent-orange); }
+        .ta-main-text { font-size: 1rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .ta-levels { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+        .ta-level { flex: 1; min-width: 100px; text-align: center; padding: 1rem; border-radius: 10px; background: var(--bg-card); }
+        .ta-level.support { border-left: 3px solid var(--accent-green); }
+        .ta-level.current { border-left: 3px solid var(--accent-xrp); }
+        .ta-level.resistance { border-left: 3px solid var(--accent-red); }
+        .level-label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .level-value { display: block; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .ta-level.support .level-value { color: var(--accent-green); }
+        .ta-level.current .level-value { color: var(--accent-xrp); }
+        .ta-level.resistance .level-value { color: var(--accent-red); }
+
+        /* ETF Guide Cards */
+        .etf-guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .etf-guide-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.25rem; transition: all 0.3s ease; border: 1px solid transparent; }
+        .etf-guide-card:hover { border-color: var(--accent-xrp); transform: translateY(-3px); }
+        .guide-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+        .guide-icon { font-size: 1.5rem; }
+        .guide-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+        .guide-recommendation { margin-bottom: 0.75rem; }
+        .guide-ticker { display: inline-block; background: var(--accent-xrp); color: var(--bg-primary); padding: 0.25rem 0.75rem; border-radius: 6px; font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; margin-right: 0.5rem; }
+        .guide-name { font-size: 0.85rem; color: var(--text-secondary); }
+        .guide-reason { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
 
         .sentiment-gauge { margin-bottom: 1rem; }
         .gauge-container { height: 20px; background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-green)); border-radius: 10px; position: relative; overflow: hidden; }
@@ -2629,6 +2692,34 @@
                     <button class="btn btn-refresh" onclick="generateInsights()">🔄 Refresh Insights</button>
                 </div>
 
+                <!-- Daily Briefing Card (NEW) -->
+                <div class="daily-briefing-section" id="dailyBriefing">
+                    <div class="briefing-card" id="briefingCard">
+                        <div class="briefing-header">
+                            <span class="briefing-icon">☀️</span>
+                            <span class="briefing-title">Daily Briefing</span>
+                            <span class="briefing-date" id="briefingDate">Jan 6, 2026</span>
+                        </div>
+                        <div class="briefing-content" id="briefingContent">
+                            <p class="briefing-main">Loading market briefing...</p>
+                        </div>
+                        <div class="briefing-quick-stats">
+                            <div class="quick-stat">
+                                <span class="quick-label">Price</span>
+                                <span class="quick-value" id="briefPrice">$--</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="quick-label">24h</span>
+                                <span class="quick-value" id="brief24h">--%</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="quick-label">Sentiment</span>
+                                <span class="quick-value" id="briefSentiment">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Market Sentiment -->
                 <div class="sentiment-section">
                     <h3><span>📊</span> Market Sentiment</h3>
@@ -2648,9 +2739,71 @@
                     </div>
                 </div>
 
+                <!-- Price Scenarios (NEW) -->
+                <div class="scenarios-section">
+                    <h3><span>🎯</span> Price Scenarios (1-2 Weeks)</h3>
+                    <div class="scenarios-grid">
+                        <div class="scenario-card bullish">
+                            <div class="scenario-header">
+                                <span class="scenario-icon">🚀</span>
+                                <span class="scenario-title">Bullish Case</span>
+                            </div>
+                            <div class="scenario-price" id="scenarioBullish">$2.80 - $3.20</div>
+                            <div class="scenario-condition" id="scenarioBullishText">If BTC breaks $100K and ETF inflows continue</div>
+                            <div class="scenario-probability">Probability: <span id="probBullish">35%</span></div>
+                        </div>
+                        <div class="scenario-card base">
+                            <div class="scenario-header">
+                                <span class="scenario-icon">📊</span>
+                                <span class="scenario-title">Base Case</span>
+                            </div>
+                            <div class="scenario-price" id="scenarioBase">$2.20 - $2.50</div>
+                            <div class="scenario-condition" id="scenarioBaseText">Current trend continues with normal volatility</div>
+                            <div class="scenario-probability">Probability: <span id="probBase">45%</span></div>
+                        </div>
+                        <div class="scenario-card bearish">
+                            <div class="scenario-header">
+                                <span class="scenario-icon">⚠️</span>
+                                <span class="scenario-title">Bearish Case</span>
+                            </div>
+                            <div class="scenario-price" id="scenarioBearish">$1.80 - $2.00</div>
+                            <div class="scenario-condition" id="scenarioBearishText">Market correction or negative regulatory news</div>
+                            <div class="scenario-probability">Probability: <span id="probBearish">20%</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Analysis Explanation (NEW) -->
+                <div class="ta-explanation-section">
+                    <h3><span>📖</span> Technical Analysis Explained</h3>
+                    <div class="ta-card" id="taExplanation">
+                        <div class="ta-signal-badge" id="taSignalBadge">
+                            <span class="ta-signal-icon">📈</span>
+                            <span class="ta-signal-text">BULLISH SETUP</span>
+                        </div>
+                        <p class="ta-main-text" id="taMainText">
+                            Loading technical analysis...
+                        </p>
+                        <div class="ta-levels">
+                            <div class="ta-level support">
+                                <span class="level-label">🛡️ Support</span>
+                                <span class="level-value" id="taSupport">$1.95</span>
+                            </div>
+                            <div class="ta-level current">
+                                <span class="level-label">📍 Current</span>
+                                <span class="level-value" id="taCurrent">$2.15</span>
+                            </div>
+                            <div class="ta-level resistance">
+                                <span class="level-label">🎯 Resistance</span>
+                                <span class="level-value" id="taResistance">$2.50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- AI Summary -->
                 <div class="ai-summary-section">
-                    <h3><span>📝</span> Daily AI Summary</h3>
+                    <h3><span>📝</span> AI Analysis</h3>
                     <div class="ai-summary-card" id="aiSummary">
                         <p><strong>XRP Market Overview:</strong> The XRP market shows strong bullish momentum with ETF trading volumes reaching new highs. Institutional interest continues to grow as spot ETFs gain mainstream adoption.</p>
                         <p><strong>Key Observations:</strong></p>
@@ -2677,17 +2830,68 @@
                         <div class="ma-indicator">
                             <span class="ma-label">7-Day MA</span>
                             <span class="ma-value" id="ma7">$2.05</span>
-                            <span class="ma-signal bullish">↑ Above</span>
+                            <span class="ma-signal bullish" id="ma7Signal">↑ Above</span>
                         </div>
                         <div class="ma-indicator">
                             <span class="ma-label">30-Day MA</span>
                             <span class="ma-value" id="ma30">$1.92</span>
-                            <span class="ma-signal bullish">↑ Above</span>
+                            <span class="ma-signal bullish" id="ma30Signal">↑ Above</span>
                         </div>
                         <div class="ma-indicator">
                             <span class="ma-label">90-Day MA</span>
                             <span class="ma-value" id="ma90">$1.45</span>
-                            <span class="ma-signal bullish">↑ Above</span>
+                            <span class="ma-signal bullish" id="ma90Signal">↑ Above</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETF Comparison Guide (NEW) -->
+                <div class="etf-guide-section">
+                    <h3><span>🏆</span> Which XRP ETF is Best For You?</h3>
+                    <div class="etf-guide-grid">
+                        <div class="etf-guide-card">
+                            <div class="guide-header">
+                                <span class="guide-icon">💎</span>
+                                <span class="guide-title">Long-Term Holders</span>
+                            </div>
+                            <div class="guide-recommendation">
+                                <span class="guide-ticker">GXRP</span>
+                                <span class="guide-name">Grayscale XRP Trust</span>
+                            </div>
+                            <div class="guide-reason">Lowest expense ratio (0.35%) means more of your money stays invested over time.</div>
+                        </div>
+                        <div class="etf-guide-card">
+                            <div class="guide-header">
+                                <span class="guide-icon">⚡</span>
+                                <span class="guide-title">Active Traders</span>
+                            </div>
+                            <div class="guide-recommendation">
+                                <span class="guide-ticker">XRP</span>
+                                <span class="guide-name">Bitwise XRP ETF</span>
+                            </div>
+                            <div class="guide-reason">Highest daily volume and tightest spreads for quick entries and exits.</div>
+                        </div>
+                        <div class="etf-guide-card">
+                            <div class="guide-header">
+                                <span class="guide-icon">🎰</span>
+                                <span class="guide-title">High Risk/Reward</span>
+                            </div>
+                            <div class="guide-recommendation">
+                                <span class="guide-ticker">XXRP</span>
+                                <span class="guide-name">Teucrium 2x Long</span>
+                            </div>
+                            <div class="guide-reason">2x leveraged exposure. Double the gains, double the losses. Day trading only.</div>
+                        </div>
+                        <div class="etf-guide-card">
+                            <div class="guide-header">
+                                <span class="guide-icon">🍁</span>
+                                <span class="guide-title">Canadian Investors</span>
+                            </div>
+                            <div class="guide-recommendation">
+                                <span class="guide-ticker">XRP.TO</span>
+                                <span class="guide-name">Purpose XRP ETF</span>
+                            </div>
+                            <div class="guide-reason">No management fees until Feb 2026. Best for TFSA/RRSP accounts.</div>
                         </div>
                     </div>
                 </div>
@@ -2740,28 +2944,28 @@
                 <div class="key-metrics-section">
                     <h3><span>🎯</span> Key Metrics</h3>
                     <div class="metrics-grid">
-                        <div class="metric-card">
+                        <div class="metric-card" id="metricVolume">
                             <div class="metric-icon">📊</div>
                             <div class="metric-label">Volume Trend</div>
-                            <div class="metric-value positive">+15.2%</div>
+                            <div class="metric-value positive" id="metricVolumeValue">+15.2%</div>
                             <div class="metric-desc">vs 7-day avg</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" id="metricFlow">
                             <div class="metric-icon">🏦</div>
                             <div class="metric-label">Exchange Flow</div>
-                            <div class="metric-value negative">-2.3M XRP</div>
-                            <div class="metric-desc">Net outflow (bullish)</div>
+                            <div class="metric-value negative" id="metricFlowValue">-2.3M XRP</div>
+                            <div class="metric-desc" id="metricFlowDesc">Net outflow (bullish)</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" id="metricRSI">
                             <div class="metric-icon">💹</div>
                             <div class="metric-label">RSI (14)</div>
-                            <div class="metric-value">58</div>
-                            <div class="metric-desc">Neutral zone</div>
+                            <div class="metric-value" id="metricRSIValue">58</div>
+                            <div class="metric-desc" id="metricRSIDesc">Neutral zone</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" id="metricSupport">
                             <div class="metric-icon">🎯</div>
                             <div class="metric-label">Support Level</div>
-                            <div class="metric-value">$1.95</div>
+                            <div class="metric-value" id="metricSupportValue">$1.95</div>
                             <div class="metric-desc">Strong support</div>
                         </div>
                     </div>
@@ -2835,27 +3039,12 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-           
-            {
-                date: "1/6/2026",
-                canary: { xrp: 178412484.85, value: 413665760.07 },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: null, value: null },
-                grayscale: { xrp: null, value: null },
-                shares21: { xrp: null, value: null },
-                rex: { xrp: null, value: null },
-                nciq: { xrp: null, value: null },
-                bitw: { xrp: null, value: null },
-                gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null }
-            },
- 
             {
                 date: "1/5/2026",
                 canary: { xrp: 175640703, value: 349221200.58 },
-                bitwise: { xrp: 139269596.51, value: 322867312.91 },
-                franklin: { xrp: 128705300.63, value: 298376211.39 },
-                grayscale: { xrp: 122812426.4807, value: 284468090 },
+                bitwise: { xrp: null, value: null },
+                franklin: { xrp: null, value: null },
+                grayscale: { xrp: null, value: null },
                 shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
                 nciq: { xrp: null, value: null },
@@ -2869,7 +3058,7 @@
                 bitwise: { xrp: 132104912, value: 262824043 },
                 franklin: { xrp: 123274697, value: 245256242.88 },
                 grayscale: { xrp: null, value: null },
-                shares21: { xrp: 139950038.34, value: 272364268.68 },
+                shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
                 nciq: { xrp: null, value: null },
                 bitw: { xrp: null, value: null },
@@ -5902,6 +6091,12 @@
                 updateKeyMetrics();
                 renderComparisonChart();
                 
+                // Update new AI features
+                updateDailyBriefing();
+                updatePriceScenarios();
+                updateTAExplanation();
+                updateDynamicColors();
+                
                 // Try to get Claude AI analysis
                 btn.textContent = '🤖 AI Analyzing...';
                 const claudeResult = await fetchClaudeInsights();
@@ -5931,6 +6126,198 @@
             } finally {
                 btn.disabled = false;
             }
+        }
+
+        // NEW: Daily Briefing Update
+        function updateDailyBriefing() {
+            const price = currentXRPPrice || 0;
+            const change24h = insightsData.priceChange24h || 0;
+            const change7d = insightsData.priceChange7d || 0;
+            const sentiment = insightsData.sentiment || 50;
+            
+            // Set date
+            const today = new Date();
+            document.getElementById('briefingDate').textContent = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            // Determine greeting based on time
+            const hour = today.getHours();
+            let greeting = '☀️';
+            if (hour >= 17) greeting = '🌙';
+            else if (hour >= 12) greeting = '☀️';
+            else greeting = '🌅';
+            document.querySelector('.briefing-icon').textContent = greeting;
+            
+            // Generate briefing text
+            let briefingText = '';
+            if (change24h >= 5) {
+                briefingText = `🚀 Strong day! XRP is up ${change24h.toFixed(1)}% in the last 24 hours, trading at $${price.toFixed(4)}. `;
+            } else if (change24h >= 0) {
+                briefingText = `📈 XRP is up ${change24h.toFixed(1)}% today at $${price.toFixed(4)}. `;
+            } else if (change24h >= -5) {
+                briefingText = `📉 XRP is down ${Math.abs(change24h).toFixed(1)}% today at $${price.toFixed(4)}. `;
+            } else {
+                briefingText = `⚠️ Volatile day - XRP dropped ${Math.abs(change24h).toFixed(1)}% to $${price.toFixed(4)}. `;
+            }
+            
+            // Add context
+            if (sentiment >= 60) {
+                briefingText += `Market sentiment remains bullish. ETF inflows continue to drive institutional interest.`;
+            } else if (sentiment >= 40) {
+                briefingText += `Market is consolidating. Watch for a breakout above resistance or breakdown below support.`;
+            } else {
+                briefingText += `Bearish sentiment prevails. Consider waiting for clearer signals before entering positions.`;
+            }
+            
+            document.getElementById('briefingContent').innerHTML = `<p class="briefing-main">${briefingText}</p>`;
+            
+            // Update quick stats
+            document.getElementById('briefPrice').textContent = `$${price.toFixed(4)}`;
+            document.getElementById('briefPrice').style.color = change24h >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            
+            const brief24hEl = document.getElementById('brief24h');
+            brief24hEl.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(1)}%`;
+            brief24hEl.style.color = change24h >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            
+            let sentimentEmoji = sentiment >= 60 ? '🟢' : (sentiment >= 40 ? '🟡' : '🔴');
+            let sentimentWord = sentiment >= 60 ? 'Bullish' : (sentiment >= 40 ? 'Neutral' : 'Bearish');
+            document.getElementById('briefSentiment').textContent = `${sentimentEmoji} ${sentimentWord}`;
+        }
+
+        // NEW: Price Scenarios Update
+        function updatePriceScenarios() {
+            const price = currentXRPPrice || 2.0;
+            const change7d = insightsData.priceChange7d || 0;
+            const sentiment = insightsData.sentiment || 50;
+            
+            // Calculate scenario prices based on current price and momentum
+            const momentum = change7d / 100;
+            
+            // Bullish case: +30-50% from current
+            const bullishLow = price * 1.25;
+            const bullishHigh = price * 1.45;
+            document.getElementById('scenarioBullish').textContent = `$${bullishLow.toFixed(2)} - $${bullishHigh.toFixed(2)}`;
+            
+            // Base case: -5% to +15%
+            const baseLow = price * 0.95;
+            const baseHigh = price * 1.15;
+            document.getElementById('scenarioBase').textContent = `$${baseLow.toFixed(2)} - $${baseHigh.toFixed(2)}`;
+            
+            // Bearish case: -15% to -25%
+            const bearishLow = price * 0.75;
+            const bearishHigh = price * 0.90;
+            document.getElementById('scenarioBearish').textContent = `$${bearishLow.toFixed(2)} - $${bearishHigh.toFixed(2)}`;
+            
+            // Update conditions based on market context
+            if (sentiment >= 60) {
+                document.getElementById('scenarioBullishText').textContent = 'Current momentum continues with strong ETF inflows';
+                document.getElementById('probBullish').textContent = '40%';
+                document.getElementById('probBase').textContent = '45%';
+                document.getElementById('probBearish').textContent = '15%';
+            } else if (sentiment >= 40) {
+                document.getElementById('scenarioBullishText').textContent = 'Breakout above resistance with positive catalysts';
+                document.getElementById('probBullish').textContent = '25%';
+                document.getElementById('probBase').textContent = '50%';
+                document.getElementById('probBearish').textContent = '25%';
+            } else {
+                document.getElementById('scenarioBullishText').textContent = 'Major reversal with unexpected positive news';
+                document.getElementById('probBullish').textContent = '15%';
+                document.getElementById('probBase').textContent = '40%';
+                document.getElementById('probBearish').textContent = '45%';
+            }
+        }
+
+        // NEW: Technical Analysis Explanation Update
+        function updateTAExplanation() {
+            const price = currentXRPPrice || 0;
+            const ma7 = insightsData.ma7 || 0;
+            const ma30 = insightsData.ma30 || 0;
+            const ma90 = insightsData.ma90 || 0;
+            const change24h = insightsData.priceChange24h || 0;
+            
+            // Determine overall signal
+            let signal = 'neutral';
+            let signalText = 'NEUTRAL';
+            let signalIcon = '➡️';
+            
+            const aboveMA7 = price > ma7;
+            const aboveMA30 = price > ma30;
+            const aboveMA90 = ma90 > 0 ? price > ma90 : true;
+            
+            if (aboveMA7 && aboveMA30 && aboveMA90) {
+                signal = 'bullish';
+                signalText = 'BULLISH SETUP';
+                signalIcon = '📈';
+            } else if (!aboveMA7 && !aboveMA30) {
+                signal = 'bearish';
+                signalText = 'BEARISH SETUP';
+                signalIcon = '📉';
+            }
+            
+            // Update signal badge
+            const badge = document.getElementById('taSignalBadge');
+            badge.className = `ta-signal-badge ${signal}`;
+            badge.innerHTML = `<span class="ta-signal-icon">${signalIcon}</span><span class="ta-signal-text">${signalText}</span>`;
+            
+            // Generate explanation
+            let explanation = '';
+            if (signal === 'bullish') {
+                explanation = `XRP is showing a <strong>bullish technical setup</strong>. The price ($${price.toFixed(4)}) is trading above all major moving averages, indicating strong upward momentum. `;
+                if (ma7 > ma30) {
+                    explanation += `The 7-day MA ($${ma7.toFixed(4)}) is above the 30-day MA ($${ma30.toFixed(4)}), forming a "golden cross" pattern which historically signals continued upside. `;
+                }
+                explanation += `Watch for resistance at $${(price * 1.15).toFixed(2)} and support at the 7-day MA.`;
+            } else if (signal === 'bearish') {
+                explanation = `XRP is showing a <strong>bearish technical setup</strong>. The price ($${price.toFixed(4)}) has fallen below key moving averages, suggesting downward pressure. `;
+                explanation += `The 7-day MA ($${ma7.toFixed(4)}) may act as resistance. Consider waiting for price to reclaim the 30-day MA ($${ma30.toFixed(4)}) before entering long positions.`;
+            } else {
+                explanation = `XRP is in a <strong>consolidation phase</strong>. The price ($${price.toFixed(4)}) is testing key moving average levels. `;
+                explanation += `A break above the 30-day MA ($${ma30.toFixed(4)}) would be bullish, while a breakdown below ${(ma30 * 0.95).toFixed(4)} could signal further downside.`;
+            }
+            
+            document.getElementById('taMainText').innerHTML = explanation;
+            
+            // Update price levels
+            const support = Math.min(ma7, ma30) * 0.98;
+            const resistance = price * 1.15;
+            
+            document.getElementById('taSupport').textContent = `$${support.toFixed(2)}`;
+            document.getElementById('taCurrent').textContent = `$${price.toFixed(4)}`;
+            document.getElementById('taResistance').textContent = `$${resistance.toFixed(2)}`;
+        }
+
+        // NEW: Dynamic Colors based on sentiment
+        function updateDynamicColors() {
+            const sentiment = insightsData.sentiment || 50;
+            const change24h = insightsData.priceChange24h || 0;
+            
+            // Update briefing card border color
+            const briefingCard = document.getElementById('briefingCard');
+            if (briefingCard) {
+                if (sentiment >= 60) {
+                    briefingCard.style.borderColor = 'var(--accent-green)';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))';
+                } else if (sentiment >= 40) {
+                    briefingCard.style.borderColor = 'var(--accent-xrp)';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1))';
+                } else {
+                    briefingCard.style.borderColor = 'var(--accent-red)';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))';
+                }
+            }
+            
+            // Update MA signal colors
+            const updateMASignal = (elementId, maValue) => {
+                const el = document.getElementById(elementId);
+                if (el && maValue) {
+                    const isAbove = currentXRPPrice > maValue;
+                    el.className = `ma-signal ${isAbove ? 'bullish' : 'bearish'}`;
+                    el.textContent = isAbove ? '↑ Above' : '↓ Below';
+                }
+            };
+            
+            updateMASignal('ma7Signal', insightsData.ma7);
+            updateMASignal('ma30Signal', insightsData.ma30);
+            updateMASignal('ma90Signal', insightsData.ma90);
         }
 
         function updateSentimentGauge() {
