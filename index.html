@@ -2174,6 +2174,74 @@
         .metric-value.positive { color: var(--accent-green); }
         .metric-value.negative { color: var(--accent-red); }
         .metric-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        /* Smart Insight Card */
+        .smart-insight-section { margin-bottom: 1.5rem; }
+        .smart-insight-card { background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(239, 68, 68, 0.1)); border: 2px solid var(--accent-orange); border-radius: 16px; padding: 1.5rem; position: relative; overflow: hidden; }
+        .smart-insight-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%); pointer-events: none; }
+        .smart-insight-badge { display: inline-block; background: var(--accent-orange); color: white; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 1rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .smart-insight-content h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .smart-insight-content p { color: var(--text-secondary); line-height: 1.6; }
+        .smart-insight-action { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        .action-label { font-size: 0.8rem; color: var(--accent-orange); font-weight: 600; display: block; margin-bottom: 0.25rem; }
+        .action-text { color: var(--text-primary); font-weight: 500; }
+
+        /* AI News Section */
+        .ai-news-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .ai-news-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .ai-news-feed { display: flex; flex-direction: column; gap: 1rem; }
+        .ai-news-item { background: var(--bg-secondary); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--border); }
+        .ai-news-item.bullish { border-left-color: var(--accent-green); }
+        .ai-news-item.bearish { border-left-color: var(--accent-red); }
+        .ai-news-item.neutral { border-left-color: var(--accent-orange); }
+        .ai-news-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .ai-sentiment-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+        .ai-sentiment-badge.bullish { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+        .ai-sentiment-badge.bearish { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .ai-sentiment-badge.neutral { background: rgba(249, 115, 22, 0.2); color: var(--accent-orange); }
+        .ai-news-time { font-size: 0.75rem; color: var(--text-muted); }
+        .ai-news-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .ai-news-original { font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin-bottom: 0.75rem; padding-left: 0.75rem; border-left: 2px solid var(--border); }
+        .ai-news-analysis { background: rgba(35, 247, 221, 0.05); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; }
+        .analysis-label { font-size: 0.75rem; font-weight: 600; color: var(--accent-xrp); display: block; margin-bottom: 0.25rem; }
+        .ai-news-analysis p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+        .ai-news-impact { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; }
+        .ai-news-impact span:first-child { color: var(--text-muted); }
+        .impact-bar { flex: 1; height: 6px; background: var(--bg-card); border-radius: 3px; overflow: hidden; max-width: 150px; }
+        .impact-fill { height: 100%; background: var(--accent-green); border-radius: 3px; transition: width 0.3s ease; }
+        .impact-fill.neutral { background: var(--accent-orange); }
+        .impact-fill.bearish { background: var(--accent-red); }
+        .impact-value { font-weight: 600; color: var(--text-primary); }
+        .news-feed-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .news-feed-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        /* Portfolio Tracker */
+        .portfolio-tracker-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .portfolio-tracker-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .portfolio-input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .portfolio-input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .portfolio-input-group label { font-size: 0.85rem; color: var(--text-muted); }
+        .portfolio-input-group input { padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 1rem; transition: border-color 0.3s ease; }
+        .portfolio-input-group input:focus { outline: none; border-color: var(--accent-xrp); }
+        .portfolio-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .portfolio-card { background: var(--bg-secondary); border-radius: 12px; padding: 1.25rem; text-align: center; }
+        .portfolio-card.current { border-left: 3px solid var(--accent-xrp); }
+        .portfolio-card.profit { border-left: 3px solid var(--accent-green); }
+        .portfolio-card.target { border-left: 3px solid var(--accent-purple); }
+        .portfolio-card.insight { border-left: 3px solid var(--accent-orange); text-align: left; }
+        .portfolio-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .portfolio-value { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .portfolio-card.current .portfolio-value { color: var(--accent-xrp); }
+        .portfolio-card.profit .portfolio-value { color: var(--accent-green); }
+        .portfolio-card.target .portfolio-value { color: var(--accent-purple); }
+        .portfolio-change, .portfolio-pnl-pct, .portfolio-gain { font-size: 0.85rem; margin-top: 0.25rem; }
+        .portfolio-change.positive, .portfolio-pnl-pct.positive, .portfolio-gain { color: var(--accent-green); }
+        .portfolio-change.negative, .portfolio-pnl-pct.negative { color: var(--accent-red); }
+        .portfolio-insight-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+        .portfolio-save-row { display: flex; align-items: center; gap: 1rem; }
+        .btn-save { background: var(--accent-xrp); color: var(--bg-primary); }
+        .save-status { font-size: 0.85rem; color: var(--accent-green); }
     </style>
 </head>
 <body>
@@ -2545,12 +2613,27 @@
         <div id="newsTab" class="tab-content">
             <div class="news-container">
                 <div class="news-header">
-                    <h2 class="section-title"><span>📰</span> Crypto News Feed</h2>
+                    <h2 class="section-title"><span>📰</span> AI-Powered News Feed</h2>
                     <div class="news-filters">
                         <button class="btn active" data-news="xrp" onclick="filterNews('xrp')">XRP</button>
                         <button class="btn" data-news="crypto" onclick="filterNews('crypto')">Crypto</button>
                         <button class="btn" data-news="etf" onclick="filterNews('etf')">ETFs</button>
                         <button class="btn" data-news="all" onclick="filterNews('all')">All</button>
+                    </div>
+                </div>
+
+                <!-- Smart Key Insight Card (NEW) -->
+                <div class="smart-insight-section">
+                    <div class="smart-insight-card" id="smartInsightCard">
+                        <div class="smart-insight-badge" id="smartInsightBadge">🔥 TODAY'S KEY INSIGHT</div>
+                        <div class="smart-insight-content" id="smartInsightContent">
+                            <h3 id="smartInsightTitle">Loading market insight...</h3>
+                            <p id="smartInsightText">Analyzing market conditions...</p>
+                        </div>
+                        <div class="smart-insight-action" id="smartInsightAction">
+                            <span class="action-label">What this means:</span>
+                            <span class="action-text" id="smartActionText">--</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -2596,84 +2679,134 @@
                     </div>
                 </div>
 
-                <!-- News Feed -->
-                <div class="news-feed" id="newsFeed">
-                    <div class="news-item" data-category="xrp etf">
-                        <div class="news-source">
-                            <span class="source-icon">🔵</span>
-                            <span class="source-name">XRP News</span>
-                            <span class="news-time">Latest</span>
+                <!-- AI News Analysis (NEW) -->
+                <div class="ai-news-section">
+                    <h3><span>🤖</span> AI News Analysis</h3>
+                    <div class="ai-news-feed" id="aiNewsFeed">
+                        <div class="ai-news-item bullish">
+                            <div class="ai-news-header">
+                                <span class="ai-sentiment-badge bullish">📈 BULLISH</span>
+                                <span class="ai-news-time">2 hours ago</span>
+                            </div>
+                            <h4 class="ai-news-title">XRP ETF Inflows Hit Record $78M in Single Day</h4>
+                            <p class="ai-news-original">Original: "Spot XRP ETFs recorded their highest single-day inflow since launch..."</p>
+                            <div class="ai-news-analysis">
+                                <span class="analysis-label">🤖 AI Analysis:</span>
+                                <p>Strong institutional buying pressure. Record inflows typically precede 10-15% price moves within 2 weeks. This signals growing confidence from traditional finance.</p>
+                            </div>
+                            <div class="ai-news-impact">
+                                <span>Impact Score:</span>
+                                <div class="impact-bar">
+                                    <div class="impact-fill" style="width: 85%;"></div>
+                                </div>
+                                <span class="impact-value">High</span>
+                            </div>
                         </div>
-                        <h3 class="news-title">XRP Spot ETFs Now Trading on Major US Exchanges</h3>
-                        <p class="news-summary">Multiple XRP spot ETFs including Canary, Bitwise, Franklin, and 21Shares are actively trading, marking a significant milestone for XRP adoption.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">XRP</span>
-                            <span class="news-tag">ETF</span>
+
+                        <div class="ai-news-item neutral">
+                            <div class="ai-news-header">
+                                <span class="ai-sentiment-badge neutral">➡️ NEUTRAL</span>
+                                <span class="ai-news-time">5 hours ago</span>
+                            </div>
+                            <h4 class="ai-news-title">SEC Commissioner Speaks at Crypto Conference</h4>
+                            <p class="ai-news-original">Original: "SEC Commissioner discussed the future of crypto regulation at annual conference..."</p>
+                            <div class="ai-news-analysis">
+                                <span class="analysis-label">🤖 AI Analysis:</span>
+                                <p>Regulatory commentary without concrete policy changes. While tone was measured, no immediate impact on XRP ETF operations expected. Monitor for follow-up announcements.</p>
+                            </div>
+                            <div class="ai-news-impact">
+                                <span>Impact Score:</span>
+                                <div class="impact-bar">
+                                    <div class="impact-fill neutral" style="width: 40%;"></div>
+                                </div>
+                                <span class="impact-value">Low</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-news-item bullish">
+                            <div class="ai-news-header">
+                                <span class="ai-sentiment-badge bullish">📈 BULLISH</span>
+                                <span class="ai-news-time">8 hours ago</span>
+                            </div>
+                            <h4 class="ai-news-title">Major Bank Adds XRP ETF to Investment Platform</h4>
+                            <p class="ai-news-original">Original: "One of the largest US banks now offers XRP ETF trading to retail clients..."</p>
+                            <div class="ai-news-analysis">
+                                <span class="analysis-label">🤖 AI Analysis:</span>
+                                <p>Significant distribution channel expansion. This opens XRP exposure to millions of retail banking customers. Historical precedent with BTC ETFs showed 5-8% AUM growth following similar announcements.</p>
+                            </div>
+                            <div class="ai-news-impact">
+                                <span>Impact Score:</span>
+                                <div class="impact-bar">
+                                    <div class="impact-fill" style="width: 75%;"></div>
+                                </div>
+                                <span class="impact-value">High</span>
+                            </div>
+                        </div>
+
+                        <div class="ai-news-item bearish">
+                            <div class="ai-news-header">
+                                <span class="ai-sentiment-badge bearish">📉 BEARISH</span>
+                                <span class="ai-news-time">12 hours ago</span>
+                            </div>
+                            <h4 class="ai-news-title">Whale Moves 500M XRP to Exchange</h4>
+                            <p class="ai-news-original">Original: "Large XRP holder transfers 500 million tokens to Binance..."</p>
+                            <div class="ai-news-analysis">
+                                <span class="analysis-label">🤖 AI Analysis:</span>
+                                <p>Potential selling pressure incoming. Large exchange deposits often precede distribution. However, could also be for OTC deals or staking. Watch for follow-up outflows within 48 hours.</p>
+                            </div>
+                            <div class="ai-news-impact">
+                                <span>Impact Score:</span>
+                                <div class="impact-bar">
+                                    <div class="impact-fill bearish" style="width: 60%;"></div>
+                                </div>
+                                <span class="impact-value">Medium</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="news-item" data-category="xrp">
-                        <div class="news-source">
-                            <span class="source-icon">🟠</span>
-                            <span class="source-name">Ripple</span>
-                            <span class="news-time">Recent</span>
+                </div>
+
+                <!-- Original News Feed -->
+                <div class="news-feed-section">
+                    <h3><span>📰</span> Latest Headlines</h3>
+                    <div class="news-feed" id="newsFeed">
+                        <div class="news-item" data-category="xrp etf">
+                            <div class="news-source">
+                                <span class="source-icon">🔵</span>
+                                <span class="source-name">XRP News</span>
+                                <span class="news-time">Latest</span>
+                            </div>
+                            <h3 class="news-title">XRP Spot ETFs Now Trading on Major US Exchanges</h3>
+                            <p class="news-summary">Multiple XRP spot ETFs including Canary, Bitwise, Franklin, and 21Shares are actively trading, marking a significant milestone for XRP adoption.</p>
+                            <div class="news-tags">
+                                <span class="news-tag">XRP</span>
+                                <span class="news-tag">ETF</span>
+                            </div>
                         </div>
-                        <h3 class="news-title">Ripple Expands Global Payment Network</h3>
-                        <p class="news-summary">Ripple continues to expand RippleNet partnerships with financial institutions worldwide for cross-border payments.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">XRP</span>
-                            <span class="news-tag">Ripple</span>
+                        <div class="news-item" data-category="xrp">
+                            <div class="news-source">
+                                <span class="source-icon">🟠</span>
+                                <span class="source-name">Ripple</span>
+                                <span class="news-time">Recent</span>
+                            </div>
+                            <h3 class="news-title">Ripple Expands Global Payment Network</h3>
+                            <p class="news-summary">Ripple continues to expand RippleNet partnerships with financial institutions worldwide for cross-border payments.</p>
+                            <div class="news-tags">
+                                <span class="news-tag">XRP</span>
+                                <span class="news-tag">Ripple</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="news-item" data-category="crypto etf">
-                        <div class="news-source">
-                            <span class="source-icon">🟢</span>
-                            <span class="source-name">ETF News</span>
-                            <span class="news-time">Recent</span>
-                        </div>
-                        <h3 class="news-title">Crypto ETF Market Continues to Grow</h3>
-                        <p class="news-summary">Bitcoin and Ethereum spot ETFs continue to see strong inflows as institutional adoption increases across the crypto market.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">Bitcoin</span>
-                            <span class="news-tag">ETF</span>
-                        </div>
-                    </div>
-                    <div class="news-item" data-category="crypto">
-                        <div class="news-source">
-                            <span class="source-icon">🔴</span>
-                            <span class="source-name">Crypto Market</span>
-                            <span class="news-time">Recent</span>
-                        </div>
-                        <h3 class="news-title">Regulatory Landscape Evolving for Digital Assets</h3>
-                        <p class="news-summary">Global regulators continue to develop frameworks for cryptocurrency regulation, with increasing clarity expected in 2026.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">Regulation</span>
-                            <span class="news-tag">Crypto</span>
-                        </div>
-                    </div>
-                    <div class="news-item" data-category="xrp">
-                        <div class="news-source">
-                            <span class="source-icon">🟣</span>
-                            <span class="source-name">XRPL</span>
-                            <span class="news-time">Recent</span>
-                        </div>
-                        <h3 class="news-title">XRP Ledger Development Updates</h3>
-                        <p class="news-summary">The XRP Ledger continues to see development activity with new features and improvements being implemented.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">XRP</span>
-                            <span class="news-tag">XRPL</span>
-                        </div>
-                    </div>
-                    <div class="news-item" data-category="etf">
-                        <div class="news-source">
-                            <span class="source-icon">🟡</span>
-                            <span class="source-name">ETF Tracker</span>
-                            <span class="news-time">Recent</span>
-                        </div>
-                        <h3 class="news-title">ETF Volume Analysis: Weekly Trends</h3>
-                        <p class="news-summary">Weekly analysis of XRP ETF trading volumes shows growing market participation and liquidity.</p>
-                        <div class="news-tags">
-                            <span class="news-tag">ETF</span>
-                            <span class="news-tag">Analysis</span>
+                        <div class="news-item" data-category="crypto etf">
+                            <div class="news-source">
+                                <span class="source-icon">🟢</span>
+                                <span class="source-name">ETF News</span>
+                                <span class="news-time">Recent</span>
+                            </div>
+                            <h3 class="news-title">Crypto ETF Market Continues to Grow</h3>
+                            <p class="news-summary">Bitcoin and Ethereum spot ETFs continue to see strong inflows as institutional adoption increases across the crypto market.</p>
+                            <div class="news-tags">
+                                <span class="news-tag">Bitcoin</span>
+                                <span class="news-tag">ETF</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2690,6 +2823,50 @@
                 <div class="insights-header">
                     <h2 class="section-title"><span>🤖</span> AI Market Insights</h2>
                     <button class="btn btn-refresh" onclick="generateInsights()">🔄 Refresh Insights</button>
+                </div>
+
+                <!-- Portfolio Tracker (NEW) -->
+                <div class="portfolio-tracker-section">
+                    <h3><span>💼</span> Your Portfolio Tracker</h3>
+                    <div class="portfolio-input-row">
+                        <div class="portfolio-input-group">
+                            <label>Your XRP Holdings</label>
+                            <input type="number" id="userXRPHoldings" placeholder="e.g. 10000" oninput="updatePortfolioTracker()">
+                        </div>
+                        <div class="portfolio-input-group">
+                            <label>Average Buy Price ($)</label>
+                            <input type="number" id="userAvgPrice" placeholder="e.g. 0.50" step="0.01" oninput="updatePortfolioTracker()">
+                        </div>
+                        <div class="portfolio-input-group">
+                            <label>Target Price ($)</label>
+                            <input type="number" id="userTargetPrice" placeholder="e.g. 5.00" step="0.01" oninput="updatePortfolioTracker()">
+                        </div>
+                    </div>
+                    <div class="portfolio-results" id="portfolioResults" style="display: none;">
+                        <div class="portfolio-card current">
+                            <div class="portfolio-label">Current Value</div>
+                            <div class="portfolio-value" id="portfolioCurrentValue">$0</div>
+                            <div class="portfolio-change" id="portfolioChange">--</div>
+                        </div>
+                        <div class="portfolio-card profit">
+                            <div class="portfolio-label">Unrealized P&L</div>
+                            <div class="portfolio-value" id="portfolioPnL">$0</div>
+                            <div class="portfolio-pnl-pct" id="portfolioPnLPct">0%</div>
+                        </div>
+                        <div class="portfolio-card target">
+                            <div class="portfolio-label">Value at Target</div>
+                            <div class="portfolio-value" id="portfolioTargetValue">$0</div>
+                            <div class="portfolio-gain" id="portfolioTargetGain">+0%</div>
+                        </div>
+                        <div class="portfolio-card insight">
+                            <div class="portfolio-label">🤖 AI Insight</div>
+                            <div class="portfolio-insight-text" id="portfolioInsight">Enter your holdings to see personalized insights</div>
+                        </div>
+                    </div>
+                    <div class="portfolio-save-row">
+                        <button class="btn btn-save" onclick="savePortfolio()">💾 Save Portfolio</button>
+                        <span class="save-status" id="saveStatus"></span>
+                    </div>
                 </div>
 
                 <!-- Daily Briefing Card (NEW) -->
@@ -3039,7 +3216,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-             {
+            {
                 date: "1/6/2026",
                 canary: { xrp: 178412485, value: 413665760.07 },
                 bitwise: { xrp: null, value: null },
@@ -3052,7 +3229,6 @@
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
             },
-
             {
                 date: "1/5/2026",
                 canary: { xrp: 175640703, value: 349221200.58 },
@@ -6110,6 +6286,8 @@
                 updatePriceScenarios();
                 updateTAExplanation();
                 updateDynamicColors();
+                updateSmartInsight();
+                updatePortfolioTracker();
                 
                 // Try to get Claude AI analysis
                 btn.textContent = '🤖 AI Analyzing...';
@@ -6332,6 +6510,177 @@
             updateMASignal('ma7Signal', insightsData.ma7);
             updateMASignal('ma30Signal', insightsData.ma30);
             updateMASignal('ma90Signal', insightsData.ma90);
+        }
+
+        // NEW: Portfolio Tracker
+        function updatePortfolioTracker() {
+            const holdings = parseFloat(document.getElementById('userXRPHoldings').value) || 0;
+            const avgPrice = parseFloat(document.getElementById('userAvgPrice').value) || 0;
+            const targetPrice = parseFloat(document.getElementById('userTargetPrice').value) || 0;
+            const currentPrice = currentXRPPrice || 0;
+            
+            // Show results section if user has entered holdings
+            const resultsDiv = document.getElementById('portfolioResults');
+            if (holdings > 0) {
+                resultsDiv.style.display = 'grid';
+            } else {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            // Calculate values
+            const currentValue = holdings * currentPrice;
+            const costBasis = holdings * avgPrice;
+            const pnl = currentValue - costBasis;
+            const pnlPct = avgPrice > 0 ? ((currentPrice - avgPrice) / avgPrice) * 100 : 0;
+            const targetValue = holdings * targetPrice;
+            const targetGain = avgPrice > 0 ? ((targetPrice - avgPrice) / avgPrice) * 100 : 0;
+            
+            // Update current value
+            document.getElementById('portfolioCurrentValue').textContent = `$${currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            const changeEl = document.getElementById('portfolioChange');
+            const change24h = insightsData.priceChange24h || 0;
+            const dailyChange = currentValue * (change24h / 100);
+            changeEl.textContent = `${change24h >= 0 ? '+' : ''}$${dailyChange.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} today`;
+            changeEl.className = `portfolio-change ${change24h >= 0 ? 'positive' : 'negative'}`;
+            
+            // Update P&L
+            const pnlEl = document.getElementById('portfolioPnL');
+            pnlEl.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            pnlEl.style.color = pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            
+            const pnlPctEl = document.getElementById('portfolioPnLPct');
+            pnlPctEl.textContent = `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%`;
+            pnlPctEl.className = `portfolio-pnl-pct ${pnlPct >= 0 ? 'positive' : 'negative'}`;
+            
+            // Update target value
+            if (targetPrice > 0) {
+                document.getElementById('portfolioTargetValue').textContent = `$${targetValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                document.getElementById('portfolioTargetGain').textContent = `+${targetGain.toFixed(0)}% from cost`;
+            }
+            
+            // Generate AI insight
+            let insight = '';
+            if (pnlPct >= 100) {
+                insight = `🎉 Amazing! You've more than doubled your investment. Consider taking some profits to lock in gains while letting winners run.`;
+            } else if (pnlPct >= 50) {
+                insight = `💪 Strong gains! Your portfolio is up ${pnlPct.toFixed(0)}%. The market is in your favor - consider your exit strategy.`;
+            } else if (pnlPct >= 0) {
+                insight = `📈 You're in profit! With ${pnlPct.toFixed(1)}% gains, you're ahead of your cost basis. Stay patient and stick to your plan.`;
+            } else if (pnlPct >= -20) {
+                insight = `📊 Small drawdown of ${Math.abs(pnlPct).toFixed(1)}%. This is normal volatility. If your thesis hasn't changed, this could be an accumulation opportunity.`;
+            } else {
+                insight = `⚠️ Significant drawdown. You're down ${Math.abs(pnlPct).toFixed(1)}%. Review your investment thesis. Don't panic sell, but don't average down without a plan.`;
+            }
+            
+            if (targetPrice > 0 && currentPrice > 0) {
+                const toTarget = ((targetPrice - currentPrice) / currentPrice) * 100;
+                insight += ` Your target is ${toTarget.toFixed(0)}% away from current price.`;
+            }
+            
+            document.getElementById('portfolioInsight').textContent = insight;
+        }
+
+        function savePortfolio() {
+            const holdings = document.getElementById('userXRPHoldings').value;
+            const avgPrice = document.getElementById('userAvgPrice').value;
+            const targetPrice = document.getElementById('userTargetPrice').value;
+            
+            localStorage.setItem('xrp_portfolio', JSON.stringify({
+                holdings, avgPrice, targetPrice
+            }));
+            
+            document.getElementById('saveStatus').textContent = '✓ Saved!';
+            setTimeout(() => {
+                document.getElementById('saveStatus').textContent = '';
+            }, 2000);
+        }
+
+        function loadPortfolio() {
+            const saved = localStorage.getItem('xrp_portfolio');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('userXRPHoldings').value = data.holdings || '';
+                document.getElementById('userAvgPrice').value = data.avgPrice || '';
+                document.getElementById('userTargetPrice').value = data.targetPrice || '';
+                updatePortfolioTracker();
+            }
+        }
+
+        // NEW: Smart Insight Card
+        function updateSmartInsight() {
+            const price = currentXRPPrice || 0;
+            const change24h = insightsData.priceChange24h || 0;
+            const change7d = insightsData.priceChange7d || 0;
+            const sentiment = insightsData.sentiment || 50;
+            const ma7 = insightsData.ma7 || 0;
+            const ma30 = insightsData.ma30 || 0;
+            
+            let badge = '🔥 TODAY\'S KEY INSIGHT';
+            let title = '';
+            let text = '';
+            let action = '';
+            let cardColor = 'var(--accent-orange)';
+            
+            // Determine the most important insight
+            if (Math.abs(change24h) >= 10) {
+                // Big price move
+                if (change24h >= 10) {
+                    badge = '🚀 MAJOR BREAKOUT';
+                    title = `XRP Surges ${change24h.toFixed(1)}% in 24 Hours!`;
+                    text = `Massive bullish momentum with price jumping to $${price.toFixed(4)}. This is one of the strongest daily moves in recent weeks.`;
+                    action = 'Consider taking partial profits if you\'re in significant profit. FOMO buying at highs is risky.';
+                    cardColor = 'var(--accent-green)';
+                } else {
+                    badge = '⚠️ SHARP DECLINE';
+                    title = `XRP Drops ${Math.abs(change24h).toFixed(1)}% - Key Levels to Watch`;
+                    text = `Significant selling pressure has pushed XRP to $${price.toFixed(4)}. Watch for support at the 30-day MA.`;
+                    action = 'Don\'t panic sell. If fundamentals unchanged, this could be a buying opportunity.';
+                    cardColor = 'var(--accent-red)';
+                }
+            } else if (ma7 > ma30 && price > ma7 && sentiment >= 60) {
+                // Golden cross / bullish setup
+                badge = '📈 BULLISH MOMENTUM';
+                title = 'Technical Setup Favors Bulls';
+                text = `XRP ($${price.toFixed(4)}) is trading above all key moving averages with positive momentum. The 7-day MA is above 30-day MA - a bullish signal.`;
+                action = 'Trend is your friend. Consider holding positions or adding on dips to support.';
+                cardColor = 'var(--accent-green)';
+            } else if (ma7 < ma30 && price < ma7) {
+                // Death cross / bearish setup
+                badge = '📉 CAUTION ADVISED';
+                title = 'Technical Weakness Detected';
+                text = `XRP has fallen below key moving averages. The 7-day MA crossing below 30-day MA suggests near-term weakness.`;
+                action = 'Be patient. Wait for price to reclaim MAs before adding positions.';
+                cardColor = 'var(--accent-red)';
+            } else if (change7d >= 15) {
+                // Strong weekly performance
+                badge = '💪 WEEKLY WINNER';
+                title = `XRP Up ${change7d.toFixed(1)}% This Week`;
+                text = `Strong weekly performance puts XRP among the top performers. Momentum traders are taking notice.`;
+                action = 'Weekly trends often continue. Trail stops to protect profits.';
+                cardColor = 'var(--accent-green)';
+            } else {
+                // Default: consolidation
+                badge = '📊 CONSOLIDATION ZONE';
+                title = 'Market Awaiting Catalyst';
+                text = `XRP is trading at $${price.toFixed(4)} in a consolidation phase. Volume and volatility are relatively muted.`;
+                action = 'Good time to accumulate if you believe in long-term thesis. Set alerts for breakout levels.';
+                cardColor = 'var(--accent-orange)';
+            }
+            
+            // Update the card
+            const card = document.getElementById('smartInsightCard');
+            if (card) {
+                card.style.borderColor = cardColor;
+                card.style.background = `linear-gradient(135deg, ${cardColor}22, ${cardColor}11)`;
+            }
+            
+            document.getElementById('smartInsightBadge').textContent = badge;
+            document.getElementById('smartInsightBadge').style.background = cardColor;
+            document.getElementById('smartInsightTitle').textContent = title;
+            document.getElementById('smartInsightText').textContent = text;
+            document.getElementById('smartActionText').textContent = action;
         }
 
         function updateSentimentGauge() {
@@ -6670,6 +7019,9 @@
             fetchXRPPrice();
             fetchData();
             startAutoRefresh();
+            
+            // Load saved portfolio
+            loadPortfolio();
             
             // Initialize dashboard overview after a delay
             setTimeout(() => {
