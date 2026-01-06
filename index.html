@@ -2242,6 +2242,61 @@
         .portfolio-save-row { display: flex; align-items: center; gap: 1rem; }
         .btn-save { background: var(--accent-xrp); color: var(--bg-primary); }
         .save-status { font-size: 0.85rem; color: var(--accent-green); }
+
+        /* AI Chat Widget */
+        .chat-toggle-btn { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple)); border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(35, 247, 221, 0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.3s ease; }
+        .chat-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(35, 247, 221, 0.6); }
+        .chat-toggle-btn.active { background: var(--accent-red); }
+        
+        .chat-widget { position: fixed; bottom: 100px; right: 24px; width: 380px; max-width: calc(100vw - 48px); height: 500px; max-height: calc(100vh - 150px); background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 999; display: none; flex-direction: column; overflow: hidden; }
+        .chat-widget.open { display: flex; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .chat-header { padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple)); display: flex; align-items: center; gap: 0.75rem; }
+        .chat-header-icon { font-size: 1.5rem; }
+        .chat-header-title { font-weight: 700; font-size: 1rem; color: var(--bg-primary); }
+        .chat-header-subtitle { font-size: 0.75rem; color: rgba(0,0,0,0.6); }
+        .chat-close-btn { margin-left: auto; background: rgba(0,0,0,0.2); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; color: var(--bg-primary); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
+        .chat-message.user { background: var(--accent-xrp); color: var(--bg-primary); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-message.assistant { background: var(--bg-secondary); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .chat-message.typing { background: var(--bg-secondary); color: var(--text-muted); }
+        .typing-dots { display: inline-flex; gap: 4px; }
+        .typing-dots span { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: typingBounce 1.4s infinite; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+        
+        .chat-suggestions { padding: 0.5rem 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; border-top: 1px solid var(--border); }
+        .chat-suggestion { padding: 0.4rem 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; }
+        .chat-suggestion:hover { border-color: var(--accent-xrp); color: var(--accent-xrp); }
+        
+        .chat-input-area { padding: 0.75rem 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
+        .chat-input { flex: 1; padding: 0.75rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 24px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; }
+        .chat-input:focus { border-color: var(--accent-xrp); }
+        .chat-send-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-xrp); border: none; cursor: pointer; color: var(--bg-primary); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .chat-send-btn:hover { background: var(--accent-green); }
+        .chat-send-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+        /* PDF Report Section */
+        .report-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .report-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .report-preview { background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+        .report-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .report-preview-title { font-size: 1.2rem; font-weight: 700; color: var(--accent-xrp); }
+        .report-preview-date { font-size: 0.85rem; color: var(--text-muted); }
+        .report-sections-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .report-section-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; background: var(--bg-card); border-radius: 8px; }
+        .report-section-icon { font-size: 1.1rem; }
+        .report-section-name { font-size: 0.9rem; color: var(--text-secondary); }
+        .report-section-check { margin-left: auto; color: var(--accent-green); }
+        .report-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-generate-report { background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple)); color: var(--bg-primary); padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+        .btn-generate-report:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(35, 247, 221, 0.4); }
+        .btn-generate-report:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .report-status { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; }
     </style>
 </head>
 <body>
@@ -3147,6 +3202,50 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- PDF Weekly Report Generator -->
+                <div class="report-section">
+                    <h3><span>📄</span> Weekly Report Generator</h3>
+                    <div class="report-preview">
+                        <div class="report-preview-header">
+                            <span class="report-preview-title">📊 XRP Weekly Report</span>
+                            <span class="report-preview-date" id="reportDateRange">Jan 1-7, 2026</span>
+                        </div>
+                        <div class="report-sections-list">
+                            <div class="report-section-item">
+                                <span class="report-section-icon">📈</span>
+                                <span class="report-section-name">Executive Summary & Price Performance</span>
+                                <span class="report-section-check">✓</span>
+                            </div>
+                            <div class="report-section-item">
+                                <span class="report-section-icon">🏦</span>
+                                <span class="report-section-name">ETF Holdings & Inflows</span>
+                                <span class="report-section-check">✓</span>
+                            </div>
+                            <div class="report-section-item">
+                                <span class="report-section-icon">📊</span>
+                                <span class="report-section-name">Technical Analysis</span>
+                                <span class="report-section-check">✓</span>
+                            </div>
+                            <div class="report-section-item">
+                                <span class="report-section-icon">🤖</span>
+                                <span class="report-section-name">AI Market Outlook</span>
+                                <span class="report-section-check">✓</span>
+                            </div>
+                            <div class="report-section-item">
+                                <span class="report-section-icon">🎯</span>
+                                <span class="report-section-name">Key Levels & Recommendations</span>
+                                <span class="report-section-check">✓</span>
+                            </div>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn-generate-report" onclick="generatePDFReport()">
+                                <span>📄</span> Generate PDF Report
+                            </button>
+                            <div class="report-status" id="reportStatus"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -3154,6 +3253,42 @@
             <p>Data provided by <a href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a> via yfinance</p>
             <p style="margin-top: 0.5rem;">Prices and volumes may be delayed • Auto-refreshes every 5 minutes</p>
         </footer>
+
+        <!-- AI Chat Widget -->
+        <button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleChat()">💬</button>
+        
+        <div class="chat-widget" id="chatWidget">
+            <div class="chat-header">
+                <span class="chat-header-icon">🤖</span>
+                <div>
+                    <div class="chat-header-title">XRP AI Assistant</div>
+                    <div class="chat-header-subtitle">Ask me anything about XRP</div>
+                </div>
+                <button class="chat-close-btn" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message assistant">
+                    👋 Hi! I'm your XRP AI assistant. I can help you with:
+                    <br><br>
+                    • Current price & market analysis<br>
+                    • Technical indicators (MA, RSI, support/resistance)<br>
+                    • ETF holdings & institutional flow<br>
+                    • Trading insights & outlook
+                    <br><br>
+                    What would you like to know?
+                </div>
+            </div>
+            <div class="chat-suggestions">
+                <button class="chat-suggestion" onclick="askQuestion('What is the current XRP price?')">Current price?</button>
+                <button class="chat-suggestion" onclick="askQuestion('Should I buy XRP now?')">Buy now?</button>
+                <button class="chat-suggestion" onclick="askQuestion('What are the support levels?')">Support levels?</button>
+                <button class="chat-suggestion" onclick="askQuestion('What is the market sentiment?')">Sentiment?</button>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask about XRP..." onkeypress="handleChatKeypress(event)">
+                <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">➤</button>
+            </div>
+        </div>
 
         <!-- Chart Modal -->
         <div class="chart-overlay" id="chartOverlay">
@@ -7014,6 +7149,391 @@
             renderComparisonChart();
         }
 
+        // =====================================================
+        // AI CHAT ASSISTANT
+        // =====================================================
+        let chatHistory = [];
+        
+        function toggleChat() {
+            const widget = document.getElementById('chatWidget');
+            const btn = document.getElementById('chatToggleBtn');
+            widget.classList.toggle('open');
+            btn.classList.toggle('active');
+            btn.textContent = widget.classList.contains('open') ? '✕' : '💬';
+            
+            if (widget.classList.contains('open')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+        
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+        
+        function askQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendChatMessage();
+        }
+        
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            const typingId = showTypingIndicator();
+            
+            // Generate AI response
+            try {
+                const response = await generateChatResponse(message);
+                removeTypingIndicator(typingId);
+                addChatMessage(response, 'assistant');
+            } catch (error) {
+                removeTypingIndicator(typingId);
+                addChatMessage("Sorry, I couldn't process that. Please try again.", 'assistant');
+            }
+        }
+        
+        function addChatMessage(text, type) {
+            const container = document.getElementById('chatMessages');
+            const msg = document.createElement('div');
+            msg.className = `chat-message ${type}`;
+            msg.innerHTML = text;
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+            
+            chatHistory.push({ role: type, content: text });
+        }
+        
+        function showTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const typing = document.createElement('div');
+            typing.className = 'chat-message assistant typing';
+            typing.id = 'typing-' + Date.now();
+            typing.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+            container.appendChild(typing);
+            container.scrollTop = container.scrollHeight;
+            return typing.id;
+        }
+        
+        function removeTypingIndicator(id) {
+            const typing = document.getElementById(id);
+            if (typing) typing.remove();
+        }
+        
+        async function generateChatResponse(question) {
+            const price = currentXRPPrice || 0;
+            const change24h = insightsData.priceChange24h || 0;
+            const change7d = insightsData.priceChange7d || 0;
+            const ma7 = insightsData.ma7 || 0;
+            const ma30 = insightsData.ma30 || 0;
+            const sentiment = insightsData.sentiment || 50;
+            
+            const q = question.toLowerCase();
+            
+            // Price questions
+            if (q.includes('price') || q.includes('cost') || q.includes('worth')) {
+                return `📊 <strong>XRP is currently trading at $${price.toFixed(4)}</strong><br><br>
+                    • 24h Change: <span style="color: ${change24h >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</span><br>
+                    • 7d Change: <span style="color: ${change7d >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%</span><br>
+                    • 7-Day MA: $${ma7.toFixed(4)}<br>
+                    • 30-Day MA: $${ma30.toFixed(4)}`;
+            }
+            
+            // Buy/sell questions
+            if (q.includes('buy') || q.includes('sell') || q.includes('should i')) {
+                let advice = '';
+                if (sentiment >= 65 && price > ma7 && price > ma30) {
+                    advice = `📈 <strong>Technical Setup: BULLISH</strong><br><br>
+                        The current setup looks favorable:<br>
+                        • Price is above all moving averages ✅<br>
+                        • Sentiment: ${sentiment}/100 (Bullish) ✅<br>
+                        • Momentum is positive ✅<br><br>
+                        <em>However, consider dollar-cost averaging rather than going all-in. Set a stop-loss below $${(ma30 * 0.95).toFixed(2)} to manage risk.</em>`;
+                } else if (sentiment <= 40 || price < ma30) {
+                    advice = `📉 <strong>Technical Setup: CAUTIOUS</strong><br><br>
+                        Current conditions suggest patience:<br>
+                        • Price is ${price < ma30 ? 'below' : 'near'} key MAs ⚠️<br>
+                        • Sentiment: ${sentiment}/100 ⚠️<br><br>
+                        <em>Consider waiting for price to reclaim the 30-day MA ($${ma30.toFixed(4)}) before adding positions. This could be an accumulation zone for long-term believers.</em>`;
+                } else {
+                    advice = `📊 <strong>Technical Setup: NEUTRAL</strong><br><br>
+                        Mixed signals currently:<br>
+                        • Price: $${price.toFixed(4)}<br>
+                        • Sentiment: ${sentiment}/100 (Neutral)<br><br>
+                        <em>No strong directional bias. Good time to set alerts for breakout levels and stick to your investment plan.</em>`;
+                }
+                return advice + `<br><br>⚠️ <em>Not financial advice. Always DYOR.</em>`;
+            }
+            
+            // Support/resistance questions
+            if (q.includes('support') || q.includes('resistance') || q.includes('level')) {
+                const support = Math.min(ma7, ma30) * 0.98;
+                const resistance = price * 1.15;
+                return `🎯 <strong>Key Price Levels</strong><br><br>
+                    <span style="color: var(--accent-green)">🛡️ Support Levels:</span><br>
+                    • Strong: $${support.toFixed(2)}<br>
+                    • 7-Day MA: $${ma7.toFixed(4)}<br>
+                    • 30-Day MA: $${ma30.toFixed(4)}<br><br>
+                    <span style="color: var(--accent-red)">🎯 Resistance Levels:</span><br>
+                    • Near-term: $${(price * 1.10).toFixed(2)}<br>
+                    • Target: $${resistance.toFixed(2)}<br><br>
+                    <em>Watch for volume confirmation at these levels.</em>`;
+            }
+            
+            // Sentiment questions
+            if (q.includes('sentiment') || q.includes('mood') || q.includes('feeling')) {
+                let sentimentEmoji = sentiment >= 65 ? '🟢' : (sentiment >= 45 ? '🟡' : '🔴');
+                let sentimentWord = sentiment >= 65 ? 'Bullish' : (sentiment >= 45 ? 'Neutral' : 'Bearish');
+                return `${sentimentEmoji} <strong>Market Sentiment: ${sentimentWord}</strong><br><br>
+                    • Score: ${sentiment}/100<br>
+                    • 24h Change: ${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%<br>
+                    • 7d Change: ${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%<br>
+                    • Price vs MA7: ${price > ma7 ? 'Above ✅' : 'Below ⚠️'}<br>
+                    • Price vs MA30: ${price > ma30 ? 'Above ✅' : 'Below ⚠️'}<br><br>
+                    <em>Sentiment is calculated from price action, moving averages, and volume trends.</em>`;
+            }
+            
+            // ETF questions
+            if (q.includes('etf') || q.includes('holdings') || q.includes('institutional')) {
+                return `🏦 <strong>XRP ETF Overview</strong><br><br>
+                    US Spot ETFs are now live and trading:<br>
+                    • <strong>GXRP</strong> - Grayscale (lowest fees)<br>
+                    • <strong>XRP</strong> - Bitwise (highest volume)<br>
+                    • <strong>XRPC</strong> - Canary Capital<br>
+                    • <strong>XRPZ</strong> - Franklin<br>
+                    • <strong>TOXR</strong> - 21Shares<br>
+                    • <strong>XRPR</strong> - REX-Osprey<br><br>
+                    Check the <strong>ETF Holdings</strong> tab for daily inflow/outflow data.`;
+            }
+            
+            // Technical analysis
+            if (q.includes('technical') || q.includes('analysis') || q.includes('ta') || q.includes('indicator')) {
+                const signal = (price > ma7 && price > ma30) ? 'BULLISH' : ((price < ma7 && price < ma30) ? 'BEARISH' : 'NEUTRAL');
+                return `📈 <strong>Technical Analysis Summary</strong><br><br>
+                    <strong>Overall Signal: ${signal}</strong><br><br>
+                    • Price: $${price.toFixed(4)}<br>
+                    • 7-Day MA: $${ma7.toFixed(4)} (${price > ma7 ? 'Above ✅' : 'Below ❌'})<br>
+                    • 30-Day MA: $${ma30.toFixed(4)} (${price > ma30 ? 'Above ✅' : 'Below ❌'})<br>
+                    • Trend: ${change7d >= 0 ? 'Uptrend 📈' : 'Downtrend 📉'}<br><br>
+                    ${ma7 > ma30 ? '✅ Golden Cross pattern (7MA > 30MA) - Bullish' : '⚠️ Watch for Golden Cross formation'}`;
+            }
+            
+            // Default response
+            return `I can help you with:<br><br>
+                • <strong>"What's the current price?"</strong> - Live XRP price<br>
+                • <strong>"Should I buy now?"</strong> - Market analysis<br>
+                • <strong>"Support levels?"</strong> - Key price levels<br>
+                • <strong>"Market sentiment?"</strong> - Overall mood<br>
+                • <strong>"ETF info"</strong> - ETF holdings data<br>
+                • <strong>"Technical analysis"</strong> - TA summary<br><br>
+                Try asking one of these! 😊`;
+        }
+
+        // =====================================================
+        // PDF REPORT GENERATOR
+        // =====================================================
+        async function generatePDFReport() {
+            const btn = document.querySelector('.btn-generate-report');
+            const status = document.getElementById('reportStatus');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Generating...';
+            status.textContent = 'Creating your report...';
+            
+            try {
+                // Gather all data
+                const price = currentXRPPrice || 0;
+                const change24h = insightsData.priceChange24h || 0;
+                const change7d = insightsData.priceChange7d || 0;
+                const change30d = insightsData.priceChange30d || 0;
+                const ma7 = insightsData.ma7 || 0;
+                const ma30 = insightsData.ma30 || 0;
+                const sentiment = insightsData.sentiment || 50;
+                
+                // Date range
+                const today = new Date();
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const dateRange = `${weekAgo.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+                
+                // Generate HTML content for PDF
+                const reportHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>XRP Weekly Report - ${dateRange}</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0a0f; color: #ffffff; padding: 40px; }
+                        .report-container { max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #23f7dd; }
+                        .header h1 { font-size: 2.5rem; color: #23f7dd; margin-bottom: 10px; }
+                        .header .date { color: #a0a0c0; font-size: 1.1rem; }
+                        .section { background: #16161f; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+                        .section h2 { color: #23f7dd; font-size: 1.3rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+                        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+                        .metric-box { background: #12121a; border-radius: 8px; padding: 16px; text-align: center; }
+                        .metric-label { font-size: 0.8rem; color: #707085; margin-bottom: 4px; }
+                        .metric-value { font-size: 1.4rem; font-weight: 700; }
+                        .metric-value.green { color: #22c55e; }
+                        .metric-value.red { color: #ef4444; }
+                        .metric-value.cyan { color: #23f7dd; }
+                        .analysis-text { line-height: 1.7; color: #a0a0c0; }
+                        .levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+                        .level-box { background: #12121a; border-radius: 8px; padding: 16px; text-align: center; }
+                        .level-box.support { border-left: 3px solid #22c55e; }
+                        .level-box.current { border-left: 3px solid #23f7dd; }
+                        .level-box.resistance { border-left: 3px solid #ef4444; }
+                        .level-label { font-size: 0.8rem; color: #707085; }
+                        .level-value { font-size: 1.2rem; font-weight: 700; }
+                        .level-box.support .level-value { color: #22c55e; }
+                        .level-box.current .level-value { color: #23f7dd; }
+                        .level-box.resistance .level-value { color: #ef4444; }
+                        .sentiment-bar { height: 12px; background: linear-gradient(90deg, #ef4444, #f97316, #22c55e); border-radius: 6px; position: relative; margin: 16px 0; }
+                        .sentiment-marker { position: absolute; top: -4px; width: 20px; height: 20px; background: white; border-radius: 50%; transform: translateX(-50%); }
+                        .disclaimer { font-size: 0.75rem; color: #707085; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #2a2a3a; }
+                        .footer { text-align: center; margin-top: 20px; color: #23f7dd; }
+                        @media print { body { background: white; color: black; } .section { border: 1px solid #ddd; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-container">
+                        <div class="header">
+                            <h1>📊 XRP Weekly Report</h1>
+                            <div class="date">${dateRange}</div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>📈 Executive Summary</h2>
+                            <div class="metrics-grid">
+                                <div class="metric-box">
+                                    <div class="metric-label">Current Price</div>
+                                    <div class="metric-value cyan">$${price.toFixed(4)}</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">24h Change</div>
+                                    <div class="metric-value ${change24h >= 0 ? 'green' : 'red'}">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">7d Change</div>
+                                    <div class="metric-value ${change7d >= 0 ? 'green' : 'red'}">${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">30d Change</div>
+                                    <div class="metric-value ${change30d >= 0 ? 'green' : 'red'}">${change30d >= 0 ? '+' : ''}${change30d.toFixed(2)}%</div>
+                                </div>
+                            </div>
+                            <p class="analysis-text">
+                                XRP ${change7d >= 0 ? 'gained' : 'lost'} ${Math.abs(change7d).toFixed(2)}% over the past week, 
+                                ${change7d >= 5 ? 'showing strong bullish momentum' : (change7d <= -5 ? 'experiencing selling pressure' : 'consolidating within a range')}.
+                                The price is currently ${price > ma30 ? 'above' : 'below'} the 30-day moving average, 
+                                indicating ${price > ma30 ? 'an uptrend' : 'a potential downtrend'}.
+                            </p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>📊 Technical Analysis</h2>
+                            <div class="levels-grid">
+                                <div class="level-box support">
+                                    <div class="level-label">🛡️ Support</div>
+                                    <div class="level-value">$${(Math.min(ma7, ma30) * 0.98).toFixed(2)}</div>
+                                </div>
+                                <div class="level-box current">
+                                    <div class="level-label">📍 Current</div>
+                                    <div class="level-value">$${price.toFixed(4)}</div>
+                                </div>
+                                <div class="level-box resistance">
+                                    <div class="level-label">🎯 Resistance</div>
+                                    <div class="level-value">$${(price * 1.15).toFixed(2)}</div>
+                                </div>
+                            </div>
+                            <br>
+                            <p class="analysis-text">
+                                <strong>Moving Averages:</strong><br>
+                                • 7-Day MA: $${ma7.toFixed(4)} (Price ${price > ma7 ? 'Above ✅' : 'Below ⚠️'})<br>
+                                • 30-Day MA: $${ma30.toFixed(4)} (Price ${price > ma30 ? 'Above ✅' : 'Below ⚠️'})<br><br>
+                                <strong>Signal:</strong> ${(price > ma7 && price > ma30) ? '🟢 BULLISH - Price above all MAs' : ((price < ma7 && price < ma30) ? '🔴 BEARISH - Price below all MAs' : '🟡 NEUTRAL - Mixed signals')}
+                            </p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>🎯 Market Sentiment</h2>
+                            <div class="sentiment-bar">
+                                <div class="sentiment-marker" style="left: ${sentiment}%;"></div>
+                            </div>
+                            <p style="text-align: center; font-size: 1.2rem; margin-bottom: 16px;">
+                                <strong>${sentiment >= 65 ? '🟢 Bullish' : (sentiment >= 45 ? '🟡 Neutral' : '🔴 Bearish')}</strong> (${sentiment}/100)
+                            </p>
+                            <p class="analysis-text">
+                                ${sentiment >= 65 ? 
+                                    'Market sentiment is bullish with positive momentum indicators. Institutional interest remains strong as ETF inflows continue.' :
+                                    (sentiment >= 45 ? 
+                                        'Market is in a consolidation phase with neutral sentiment. Watch for a breakout above resistance or breakdown below support.' :
+                                        'Bearish sentiment prevails with selling pressure. Consider waiting for clearer bullish signals before adding positions.'
+                                    )
+                                }
+                            </p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>🤖 AI Outlook</h2>
+                            <p class="analysis-text">
+                                <strong>Short-term (1-2 weeks):</strong><br>
+                                ${sentiment >= 60 ? 
+                                    `Bullish bias with potential upside to $${(price * 1.15).toFixed(2)}. Key support at $${ma7.toFixed(4)} (7-day MA).` :
+                                    `Cautious outlook. Watch for price to reclaim $${ma30.toFixed(4)} (30-day MA) for bullish confirmation.`
+                                }<br><br>
+                                <strong>Key Levels to Watch:</strong><br>
+                                • Breakout target: $${(price * 1.20).toFixed(2)}<br>
+                                • Support to hold: $${(Math.min(ma7, ma30) * 0.95).toFixed(2)}<br><br>
+                                <strong>Risk Management:</strong><br>
+                                Consider stop-loss below $${(Math.min(ma7, ma30) * 0.92).toFixed(2)} for risk management.
+                            </p>
+                        </div>
+                        
+                        <div class="disclaimer">
+                            ⚠️ This report is for informational purposes only and does not constitute financial advice. 
+                            Always do your own research before making investment decisions.
+                        </div>
+                        
+                        <div class="footer">
+                            Generated by XRP ETF Tracker • @chachakobe4er
+                        </div>
+                    </div>
+                </body>
+                </html>`;
+                
+                // Create and download
+                const blob = new Blob([reportHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `XRP_Weekly_Report_${today.toISOString().split('T')[0]}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                status.innerHTML = '✅ Report downloaded! Open in browser and print to PDF.';
+                btn.innerHTML = '<span>📄</span> Generate PDF Report';
+                btn.disabled = false;
+                
+            } catch (error) {
+                console.error('Report generation error:', error);
+                status.textContent = '❌ Error generating report';
+                btn.innerHTML = '<span>📄</span> Generate PDF Report';
+                btn.disabled = false;
+            }
+        }
+
         // Auto-connect on page load
         window.addEventListener('DOMContentLoaded', () => {
             fetchXRPPrice();
@@ -7022,6 +7542,15 @@
             
             // Load saved portfolio
             loadPortfolio();
+            
+            // Update report date range
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const reportDateEl = document.getElementById('reportDateRange');
+            if (reportDateEl) {
+                reportDateEl.textContent = `${weekAgo.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+            }
             
             // Initialize dashboard overview after a delay
             setTimeout(() => {
