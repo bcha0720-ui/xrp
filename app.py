@@ -207,16 +207,3 @@ def home():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
-```
-
-6. Click **Commit changes**
-
----
-
-## After Saving:
-
-Go to **Render** → **Manual Deploy** → **Deploy latest commit**
-
-Wait 2-3 minutes, then test:
-```
-https://xrp-gtve.onrender.com/
