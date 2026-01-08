@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import logging
 import time
 import os
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -28,6 +29,16 @@ except ImportError:
 ai_cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
 cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
 historical_cache = {'data': None, 'timestamp': None, 'cache_duration': 600}  # 10 min cache for historical
+richlist_cache = {'data': None, 'timestamp': None, 'cache_duration': 86400}  # 24 hour cache for rich list
+burn_cache = {'data': None, 'timestamp': None, 'cache_duration': 3600}  # 1 hour cache for burn data
+
+# XRPL API endpoints
+XRPSCAN_BASE = "https://api.xrpscan.com/api/v1"
+RIPPLED_URLS = [
+    "https://xrplcluster.com",
+    "https://s1.ripple.com:51234",
+    "https://s2.ripple.com:51234"
+]
 
 groups = {
     "Spot ETFs": ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
@@ -285,6 +296,321 @@ def get_historical():
         logging.error(f"Historical endpoint error: {e}")
         return jsonify({'error': str(e), 'data': {}}), 500
 
+# =====================================================
+# RICH LIST (TOP 10K) ENDPOINT
+# =====================================================
+
+# Known wallet labels
+KNOWN_ADDRESSES = {
+    "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance",
+    "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance",
+    "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance",
+    "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Uphold",
+    "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Uphold",
+    "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Uphold",
+    "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "Bitso",
+    "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Kraken",
+    "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bitstamp",
+    "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe": "Coinbase",
+    "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood",
+    "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood",
+    "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp",
+    "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex",
+    "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq": "GateHub",
+    "rHWcuuZoFvDS6gNbmHSdpb7u1hZzxvCoMt": "GateHub",
+    "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue",
+    "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb",
+    "rGDreBvnHrX1get7na3J4oowN19ny4GzFn": "Bitget",
+    "rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9": "Ripple",
+    "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh": "Genesis",
+}
+
+def fetch_account_balance(address):
+    """Fetch balance for a single account from XRPL"""
+    for url in RIPPLED_URLS:
+        try:
+            response = requests.post(url, json={
+                "method": "account_info",
+                "params": [{
+                    "account": address,
+                    "ledger_index": "validated",
+                    "strict": True
+                }]
+            }, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'result' in data and 'account_data' in data['result']:
+                    balance_drops = int(data['result']['account_data']['Balance'])
+                    return balance_drops / 1000000  # Convert drops to XRP
+        except Exception as e:
+            logging.warning(f"Error fetching {address} from {url}: {e}")
+            continue
+    return None
+
+def fetch_richlist_from_xrpscan():
+    """Fetch rich list from XRPScan API"""
+    try:
+        response = requests.get(f"{XRPSCAN_BASE}/richlist", timeout=30)
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list) and len(data) > 0:
+                return data
+        return None
+    except Exception as e:
+        logging.error(f"XRPScan richlist error: {e}")
+        return None
+
+def calculate_richlist_stats(accounts):
+    """Calculate statistics for the rich list"""
+    if not accounts:
+        return {}
+    
+    balances = [a['balance'] for a in accounts]
+    total = sum(balances)
+    count = len(balances)
+    
+    sorted_balances = sorted(balances)
+    median = sorted_balances[count // 2] if count > 0 else 0
+    mean = total / count if count > 0 else 0
+    
+    # Count whales (>=1M XRP)
+    whale_count = sum(1 for b in balances if b >= 1000000)
+    
+    # Gini coefficient
+    gini = 0
+    if count > 0 and total > 0:
+        cumulative = 0
+        for i, b in enumerate(sorted_balances):
+            cumulative += b
+            gini += (2 * (i + 1) - count - 1) * b
+        gini = gini / (count * total)
+    
+    return {
+        'total_xrp': total,
+        'account_count': count,
+        'whale_count': whale_count,
+        'mean_balance': mean,
+        'median_balance': median,
+        'gini_coefficient': round(gini, 4)
+    }
+
+@app.route('/api/richlist', methods=['GET'])
+def get_richlist():
+    """
+    Get top 10K XRP rich list
+    Query params:
+        - refresh: true to force refresh (bypasses cache)
+        - limit: number of accounts to return (default 10000, max 10000)
+    """
+    try:
+        force_refresh = request.args.get('refresh', 'false').lower() == 'true'
+        limit = min(int(request.args.get('limit', 10000)), 10000)
+        
+        now = datetime.now()
+        
+        # Check cache unless force refresh
+        if not force_refresh and richlist_cache['data'] and richlist_cache['timestamp']:
+            age = (now - richlist_cache['timestamp']).total_seconds()
+            if age < richlist_cache['cache_duration']:
+                result = richlist_cache['data'].copy()
+                result['cached'] = True
+                result['cache_age'] = int(age)
+                result['accounts'] = result['accounts'][:limit]
+                logging.info(f"Returning cached richlist (age: {int(age)}s)")
+                return jsonify(result)
+        
+        logging.info("Fetching fresh rich list data...")
+        
+        # Try XRPScan first
+        xrpscan_data = fetch_richlist_from_xrpscan()
+        
+        accounts = []
+        if xrpscan_data:
+            for i, item in enumerate(xrpscan_data[:10000]):
+                address = item.get('account') or item.get('address', '')
+                balance = float(item.get('balance', 0))
+                accounts.append({
+                    'rank': i + 1,
+                    'address': address,
+                    'balance': balance,
+                    'name': KNOWN_ADDRESSES.get(address, item.get('name', 'Unknown'))
+                })
+        
+        if not accounts:
+            # Fallback: Return error
+            return jsonify({
+                'error': 'Unable to fetch rich list data',
+                'accounts': [],
+                'stats': {}
+            }), 503
+        
+        # Calculate stats
+        stats = calculate_richlist_stats(accounts)
+        
+        result = {
+            'timestamp': now.strftime("%Y-%m-%d %H:%M:%S"),
+            'accounts': accounts,
+            'stats': stats,
+            'cached': False
+        }
+        
+        # Cache the result
+        richlist_cache['data'] = result
+        richlist_cache['timestamp'] = now
+        
+        # Return with limit applied
+        result['accounts'] = accounts[:limit]
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Richlist endpoint error: {e}")
+        return jsonify({'error': str(e), 'accounts': [], 'stats': {}}), 500
+
+# =====================================================
+# BURN TRACKER ENDPOINT
+# =====================================================
+
+def get_ledger_data(ledger_index):
+    """Fetch ledger data from XRPScan"""
+    try:
+        response = requests.get(f"{XRPSCAN_BASE}/ledger/{ledger_index}", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        logging.warning(f"Error fetching ledger {ledger_index}: {e}")
+    return None
+
+def get_current_ledger():
+    """Get current ledger info"""
+    try:
+        response = requests.get(f"{XRPSCAN_BASE}/ledgers", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        logging.warning(f"Error fetching current ledger: {e}")
+    return None
+
+def find_ledger_at_time(target_timestamp, current_ledger_index):
+    """Binary search to find ledger at specific timestamp"""
+    low = 32570  # Approximate starting ledger
+    high = current_ledger_index
+    
+    while low < high:
+        mid = (low + high) // 2
+        ledger = get_ledger_data(mid)
+        if not ledger:
+            break
+        
+        close_time = ledger.get('close_time', 0)
+        if close_time < target_timestamp:
+            low = mid + 1
+        else:
+            high = mid
+    
+    return low
+
+def calculate_burn_for_period(start_ledger_index, end_ledger_index):
+    """Calculate XRP burned between two ledgers"""
+    start_ledger = get_ledger_data(start_ledger_index)
+    end_ledger = get_ledger_data(end_ledger_index)
+    
+    if not start_ledger or not end_ledger:
+        return None
+    
+    start_total = int(start_ledger.get('total_coins', 0))
+    end_total = int(end_ledger.get('total_coins', 0))
+    
+    burned_drops = start_total - end_total
+    burned_xrp = burned_drops / 1000000
+    
+    return burned_xrp
+
+@app.route('/api/burn', methods=['GET'])
+def get_burn_data():
+    """
+    Get XRP burn statistics
+    Query params:
+        - refresh: true to force refresh
+    """
+    try:
+        force_refresh = request.args.get('refresh', 'false').lower() == 'true'
+        now = datetime.now()
+        
+        # Check cache
+        if not force_refresh and burn_cache['data'] and burn_cache['timestamp']:
+            age = (now - burn_cache['timestamp']).total_seconds()
+            if age < burn_cache['cache_duration']:
+                result = burn_cache['data'].copy()
+                result['cached'] = True
+                result['cache_age'] = int(age)
+                return jsonify(result)
+        
+        logging.info("Fetching fresh burn data...")
+        
+        # Get current ledger info
+        current_ledger_info = get_current_ledger()
+        if not current_ledger_info:
+            return jsonify({'error': 'Unable to fetch ledger data'}), 503
+        
+        current_ledger_index = current_ledger_info.get('current_ledger', 0)
+        current_total_drops = int(current_ledger_info.get('total_coins', 0))
+        
+        # Initial supply: 100 billion XRP in drops
+        initial_drops = 100000000000000000
+        
+        # Calculate total burned
+        total_burned_drops = initial_drops - current_total_drops
+        total_burned_xrp = total_burned_drops / 1000000
+        current_supply_xrp = current_total_drops / 1000000
+        
+        # Calculate periodic burns
+        now_ts = time.time()
+        
+        burn_data = {
+            'daily': None,
+            'weekly': None,
+            'monthly': None,
+            'yearly': None
+        }
+        
+        periods = {
+            'daily': 1,
+            'weekly': 7,
+            'monthly': 30,
+            'yearly': 365
+        }
+        
+        for period_name, days in periods.items():
+            try:
+                target_time = now_ts - (days * 86400)
+                start_ledger = find_ledger_at_time(target_time, current_ledger_index)
+                burned = calculate_burn_for_period(start_ledger, current_ledger_index)
+                if burned is not None:
+                    burn_data[period_name] = int(burned)
+            except Exception as e:
+                logging.warning(f"Error calculating {period_name} burn: {e}")
+        
+        result = {
+            'timestamp': now.strftime("%Y-%m-%d %H:%M:%S"),
+            'current_supply': current_supply_xrp,
+            'total_burned': total_burned_xrp,
+            'burns': burn_data,
+            'ledger_index': current_ledger_index,
+            'cached': False
+        }
+        
+        # Cache result
+        burn_cache['data'] = result
+        burn_cache['timestamp'] = now
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Burn endpoint error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/etf-data', methods=['GET'])
 def get_etf_data():
     try:
@@ -410,6 +736,8 @@ def home():
         'endpoints': [
             '/api/etf-data',
             '/api/historical?period=1mo|3mo|6mo|1y',
+            '/api/richlist?refresh=false&limit=10000',
+            '/api/burn?refresh=false',
             '/api/ai-insights',
             '/api/chat',
             '/api/health'
