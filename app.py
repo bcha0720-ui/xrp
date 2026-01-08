@@ -27,6 +27,7 @@ except ImportError:
 # Caches
 ai_cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
 cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
+historical_cache = {'data': None, 'timestamp': None, 'cache_duration': 600}  # 10 min cache for historical
 
 groups = {
     "Spot ETFs": ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
@@ -34,6 +35,9 @@ groups = {
     "Index ETFs": ['EZPZ', 'GDLC', 'NCIQ', 'BITW'],
     "Canada ETFs": ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE']
 }
+
+# XRP Spot ETFs for historical chart (main focus)
+spot_etf_symbols = ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR']
 
 descriptions = {
     'EZPZ': 'Franklin Templeton', 'GDLC': 'Grayscale Digital Large Cap',
@@ -141,6 +145,145 @@ def get_cached_or_fetch():
         cache['data'] = result
         cache['timestamp'] = now
     return result
+
+# =====================================================
+# HISTORICAL DATA ENDPOINT
+# =====================================================
+def fetch_historical_data(period='1mo'):
+    """Fetch historical price and volume data for XRP Spot ETFs"""
+    
+    # Map period to yfinance period string
+    period_map = {
+        '1mo': '1mo',
+        '3mo': '3mo', 
+        '6mo': '6mo',
+        '1y': '1y'
+    }
+    yf_period = period_map.get(period, '1mo')
+    
+    logging.info(f"Fetching historical data for period: {yf_period}")
+    
+    data = {}
+    errors = []
+    
+    try:
+        # Download historical data for spot ETFs
+        hist = yf.download(
+            spot_etf_symbols, 
+            period=yf_period, 
+            group_by='ticker', 
+            progress=False, 
+            threads=False
+        )
+        
+        if hist is None or hist.empty:
+            logging.warning("No historical data returned from yfinance")
+            return {'data': {}, 'errors': ['No data available']}
+        
+        for symbol in spot_etf_symbols:
+            try:
+                symbol_data = []
+                
+                # Check if symbol exists in data
+                if symbol in hist.columns.get_level_values(0):
+                    sym_hist = hist[symbol]
+                    
+                    if sym_hist.empty:
+                        continue
+                    
+                    # Iterate through each day
+                    for date, row in sym_hist.iterrows():
+                        try:
+                            close_price = row.get('Close')
+                            volume = row.get('Volume')
+                            
+                            # Skip if no valid data
+                            if close_price is None or (hasattr(close_price, '__iter__') and len(close_price) == 0):
+                                continue
+                            
+                            # Handle potential series/array values
+                            if hasattr(close_price, 'item'):
+                                close_price = close_price.item()
+                            if hasattr(volume, 'item'):
+                                volume = volume.item()
+                            
+                            # Skip NaN values
+                            if close_price != close_price:  # NaN check
+                                continue
+                            
+                            symbol_data.append({
+                                'date': date.strftime('%Y-%m-%d'),
+                                'price': round(float(close_price), 2),
+                                'volume': int(volume) if volume == volume else 0  # NaN check for volume
+                            })
+                        except Exception as e:
+                            logging.warning(f"Error processing row for {symbol}: {e}")
+                            continue
+                    
+                    if symbol_data:
+                        data[symbol] = symbol_data
+                        logging.info(f"Got {len(symbol_data)} data points for {symbol}")
+                        
+            except Exception as e:
+                errors.append(f"{symbol}: {str(e)}")
+                logging.warning(f"Error fetching {symbol}: {e}")
+                
+    except Exception as e:
+        errors.append(f"Batch error: {str(e)}")
+        logging.error(f"Historical fetch error: {e}")
+    
+    return {
+        'data': data,
+        'period': period,
+        'symbols': list(data.keys()),
+        'errors': errors if errors else None
+    }
+
+@app.route('/api/historical', methods=['GET'])
+def get_historical():
+    """
+    Get historical price/volume data for XRP Spot ETFs
+    Query params:
+        - period: 1mo, 3mo, 6mo, 1y (default: 1mo)
+    """
+    try:
+        period = request.args.get('period', '1mo')
+        
+        # Validate period
+        valid_periods = ['1mo', '3mo', '6mo', '1y']
+        if period not in valid_periods:
+            period = '1mo'
+        
+        # Check cache
+        cache_key = f"historical_{period}"
+        now = datetime.now()
+        
+        if (historical_cache.get('key') == cache_key and 
+            historical_cache['data'] and 
+            historical_cache['timestamp']):
+            age = (now - historical_cache['timestamp']).total_seconds()
+            if age < historical_cache['cache_duration']:
+                result = historical_cache['data'].copy()
+                result['cached'] = True
+                result['cache_age'] = int(age)
+                logging.info(f"Returning cached historical data (age: {int(age)}s)")
+                return jsonify(result)
+        
+        # Fetch fresh data
+        result = fetch_historical_data(period)
+        
+        # Cache if we got data
+        if result['data']:
+            historical_cache['data'] = result
+            historical_cache['timestamp'] = now
+            historical_cache['key'] = cache_key
+        
+        result['cached'] = False
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Historical endpoint error: {e}")
+        return jsonify({'error': str(e), 'data': {}}), 500
 
 @app.route('/api/etf-data', methods=['GET'])
 def get_etf_data():
@@ -261,7 +404,17 @@ def health():
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({'message': 'XRP ETF API', 'ai_enabled': anthropic_client is not None})
+    return jsonify({
+        'message': 'XRP ETF API',
+        'ai_enabled': anthropic_client is not None,
+        'endpoints': [
+            '/api/etf-data',
+            '/api/historical?period=1mo|3mo|6mo|1y',
+            '/api/ai-insights',
+            '/api/chat',
+            '/api/health'
+        ]
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
