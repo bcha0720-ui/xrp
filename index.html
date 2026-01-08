@@ -2310,6 +2310,81 @@
         .chat-send-btn:hover { background: var(--accent-green); }
         .chat-send-btn:disabled { background: var(--border); cursor: not-allowed; }
 
+        /* Analytics Tab Styles */
+        .analytics-container { padding: 1rem 0; }
+        .analytics-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .analytics-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .analytics-select { padding: 0.6rem 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: inherit; cursor: pointer; }
+        .analytics-select:focus { outline: none; border-color: var(--accent-xrp); }
+        
+        .analytics-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .analytics-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; transition: all 0.3s ease; }
+        .analytics-card:hover { border-color: var(--accent-xrp); transform: translateY(-2px); }
+        .analytics-card.highlight { background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1)); border-color: var(--accent-xrp); }
+        .analytics-card.flow-card { border-left: 3px solid var(--accent-orange); }
+        .analytics-icon { font-size: 2rem; }
+        .analytics-info { flex: 1; }
+        .analytics-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .analytics-value { font-size: 1.4rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+        .analytics-subtext { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .analytics-subtext.positive { color: var(--accent-green); }
+        .analytics-subtext.negative { color: var(--accent-red); }
+        
+        .benchmark-notice { background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: var(--text-secondary); }
+        
+        .analytics-charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 900px) { .analytics-charts-grid { grid-template-columns: 1fr; } }
+        
+        .analytics-chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+        .analytics-chart-card.main-chart { min-height: 400px; }
+        .chart-card-header { margin-bottom: 1rem; }
+        .chart-card-header h3 { font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .analytics-chart-container { height: 350px; position: relative; }
+        
+        .analytics-rankings { display: flex; flex-direction: column; gap: 0.5rem; max-height: 350px; overflow-y: auto; }
+        .ranking-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; }
+        .ranking-item.skeleton { height: 50px; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { opacity: 0.5; } 50% { opacity: 0.8; } 100% { opacity: 0.5; } }
+        .ranking-position { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border-radius: 50%; font-weight: 700; font-size: 0.85rem; }
+        .ranking-position.gold { background: linear-gradient(135deg, #ffd700, #ffb800); color: #000; }
+        .ranking-position.silver { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #000; }
+        .ranking-position.bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: #000; }
+        .ranking-info { flex: 1; }
+        .ranking-name { font-weight: 600; font-size: 0.9rem; }
+        .ranking-balance { font-size: 0.8rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .ranking-share { font-size: 0.85rem; font-weight: 600; color: var(--accent-xrp); }
+        
+        .analytics-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .analytics-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .change-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 768px) { .change-charts-grid { grid-template-columns: 1fr; } }
+        .change-chart-card { background: var(--bg-secondary); border-radius: 8px; padding: 1rem; }
+        .change-chart-card h4 { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; text-align: center; }
+        .change-chart-card canvas { max-height: 250px; }
+        
+        .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 768px) { .flow-grid { grid-template-columns: 1fr; } }
+        .flow-card-section { background: var(--bg-secondary); border-radius: 8px; padding: 1rem; }
+        .flow-card-section h4 { font-size: 0.9rem; margin-bottom: 1rem; }
+        .flow-card-section.inflows { border-left: 3px solid var(--accent-green); }
+        .flow-card-section.outflows { border-left: 3px solid var(--accent-red); }
+        .flow-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .flow-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-card); border-radius: 6px; }
+        .flow-item.skeleton { height: 40px; }
+        .flow-item-name { font-weight: 500; }
+        .flow-item-value { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+        .flow-item-value.positive { color: var(--accent-green); }
+        .flow-item-value.negative { color: var(--accent-red); }
+        
+        .wallet-details-controls { margin-bottom: 1rem; }
+        .wallet-details-table { overflow-x: auto; }
+        
+        .analytics-export { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: var(--bg-card); border-radius: 12px; }
+        .btn-export { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); padding: 0.6rem 1.25rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease; }
+        .btn-export:hover { border-color: var(--accent-xrp); color: var(--accent-xrp); }
+        .export-note { font-size: 0.8rem; color: var(--text-muted); }
+
         /* PDF Report Section */
         .report-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
         .report-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -2429,6 +2504,10 @@
             <button class="main-tab" onclick="switchMainTab('exchange')">
                 <span class="main-tab-icon">🏦</span>
                 Exchange
+            </button>
+            <button class="main-tab" onclick="switchMainTab('analytics')">
+                <span class="main-tab-icon">📊</span>
+                Analytics
             </button>
             <button class="main-tab" onclick="switchMainTab('news')">
                 <span class="main-tab-icon">📰</span>
@@ -2691,6 +2770,160 @@
             <div class="exchange-info-banner" style="margin-top: 1rem; background: var(--bg-secondary);">
                 <span>📌</span>
                 <span><strong>Note:</strong> Data fetched from XRPL nodes (s1.ripple.com, s2.ripple.com, xrplcluster.com). Some requests may timeout - refresh to retry.</span>
+            </div>
+        </div>
+
+        <!-- Analytics Tab Content -->
+        <div id="analyticsTab" class="tab-content">
+            <div class="analytics-container">
+                <div class="analytics-header">
+                    <h2 class="section-title"><span>📊</span> Exchange Analytics</h2>
+                    <div class="analytics-controls">
+                        <select id="analyticsChartType" class="analytics-select" onchange="updateAnalyticsChart()">
+                            <option value="bar">Bar Chart</option>
+                            <option value="treemap">Treemap</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="horizontal">Horizontal Bar</option>
+                        </select>
+                        <select id="analyticsTopN" class="analytics-select" onchange="updateAnalyticsChart()">
+                            <option value="5">Top 5</option>
+                            <option value="10" selected>Top 10</option>
+                            <option value="15">Top 15</option>
+                            <option value="20">Top 20</option>
+                        </select>
+                        <button class="btn btn-refresh" onclick="refreshAnalytics()">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Analytics Summary Cards -->
+                <div class="analytics-summary">
+                    <div class="analytics-card highlight">
+                        <div class="analytics-icon">💰</div>
+                        <div class="analytics-info">
+                            <div class="analytics-label">Total XRP on Exchanges</div>
+                            <div class="analytics-value" id="analyticsTotalXRP">--</div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-icon">🏦</div>
+                        <div class="analytics-info">
+                            <div class="analytics-label">Exchanges Tracked</div>
+                            <div class="analytics-value" id="analyticsExchangeCount">43</div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-icon">🥇</div>
+                        <div class="analytics-info">
+                            <div class="analytics-label">Top 3 Dominance</div>
+                            <div class="analytics-value" id="analyticsTop3">--%</div>
+                        </div>
+                    </div>
+                    <div class="analytics-card flow-card">
+                        <div class="analytics-icon">📉</div>
+                        <div class="analytics-info">
+                            <div class="analytics-label">Net Flow (vs Feb 24)</div>
+                            <div class="analytics-value" id="analyticsNetFlow">--</div>
+                            <div class="analytics-subtext" id="analyticsFlowDirection">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Benchmark Notice -->
+                <div class="benchmark-notice">
+                    <span>📅</span>
+                    <span>Historical benchmark: <strong>February 24, 2025</strong> - Comparing current balances to this date</span>
+                </div>
+
+                <!-- Main Analytics Charts -->
+                <div class="analytics-charts-grid">
+                    <div class="analytics-chart-card main-chart">
+                        <div class="chart-card-header">
+                            <h3><span id="analyticsChartTitle">Top 10 Exchange Holdings</span></h3>
+                        </div>
+                        <div class="analytics-chart-container">
+                            <canvas id="analyticsMainChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="analytics-chart-card">
+                        <div class="chart-card-header">
+                            <h3>🏆 Rankings</h3>
+                        </div>
+                        <div class="analytics-rankings" id="analyticsRankings">
+                            <div class="ranking-item skeleton"></div>
+                            <div class="ranking-item skeleton"></div>
+                            <div class="ranking-item skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Change Analysis -->
+                <div class="analytics-section">
+                    <h3><span>📈</span> Change Since Feb 24, 2025</h3>
+                    <div class="change-charts-grid">
+                        <div class="change-chart-card">
+                            <h4>Absolute Change (XRP)</h4>
+                            <canvas id="absoluteChangeChart"></canvas>
+                        </div>
+                        <div class="change-chart-card">
+                            <h4>Percentage Change (%)</h4>
+                            <canvas id="percentChangeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Gainers & Losers -->
+                <div class="analytics-section">
+                    <h3><span>🔄</span> Inflows & Outflows</h3>
+                    <div class="flow-grid">
+                        <div class="flow-card-section inflows">
+                            <h4>🟢 Top Inflows (Accumulating)</h4>
+                            <div class="flow-list" id="topInflows">
+                                <div class="flow-item skeleton"></div>
+                            </div>
+                        </div>
+                        <div class="flow-card-section outflows">
+                            <h4>🔴 Top Outflows (Distributing)</h4>
+                            <div class="flow-list" id="topOutflows">
+                                <div class="flow-item skeleton"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wallet Details Section -->
+                <div class="analytics-section">
+                    <h3><span>🔍</span> Wallet Details</h3>
+                    <div class="wallet-details-controls">
+                        <select id="walletExchangeSelect" class="analytics-select" onchange="showWalletDetails()">
+                            <option value="">Select an exchange...</option>
+                        </select>
+                    </div>
+                    <div class="wallet-details-table" id="walletDetailsTable" style="display: none;">
+                        <table class="holdings-table">
+                            <thead>
+                                <tr>
+                                    <th>Wallet Name</th>
+                                    <th>Address</th>
+                                    <th>Balance (XRP)</th>
+                                    <th>Historical</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="walletDetailsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Export Section -->
+                <div class="analytics-export">
+                    <button class="btn btn-export" onclick="exportAnalyticsCSV()">
+                        📥 Download CSV
+                    </button>
+                    <button class="btn btn-export" onclick="exportAnalyticsJSON()">
+                        📥 Download JSON
+                    </button>
+                    <span class="export-note">Export current exchange data with historical comparison</span>
+                </div>
             </div>
         </div>
 
@@ -3914,6 +4147,17 @@
                         renderExchangeCharts();
                     }, 100);
                 }
+            } else if (tabName === 'analytics') {
+                document.getElementById('analyticsTab').classList.add('active');
+                initAnalytics();
+                // Load exchange data if not already loaded
+                if (Object.keys(exchangeData).length === 0 && !isExchangeFetching) {
+                    fetchExchangeData().then(() => {
+                        setTimeout(() => updateAnalytics(), 500);
+                    });
+                } else if (Object.keys(exchangeData).length > 0) {
+                    setTimeout(() => updateAnalytics(), 100);
+                }
             } else if (tabName === 'news') {
                 document.getElementById('newsTab').classList.add('active');
             } else if (tabName === 'insights') {
@@ -5114,10 +5358,47 @@
 		}
         };
 
+        // Historical Balances - February 24, 2025 Benchmark
+        const HISTORICAL_BALANCES = {
+            "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": 500000022,
+            "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": 500000023,
+            "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": 980472688,
+            "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": 500000022,
+            "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": 500000022,
+            "rLgn612WAgRoZ285YmsQ4t7kb8Ui3csdoU": 500000022,
+            "rMNUAfSz2spLEbaBwPnGtxTzZCajJifnzH": 500000022,
+            "rNcAdhSLXBrJ3aZUq22HaNtNEPpB5fR8Ri": 500000070,
+            "raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA": 5380330,
+            "rfL1mn4VTCoHdhHhHMwqpShCFUaDBRk6Z5": 500000113,
+            "rs48xReB6gjKtTnTfii93iwUhjhTJsW78B": 500000022,
+            "rwa7YXssGVAL9yPKw6QJtCen2UqZbRQqpM": 500000111,
+            "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": 7375,
+            "rNU4eAowPuixS5ZCWaRL72UUeKgxcKExpK": 6152514,
+            "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": 268204,
+            "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": 109917943,
+            "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": 661827727,
+            "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": 4831865,
+            "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": 25860812,
+            "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": 265582363,
+            "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": 290523350,
+            "rJn2zAPdFA193sixJwuFixRkYDUtx3apQh": 4653377,
+            "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": 116576792,
+            "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": 147378587,
+            "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe": 57941994,
+            "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": 318277941
+        };
+        const HISTORICAL_DATE = "Feb 24, 2025";
+
         let exchangeData = {};
         let isExchangeFetching = false;
         let exchangeDataTimestamp = null;
         const EXCHANGE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
+        
+        // Analytics data
+        let analyticsData = {};
+        let analyticsChart = null;
+        let absoluteChangeChart = null;
+        let percentChangeChart = null;
 
         async function fetchSingleBalance(address) {
             for (const url of RIPPLED_URLS) {
@@ -7577,6 +7858,441 @@
                 🏦 <strong>ETFs</strong> - "ETF info" "Institutional holdings"<br>
                 🔮 <strong>Outlook</strong> - "Price prediction?" "Future?"<br><br>
                 <em>Ask me anything! 😊</em>`;
+        }
+
+        // =====================================================
+        // ANALYTICS TAB FUNCTIONS
+        // =====================================================
+        
+        function initAnalytics() {
+            // Populate exchange selector for wallet details
+            const select = document.getElementById('walletExchangeSelect');
+            if (select) {
+                select.innerHTML = '<option value="">Select an exchange...</option>';
+                Object.keys(EXCHANGES).sort().forEach(exchange => {
+                    const option = document.createElement('option');
+                    option.value = exchange;
+                    option.textContent = exchange.charAt(0).toUpperCase() + exchange.slice(1);
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        async function refreshAnalytics() {
+            if (Object.keys(exchangeData).length === 0) {
+                // Need to fetch exchange data first
+                updateStatus('loading', 'Loading exchange data...');
+                await fetchExchangeData(true);
+            }
+            updateAnalytics();
+        }
+        
+        function updateAnalytics() {
+            if (Object.keys(exchangeData).length === 0) {
+                return;
+            }
+            
+            // Build analytics data with historical comparison
+            analyticsData = {};
+            let totalXRP = 0;
+            
+            Object.entries(exchangeData).forEach(([name, data]) => {
+                const current = data.total || 0;
+                let historical = 0;
+                
+                // Calculate historical total for this exchange
+                if (EXCHANGES[name]) {
+                    Object.keys(EXCHANGES[name]).forEach(address => {
+                        if (HISTORICAL_BALANCES[address]) {
+                            historical += HISTORICAL_BALANCES[address];
+                        }
+                    });
+                }
+                
+                const change = historical > 0 ? current - historical : 0;
+                const changePct = historical > 0 ? ((current - historical) / historical) * 100 : 0;
+                
+                analyticsData[name] = {
+                    current: current,
+                    historical: historical,
+                    change: change,
+                    changePct: changePct,
+                    walletCount: data.walletCount || 0
+                };
+                
+                totalXRP += current;
+            });
+            
+            // Update summary cards
+            document.getElementById('analyticsTotalXRP').textContent = formatHoldingsNumber(totalXRP);
+            document.getElementById('analyticsExchangeCount').textContent = Object.keys(analyticsData).length;
+            
+            // Calculate top 3 dominance
+            const sorted = Object.entries(analyticsData).sort((a, b) => b[1].current - a[1].current);
+            const top3Total = sorted.slice(0, 3).reduce((sum, [_, data]) => sum + data.current, 0);
+            const top3Pct = totalXRP > 0 ? (top3Total / totalXRP) * 100 : 0;
+            document.getElementById('analyticsTop3').textContent = top3Pct.toFixed(1) + '%';
+            
+            // Calculate net flow
+            let netFlow = 0;
+            Object.values(analyticsData).forEach(data => {
+                if (data.historical > 0) {
+                    netFlow += data.change;
+                }
+            });
+            
+            const flowEl = document.getElementById('analyticsNetFlow');
+            const flowDirEl = document.getElementById('analyticsFlowDirection');
+            flowEl.textContent = (netFlow >= 0 ? '+' : '') + formatHoldingsNumber(netFlow);
+            flowEl.style.color = netFlow >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            flowDirEl.textContent = netFlow >= 0 ? '📈 Net Inflow (Accumulation)' : '📉 Net Outflow (Distribution)';
+            flowDirEl.className = 'analytics-subtext ' + (netFlow >= 0 ? 'positive' : 'negative');
+            
+            // Update charts and rankings
+            updateAnalyticsChart();
+            updateAnalyticsRankings(sorted, totalXRP);
+            updateChangeCharts(sorted);
+            updateFlowLists(sorted);
+        }
+        
+        function updateAnalyticsChart() {
+            const chartType = document.getElementById('analyticsChartType').value;
+            const topN = parseInt(document.getElementById('analyticsTopN').value);
+            
+            document.getElementById('analyticsChartTitle').textContent = `Top ${topN} Exchange Holdings`;
+            
+            const sorted = Object.entries(analyticsData)
+                .sort((a, b) => b[1].current - a[1].current)
+                .slice(0, topN);
+            
+            const labels = sorted.map(([name, _]) => name.charAt(0).toUpperCase() + name.slice(1));
+            const data = sorted.map(([_, d]) => d.current);
+            const colors = generateColors(topN);
+            
+            const ctx = document.getElementById('analyticsMainChart').getContext('2d');
+            
+            if (analyticsChart) {
+                analyticsChart.destroy();
+            }
+            
+            let chartConfig;
+            
+            if (chartType === 'bar') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'XRP Balance',
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: colors.map(c => c.replace('0.8', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => formatHoldingsNumber(ctx.raw) + ' XRP'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                };
+            } else if (chartType === 'horizontal') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'XRP Balance',
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                };
+            } else if (chartType === 'pie') {
+                chartConfig = {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#1e293b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { color: '#94a3b8' } }
+                        }
+                    }
+                };
+            } else if (chartType === 'treemap') {
+                // Treemap using nested rectangles (simplified version)
+                chartConfig = {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#1e293b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } }
+                    }
+                };
+            }
+            
+            analyticsChart = new Chart(ctx, chartConfig);
+        }
+        
+        function updateAnalyticsRankings(sorted, totalXRP) {
+            const container = document.getElementById('analyticsRankings');
+            container.innerHTML = '';
+            
+            sorted.slice(0, 10).forEach(([name, data], index) => {
+                const share = totalXRP > 0 ? (data.current / totalXRP) * 100 : 0;
+                const posClass = index === 0 ? 'gold' : (index === 1 ? 'silver' : (index === 2 ? 'bronze' : ''));
+                
+                container.innerHTML += `
+                    <div class="ranking-item">
+                        <div class="ranking-position ${posClass}">${index + 1}</div>
+                        <div class="ranking-info">
+                            <div class="ranking-name">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
+                            <div class="ranking-balance">${formatHoldingsNumber(data.current)} XRP</div>
+                        </div>
+                        <div class="ranking-share">${share.toFixed(1)}%</div>
+                    </div>
+                `;
+            });
+        }
+        
+        function updateChangeCharts(sorted) {
+            // Filter to only exchanges with historical data
+            const withHistory = sorted.filter(([_, d]) => d.historical > 0).slice(0, 10);
+            
+            const labels = withHistory.map(([name, _]) => name.charAt(0).toUpperCase() + name.slice(1));
+            const absChanges = withHistory.map(([_, d]) => d.change);
+            const pctChanges = withHistory.map(([_, d]) => d.changePct);
+            
+            // Absolute change chart
+            const absCtx = document.getElementById('absoluteChangeChart').getContext('2d');
+            if (absoluteChangeChart) absoluteChangeChart.destroy();
+            
+            absoluteChangeChart = new Chart(absCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: absChanges,
+                        backgroundColor: absChanges.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    }
+                }
+            });
+            
+            // Percentage change chart
+            const pctCtx = document.getElementById('percentChangeChart').getContext('2d');
+            if (percentChangeChart) percentChangeChart.destroy();
+            
+            percentChangeChart = new Chart(pctCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: pctChanges,
+                        backgroundColor: pctChanges.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { callback: (v) => v.toFixed(1) + '%', color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+        
+        function updateFlowLists(sorted) {
+            const withHistory = sorted.filter(([_, d]) => d.historical > 0);
+            
+            // Top inflows (positive change)
+            const inflows = withHistory.filter(([_, d]) => d.change > 0).sort((a, b) => b[1].change - a[1].change).slice(0, 5);
+            const inflowsContainer = document.getElementById('topInflows');
+            inflowsContainer.innerHTML = inflows.length === 0 
+                ? '<div class="flow-item"><span>No inflows detected</span></div>'
+                : inflows.map(([name, data]) => `
+                    <div class="flow-item">
+                        <span class="flow-item-name">${name.charAt(0).toUpperCase() + name.slice(1)}</span>
+                        <span class="flow-item-value positive">+${formatHoldingsNumber(data.change)} XRP</span>
+                    </div>
+                `).join('');
+            
+            // Top outflows (negative change)
+            const outflows = withHistory.filter(([_, d]) => d.change < 0).sort((a, b) => a[1].change - b[1].change).slice(0, 5);
+            const outflowsContainer = document.getElementById('topOutflows');
+            outflowsContainer.innerHTML = outflows.length === 0
+                ? '<div class="flow-item"><span>No outflows detected</span></div>'
+                : outflows.map(([name, data]) => `
+                    <div class="flow-item">
+                        <span class="flow-item-name">${name.charAt(0).toUpperCase() + name.slice(1)}</span>
+                        <span class="flow-item-value negative">${formatHoldingsNumber(data.change)} XRP</span>
+                    </div>
+                `).join('');
+        }
+        
+        function showWalletDetails() {
+            const exchange = document.getElementById('walletExchangeSelect').value;
+            const tableDiv = document.getElementById('walletDetailsTable');
+            const tbody = document.getElementById('walletDetailsBody');
+            
+            if (!exchange) {
+                tableDiv.style.display = 'none';
+                return;
+            }
+            
+            tableDiv.style.display = 'block';
+            tbody.innerHTML = '';
+            
+            const wallets = EXCHANGES[exchange] || {};
+            const exchangeInfo = exchangeData[exchange] || {};
+            
+            // We don't have individual wallet balances in current implementation
+            // Show wallet addresses with historical data if available
+            Object.entries(wallets).forEach(([address, name]) => {
+                const historical = HISTORICAL_BALANCES[address] || 0;
+                const change = historical > 0 ? 'Data needed' : 'N/A';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">${address.substring(0, 8)}...${address.substring(address.length - 6)}</td>
+                        <td>--</td>
+                        <td>${historical > 0 ? formatHoldingsNumber(historical) : 'N/A'}</td>
+                        <td>${change}</td>
+                    </tr>
+                `;
+            });
+        }
+        
+        function generateColors(count) {
+            const baseColors = [
+                'rgba(35, 247, 221, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(249, 115, 22, 0.8)',
+                'rgba(236, 72, 153, 0.8)',
+                'rgba(234, 179, 8, 0.8)',
+                'rgba(139, 92, 246, 0.8)',
+                'rgba(20, 184, 166, 0.8)',
+                'rgba(244, 63, 94, 0.8)'
+            ];
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(baseColors[i % baseColors.length]);
+            }
+            return colors;
+        }
+        
+        function exportAnalyticsCSV() {
+            if (Object.keys(analyticsData).length === 0) {
+                alert('No data to export. Please load exchange data first.');
+                return;
+            }
+            
+            let csv = 'Exchange,Current Balance (XRP),Historical Balance (XRP),Change (XRP),Change (%),Wallet Count\n';
+            
+            Object.entries(analyticsData)
+                .sort((a, b) => b[1].current - a[1].current)
+                .forEach(([name, data]) => {
+                    csv += `${name},${data.current},${data.historical},${data.change},${data.changePct.toFixed(2)},${data.walletCount}\n`;
+                });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `xrp_exchange_analytics_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportAnalyticsJSON() {
+            if (Object.keys(analyticsData).length === 0) {
+                alert('No data to export. Please load exchange data first.');
+                return;
+            }
+            
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                historicalBenchmark: HISTORICAL_DATE,
+                exchanges: analyticsData
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `xrp_exchange_analytics_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         // =====================================================
