@@ -1965,6 +1965,47 @@
         }
 
         /* Theme Toggle */
+        /* Header Buttons */
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .help-button {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .help-button:hover {
+            border-color: var(--accent-xrp);
+            color: var(--accent-xrp);
+            transform: translateY(-2px);
+        }
+
+        .header-theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-theme-toggle:hover {
+            border-color: var(--accent-xrp);
+        }
+
         .theme-toggle {
             position: fixed;
             bottom: 2rem;
@@ -2563,9 +2604,14 @@
                 <div class="dashboard-overview-title">
                     <span>📊</span> XRP Holdings - Exchange & SPOT ETFs
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
-                    🌓
-                </button>
+                <div class="header-buttons">
+                    <a href="help.html" class="help-button" title="How to Use This Dashboard">
+                        ❓ Help
+                    </a>
+                    <button class="header-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                        🌓
+                    </button>
+                </div>
             </div>
             <div class="dashboard-grid">
                 <div class="dashboard-metrics">
