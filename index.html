@@ -4631,27 +4631,31 @@
         
         // Refresh all dynamic content after language change
         function refreshDynamicContent() {
-            // Only refresh if data is loaded
-            if (currentXRPPrice > 0) {
-                // Refresh AI analysis
-                if (document.getElementById('aiSummary')) {
-                    generateAISummary();
+            // Only refresh if functions and data are available
+            try {
+                if (typeof currentXRPPrice !== 'undefined' && currentXRPPrice > 0) {
+                    // Refresh AI analysis
+                    if (typeof generateAISummary === 'function' && document.getElementById('aiSummary')) {
+                        generateAISummary();
+                    }
+                    
+                    // Refresh daily briefing
+                    if (typeof updateDailyBriefing === 'function' && document.getElementById('briefingContent')) {
+                        updateDailyBriefing();
+                    }
+                    
+                    // Refresh price scenarios
+                    if (typeof updatePriceScenarios === 'function' && document.getElementById('scenarioBullish')) {
+                        updatePriceScenarios();
+                    }
+                    
+                    // Refresh TA explanation
+                    if (typeof updateTAExplanation === 'function' && document.getElementById('taMainText')) {
+                        updateTAExplanation();
+                    }
                 }
-                
-                // Refresh daily briefing
-                if (document.getElementById('briefingContent')) {
-                    updateDailyBriefing();
-                }
-                
-                // Refresh price scenarios
-                if (document.getElementById('scenarioBullish')) {
-                    updatePriceScenarios();
-                }
-                
-                // Refresh TA explanation
-                if (document.getElementById('taMainText')) {
-                    updateTAExplanation();
-                }
+            } catch (e) {
+                console.log('Language refresh - dynamic content not ready yet:', e.message);
             }
         }
 
@@ -5121,7 +5125,8 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-             {
+	    
+            {
                 date: "1/8/2026",
                 canary: { xrp: 179897875.12, value: 392454590.39 },
                 bitwise: { xrp: 144083290.75, value: 305619390.52},
@@ -5133,21 +5138,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },  
-			{
-                date: "1/7/2026",
-                canary: { xrp: 179897875.12, value: 392454590.39 },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: null, value: null },
-                grayscale: { xrp: null, value: null },
-                shares21: { xrp: null, value: null },
-                rex: { xrp: null, value: null },
-                nciq: { xrp: null, value: null },
-                bitw: { xrp: null, value: null },
-                gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null }
-            },
-			{
+            },   
+            {
                 date: "1/7/2026",
                 canary: { xrp: 179474539.89, value: 404985914.53 },
                 bitwise: { xrp: 141956329.77, value: 309674894.28 },
@@ -8387,6 +8379,9 @@
         }
 
         function generateAISummary() {
+            // Safety check for required data
+            if (typeof insightsData === 'undefined') return;
+            
             const sentiment = insightsData.sentiment;
             const change24h = insightsData.priceChange24h;
             const change7d = insightsData.priceChange7d;
@@ -8524,6 +8519,9 @@
 
         // NEW: Daily Briefing Update
         function updateDailyBriefing() {
+            // Safety check for required data
+            if (typeof insightsData === 'undefined') return;
+            
             const price = currentXRPPrice || 0;
             const change24h = insightsData.priceChange24h || 0;
             const change7d = insightsData.priceChange7d || 0;
@@ -8582,6 +8580,9 @@
 
         // NEW: Price Scenarios Update
         function updatePriceScenarios() {
+            // Safety check for required data
+            if (typeof insightsData === 'undefined') return;
+            
             const price = currentXRPPrice || 2.0;
             const change7d = insightsData.priceChange7d || 0;
             const sentiment = insightsData.sentiment || 50;
@@ -8629,6 +8630,9 @@
 
         // NEW: Technical Analysis Explanation Update
         function updateTAExplanation() {
+            // Safety check for required data
+            if (typeof insightsData === 'undefined') return;
+            
             const price = currentXRPPrice || 0;
             const ma7 = insightsData.ma7 || 0;
             const ma30 = insightsData.ma30 || 0;
