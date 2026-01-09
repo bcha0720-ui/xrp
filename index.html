@@ -5125,7 +5125,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-           {
+            {
                 date: "1/8/2026",
                 canary: { xrp: 179897875.12, value: 392454590.39 },
                 bitwise: { xrp: 144083290.75, value: 305619390.52},
@@ -5137,8 +5137,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },  
-        	{
+            },   
+            {
                 date: "1/7/2026",
                 canary: { xrp: 179474539.89, value: 404985914.53 },
                 bitwise: { xrp: 141956329.77, value: 309674894.28 },
@@ -8379,7 +8379,10 @@
                 const response = await fetch(`${API_URL}/api/ai-insights`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ marketData })
+                    body: JSON.stringify({ 
+                        marketData,
+                        language: currentLanguage // Send language preference to API
+                    })
                 });
 
                 if (!response.ok) throw new Error('API request failed');
@@ -9405,7 +9408,8 @@
                 body: JSON.stringify({
                     question: question,
                     marketData: marketData,
-                    chatHistory: chatHistory.slice(-6) // Last 6 messages for context
+                    chatHistory: chatHistory.slice(-6), // Last 6 messages for context
+                    language: currentLanguage // Send language preference
                 })
             });
             

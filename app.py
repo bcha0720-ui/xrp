@@ -628,13 +628,25 @@ def get_ai_insights():
         if not data or 'marketData' not in data:
             return jsonify({'error': 'Market data required'}), 400
         market_data = data['marketData']
-        now = datetime.now()
-        if ai_cache['data'] and ai_cache['timestamp']:
-            age = (now - ai_cache['timestamp']).total_seconds()
-            if age < ai_cache['cache_duration']:
-                return jsonify({'success': True, 'analysis': ai_cache['data'], 'cached': True})
+        language = data.get('language', 'en')  # Get language preference
         
-        prompt = f"""Analyze this XRP market data and provide 4 paragraphs: Market Overview, Technical Analysis, Institutional Flow, Outlook.
+        now = datetime.now()
+        # Use language-specific cache key
+        cache_key = f"analysis_{language}"
+        if ai_cache.get(cache_key) and ai_cache.get(f'{cache_key}_timestamp'):
+            age = (now - ai_cache[f'{cache_key}_timestamp']).total_seconds()
+            if age < ai_cache['cache_duration']:
+                return jsonify({'success': True, 'analysis': ai_cache[cache_key], 'cached': True})
+        
+        # Language instruction
+        if language == 'ko':
+            lang_instruction = "한국어로 답변해 주세요. (Respond in Korean)"
+            section_names = "시장 개요, 기술적 분석, 기관 자금 흐름, 전망"
+        else:
+            lang_instruction = "Respond in English."
+            section_names = "Market Overview, Technical Analysis, Institutional Flow, Outlook"
+        
+        prompt = f"""Analyze this XRP market data and provide 4 paragraphs: {section_names}.
 Price: ${market_data.get('currentPrice', 0):.4f}
 24h Change: {market_data.get('priceChange24h', 0):.2f}%
 7d Change: {market_data.get('priceChange7d', 0):.2f}%
@@ -642,6 +654,8 @@ Price: ${market_data.get('currentPrice', 0):.4f}
 30-Day MA: ${market_data.get('ma30', 0):.4f}
 ETF Holdings: {market_data.get('etfHoldings', 0):,} XRP
 Sentiment: {market_data.get('sentimentScore', 50)}/100
+
+{lang_instruction}
 Be concise and professional."""
 
         message = anthropic_client.messages.create(
@@ -650,12 +664,15 @@ Be concise and professional."""
             messages=[{"role": "user", "content": prompt}]
         )
         analysis = message.content[0].text
-        ai_cache['data'] = analysis
-        ai_cache['timestamp'] = now
+        ai_cache[cache_key] = analysis
+        ai_cache[f'{cache_key}_timestamp'] = now
         return jsonify({'success': True, 'analysis': analysis, 'cached': False})
     except Exception as e:
-        if ai_cache['data']:
-            return jsonify({'success': True, 'analysis': ai_cache['data'], 'cached': True, 'stale': True})
+        # Try to return cached data for any language
+        for lang in ['en', 'ko']:
+            cache_key = f"analysis_{lang}"
+            if ai_cache.get(cache_key):
+                return jsonify({'success': True, 'analysis': ai_cache[cache_key], 'cached': True, 'stale': True})
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/chat', methods=['POST'])
@@ -667,9 +684,19 @@ def chat():
         question = data.get('question', '')
         market_data = data.get('marketData', {})
         chat_history = data.get('chatHistory', [])
+        language = data.get('language', 'en')  # Get language preference
+        
+        # Language-specific instructions
+        if language == 'ko':
+            lang_instruction = "한국어로 답변해 주세요. 친근하고 도움이 되게 답변하세요."
+            disclaimer = "투자 조언은 전문가와 상담하세요."
+        else:
+            lang_instruction = "Respond in English."
+            disclaimer = "Always consult a financial advisor for investment decisions."
         
         # Build context with market data
         context = f"""You are an XRP market assistant. Be helpful, concise, and friendly. Use emojis occasionally.
+{lang_instruction}
 
 Current XRP Market Data:
 - Price: ${market_data.get('currentPrice', 0):.4f}
@@ -687,7 +714,7 @@ Guidelines:
 - Keep responses under 150 words
 - Use bullet points for lists
 - Include specific numbers from the data
-- Add disclaimer for investment advice
+- {disclaimer}
 - Be conversational and helpful"""
 
         # Build messages with history
