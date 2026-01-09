@@ -429,6 +429,16 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100px); }
+        }
+
         .group-header {
             display: flex;
             justify-content: space-between;
@@ -3978,7 +3988,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-            {
+		 {
                 date: "1/8/2026",
                 canary: { xrp: 179897875.12, value: 392454590.39 },
                 bitwise: { xrp: 144083290.75, value: 305619390.52},
@@ -3990,8 +4000,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },
-			{
+            },	
+            {
                 date: "1/7/2026",
                 canary: { xrp: 179474539.89, value: 404985914.53 },
                 bitwise: { xrp: 141956329.77, value: 309674894.28 },
@@ -5789,6 +5799,7 @@
         const HISTORICAL_DATE = "Feb 24, 2025";
 
         let exchangeData = {};
+        let walletBalances = {}; // Store individual wallet balances
         let isExchangeFetching = false;
         let exchangeDataTimestamp = null;
         const EXCHANGE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
@@ -5913,6 +5924,7 @@
             `;
 
             exchangeData = {};
+            walletBalances = {}; // Store individual wallet balances
             let totalAddresses = 0;
             let fetchedAddresses = 0;
 
@@ -5926,6 +5938,7 @@
                 let exchangeTotal = 0;
                 let walletCount = 0;
                 let successCount = 0;
+                const walletData = {}; // Store individual wallet data for this exchange
 
                 for (const [address, walletName] of Object.entries(wallets)) {
                     const balance = await fetchSingleBalance(address);
@@ -5940,6 +5953,17 @@
                     if (balance !== null) {
                         exchangeTotal += balance;
                         successCount++;
+                        walletData[address] = {
+                            name: walletName,
+                            balance: balance
+                        };
+                        // Also store in global wallet balances
+                        walletBalances[address] = balance;
+                    } else {
+                        walletData[address] = {
+                            name: walletName,
+                            balance: null
+                        };
                     }
                     walletCount++;
                 }
@@ -5947,7 +5971,8 @@
                 exchangeData[exchangeName] = {
                     total: exchangeTotal,
                     walletCount: walletCount,
-                    successCount: successCount
+                    successCount: successCount,
+                    wallets: walletData // Store individual wallet data
                 };
             }
 
@@ -8649,20 +8674,47 @@
             
             const wallets = EXCHANGES[exchange] || {};
             const exchangeInfo = exchangeData[exchange] || {};
+            const walletData = exchangeInfo.wallets || {};
             
-            // We don't have individual wallet balances in current implementation
-            // Show wallet addresses with historical data if available
+            // Show wallet addresses with current and historical balances
             Object.entries(wallets).forEach(([address, name]) => {
+                // Get current balance from fetched data
+                const currentWallet = walletData[address];
+                const currentBalance = currentWallet ? currentWallet.balance : (walletBalances[address] || null);
+                
+                // Get historical balance
                 const historical = HISTORICAL_BALANCES[address] || 0;
-                const change = historical > 0 ? 'Data needed' : 'N/A';
+                
+                // Calculate change if we have both values
+                let changeDisplay = 'N/A';
+                let changeClass = '';
+                if (currentBalance !== null && historical > 0) {
+                    const change = currentBalance - historical;
+                    const changePct = (change / historical * 100).toFixed(2);
+                    if (change > 0) {
+                        changeDisplay = `+${formatHoldingsNumber(change)} (+${changePct}%)`;
+                        changeClass = 'style="color: var(--accent-green);"';
+                    } else if (change < 0) {
+                        changeDisplay = `${formatHoldingsNumber(change)} (${changePct}%)`;
+                        changeClass = 'style="color: var(--accent-red);"';
+                    } else {
+                        changeDisplay = '0 (0%)';
+                    }
+                } else if (currentBalance !== null && historical === 0) {
+                    changeDisplay = 'No historical data';
+                }
                 
                 tbody.innerHTML += `
                     <tr>
-                        <td>${name}</td>
-                        <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">${address.substring(0, 8)}...${address.substring(address.length - 6)}</td>
-                        <td>--</td>
+                        <td style="color: var(--accent-xrp);">${name}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">
+                            <a href="https://xrpscan.com/account/${address}" target="_blank" style="color: var(--text-secondary); text-decoration: none;">
+                                ${address.substring(0, 8)}...${address.substring(address.length - 6)}
+                            </a>
+                        </td>
+                        <td style="font-weight: 600;">${currentBalance !== null ? formatHoldingsNumber(currentBalance) : '—'}</td>
                         <td>${historical > 0 ? formatHoldingsNumber(historical) : 'N/A'}</td>
-                        <td>${change}</td>
+                        <td ${changeClass}>${changeDisplay}</td>
                     </tr>
                 `;
             });
@@ -9490,19 +9542,25 @@
                 }
             }, 3000);
             
+            // Auto pre-fetch Top 10K data in background after 5 seconds
+            setTimeout(() => {
+                if (whaleDataFull.length === 0 && !isWhaleFetching) {
+                    console.log('Pre-fetching Top 10K data in background...');
+                    fetchWhaleData();
+                }
+            }, 5000);
+            
             // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
                 updateDashboardOverview();
             }, 10000);
             
-            // Auto-refresh exchange data every hour
-            setInterval(() => {
-                if (!isExchangeFetching) {
-                    console.log('Auto-refreshing exchange data...');
-                    fetchExchangeData(true);
-                }
-            }, 60 * 60 * 1000); // 1 hour
+            // Schedule daily auto-refresh at 3 PM PST (23:00 UTC)
+            scheduleDaily3PMRefresh();
+            
+            // Also check every minute if it's time to refresh
+            setInterval(checkScheduledRefresh, 60000);
 
             // Show popup after 5 seconds if not recently closed
             if (shouldShowPopup()) {
@@ -9511,6 +9569,122 @@
                 }, 5000);
             }
         });
+        
+        // Schedule daily refresh at 3 PM PST
+        let lastScheduledRefresh = null;
+        
+        function scheduleDaily3PMRefresh() {
+            const now = new Date();
+            
+            // Calculate next 3 PM PST (UTC-8)
+            // 3 PM PST = 23:00 UTC (or 22:00 UTC during daylight saving)
+            const pstOffset = -8; // PST is UTC-8
+            const targetHourUTC = 15 - pstOffset; // 3 PM PST in UTC = 23:00
+            
+            let next3PM = new Date(now);
+            next3PM.setUTCHours(targetHourUTC, 0, 0, 0);
+            
+            // If we've passed 3 PM today, schedule for tomorrow
+            if (now > next3PM) {
+                next3PM.setDate(next3PM.getDate() + 1);
+            }
+            
+            const msUntil3PM = next3PM - now;
+            
+            console.log(`Next scheduled refresh at 3 PM PST: ${next3PM.toLocaleString()}`);
+            console.log(`Time until refresh: ${Math.round(msUntil3PM / 1000 / 60)} minutes`);
+            
+            // Schedule the refresh
+            setTimeout(() => {
+                performScheduledRefresh();
+                // Schedule next day's refresh
+                scheduleDaily3PMRefresh();
+            }, msUntil3PM);
+        }
+        
+        function checkScheduledRefresh() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            
+            // Check if it's around 3 PM local time (allow 1 minute window)
+            // This is a backup check in case the setTimeout drifts
+            const today = now.toDateString();
+            
+            // Convert 3 PM PST to local time
+            const pstOffset = -8;
+            const localOffset = -now.getTimezoneOffset() / 60;
+            const targetHourLocal = 15 + (localOffset - pstOffset);
+            
+            if (hour === Math.floor(targetHourLocal) && minute === 0 && lastScheduledRefresh !== today) {
+                console.log('Backup scheduled refresh triggered');
+                performScheduledRefresh();
+            }
+        }
+        
+        function performScheduledRefresh() {
+            const today = new Date().toDateString();
+            
+            // Prevent multiple refreshes on same day
+            if (lastScheduledRefresh === today) {
+                console.log('Already refreshed today, skipping');
+                return;
+            }
+            
+            lastScheduledRefresh = today;
+            
+            console.log('🔄 Performing scheduled 3 PM PST refresh...');
+            
+            // Show notification
+            showRefreshNotification();
+            
+            // Refresh exchange data
+            if (!isExchangeFetching) {
+                console.log('Refreshing exchange data...');
+                fetchExchangeData(true);
+            }
+            
+            // Refresh Top 10K data
+            if (!isWhaleFetching) {
+                console.log('Refreshing Top 10K data...');
+                fetchWhaleData(true);
+            }
+        }
+        
+        function showRefreshNotification() {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--bg-card);
+                border: 1px solid var(--accent-xrp);
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <span style="font-size: 1.5rem;">🔄</span>
+                <div>
+                    <div style="font-weight: 600; color: var(--text-primary);">Scheduled Refresh</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Updating Exchange & Top 10K data...</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
     </script>
 </body>
 </html>
