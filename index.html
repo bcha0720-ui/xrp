@@ -2604,50 +2604,6 @@
         .btn-generate-report:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(35, 247, 221, 0.4); }
         .btn-generate-report:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .report-status { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; }
-
-        /* ============================================
-           ON-CHAIN ANALYTICS STYLES
-           ============================================ */
-        .onchain-container { padding: 0; }
-        .onchain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .onchain-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .onchain-stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; transition: all 0.3s ease; }
-        .onchain-stat-card:hover { border-color: var(--accent-xrp); transform: translateY(-2px); }
-        .onchain-stat-card.escrow { border-left: 3px solid var(--accent-purple); }
-        .onchain-stat-card.network { border-left: 3px solid var(--accent-blue); }
-        .onchain-stat-card.odl { border-left: 3px solid var(--accent-green); }
-        .onchain-stat-card.dex { border-left: 3px solid var(--accent-orange); }
-        .onchain-stat-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-        .onchain-stat-icon { font-size: 1.25rem; }
-        .onchain-stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .onchain-stat-value { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent-xrp); margin-bottom: 0.25rem; }
-        .onchain-stat-subtitle { font-size: 0.8rem; color: var(--text-muted); }
-        .onchain-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .onchain-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .escrow-timeline { display: flex; flex-direction: column; gap: 1rem; }
-        .escrow-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; flex-wrap: wrap; }
-        .escrow-date { min-width: 100px; font-weight: 600; color: var(--accent-purple); }
-        .escrow-amount { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
-        .escrow-status { margin-left: auto; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-        .escrow-status.upcoming { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
-        .escrow-status.released { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
-        .odl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-        .odl-corridor { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--accent-green); }
-        .odl-corridor-icon { font-size: 1.5rem; }
-        .odl-corridor-info { flex: 1; }
-        .odl-corridor-name { font-weight: 600; color: var(--text-primary); }
-        .odl-corridor-pair { font-size: 0.85rem; color: var(--text-muted); }
-        .odl-corridor-status { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
-        .network-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
-        .network-item { text-align: center; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; }
-        .network-item-value { font-size: 1.25rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent-blue); margin-bottom: 0.25rem; }
-        .network-item-label { font-size: 0.75rem; color: var(--text-muted); }
-        .dex-pairs { display: flex; flex-direction: column; gap: 0.75rem; }
-        .dex-pair { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; flex-wrap: wrap; gap: 0.5rem; }
-        .dex-pair-name { font-weight: 600; color: var(--text-primary); }
-        .dex-pair-liquidity { font-family: 'JetBrains Mono', monospace; color: var(--accent-orange); }
-        .dex-pair-orders { font-size: 0.85rem; color: var(--text-muted); }
-        .onchain-loading { text-align: center; padding: 3rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -2810,10 +2766,6 @@
             <button class="main-tab" onclick="switchMainTab('news')">
                 <span class="main-tab-icon">📰</span>
                 News
-            </button>
-            <button class="main-tab" onclick="switchMainTab('onchain')">
-                <span class="main-tab-icon">⛓️</span>
-                On-Chain
             </button>
             <button class="main-tab" onclick="switchMainTab('insights')">
                 <span class="main-tab-icon">🤖</span>
@@ -3593,92 +3545,6 @@
 
                 <div class="news-load-more">
                     <button class="btn" onclick="loadMoreNews()">Load More News</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- On-Chain Analytics Tab Content -->
-        <div id="onchainTab" class="tab-content">
-            <div class="onchain-container">
-                <div class="onchain-header">
-                    <h2 class="section-title"><span>⛓️</span> On-Chain Analytics</h2>
-                    <button class="btn btn-refresh" onclick="fetchOnChainData()">🔄 Refresh Data</button>
-                </div>
-
-                <!-- Quick Stats Grid -->
-                <div class="onchain-stats-grid">
-                    <div class="onchain-stat-card escrow">
-                        <div class="onchain-stat-header">
-                            <span class="onchain-stat-icon">🔒</span>
-                            <span class="onchain-stat-title">Escrow Balance</span>
-                        </div>
-                        <div class="onchain-stat-value" id="escrowBalance">--</div>
-                        <div class="onchain-stat-subtitle" id="escrowReleasesLeft">-- releases remaining</div>
-                    </div>
-                    
-                    <div class="onchain-stat-card network">
-                        <div class="onchain-stat-header">
-                            <span class="onchain-stat-icon">🌐</span>
-                            <span class="onchain-stat-title">Ledger Index</span>
-                        </div>
-                        <div class="onchain-stat-value" id="ledgerIndex">--</div>
-                        <div class="onchain-stat-subtitle" id="networkState">--</div>
-                    </div>
-                    
-                    <div class="onchain-stat-card odl">
-                        <div class="onchain-stat-header">
-                            <span class="onchain-stat-icon">💱</span>
-                            <span class="onchain-stat-title">ODL Corridors</span>
-                        </div>
-                        <div class="onchain-stat-value" id="odlCorridors">6</div>
-                        <div class="onchain-stat-subtitle">Active corridors</div>
-                    </div>
-                    
-                    <div class="onchain-stat-card dex">
-                        <div class="onchain-stat-header">
-                            <span class="onchain-stat-icon">📊</span>
-                            <span class="onchain-stat-title">DEX Liquidity</span>
-                        </div>
-                        <div class="onchain-stat-value" id="dexLiquidity">--</div>
-                        <div class="onchain-stat-subtitle" id="dexOrders">-- active orders</div>
-                    </div>
-                </div>
-
-                <!-- Escrow Section -->
-                <div class="onchain-section">
-                    <h3><span>🔒</span> Ripple Escrow Schedule</h3>
-                    <div class="escrow-timeline" id="escrowTimeline">
-                        <div class="onchain-loading">Click "Refresh Data" to load escrow information</div>
-                    </div>
-                </div>
-
-                <!-- ODL Corridors Section -->
-                <div class="onchain-section">
-                    <h3><span>💱</span> ODL (On-Demand Liquidity) Corridors</h3>
-                    <div class="odl-grid" id="odlGrid">
-                        <div class="onchain-loading">Click "Refresh Data" to load ODL corridors</div>
-                    </div>
-                </div>
-
-                <!-- Network Stats Section -->
-                <div class="onchain-section">
-                    <h3><span>🌐</span> XRPL Network Statistics</h3>
-                    <div class="network-grid" id="networkGrid">
-                        <div class="onchain-loading">Click "Refresh Data" to load network stats</div>
-                    </div>
-                </div>
-
-                <!-- DEX Section -->
-                <div class="onchain-section">
-                    <h3><span>📊</span> XRPL DEX Activity</h3>
-                    <div class="dex-pairs" id="dexPairs">
-                        <div class="onchain-loading">Click "Refresh Data" to load DEX data</div>
-                    </div>
-                </div>
-
-                <div class="exchange-info-banner">
-                    <span>ℹ️</span>
-                    <span><strong>Live XRPL Data:</strong> Fetched directly from XRP Ledger nodes. Data refreshes every 5 minutes.</span>
                 </div>
             </div>
         </div>
@@ -5259,7 +5125,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	     {    
+		{    
                 date: "1/13/2026",
                 canary: { xrp: 181801494.5, value: 375660973.11},
                 bitwise: { xrp: 148896734.97, value: 317915374.71 },
@@ -5285,7 +5151,7 @@
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
             }, 
-			{   
+	    {    
                 date: "1/9/2026",
                 canary: { xrp: null, value: null },
                 bitwise: { xrp: null, value: null },
@@ -5852,12 +5718,6 @@
                 }
             } else if (tabName === 'news') {
                 document.getElementById('newsTab').classList.add('active');
-            } else if (tabName === 'onchain') {
-                document.getElementById('onchainTab').classList.add('active');
-                // Auto-load on-chain data if not already loaded
-                if (!onChainData.escrow) {
-                    fetchOnChainData();
-                }
             } else if (tabName === 'insights') {
                 document.getElementById('insightsTab').classList.add('active');
                 // Auto-fetch real data when visiting insights tab
@@ -11088,184 +10948,6 @@
                 notification.style.animation = 'slideOut 0.3s ease forwards';
                 setTimeout(() => notification.remove(), 300);
             }, 5000);
-        }
-
-        // ============================================
-        // ON-CHAIN ANALYTICS FUNCTIONS
-        // ============================================
-
-        let onChainData = {
-            escrow: null,
-            network: null,
-            odl: null,
-            dex: null
-        };
-
-        async function fetchOnChainData() {
-            const btn = document.querySelector('.onchain-header .btn-refresh');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '⏳ Loading...';
-            }
-
-            try {
-                const [escrowRes, networkRes, odlRes, dexRes] = await Promise.allSettled([
-                    fetch(`${API_URL}/api/onchain/escrow`),
-                    fetch(`${API_URL}/api/onchain/network`),
-                    fetch(`${API_URL}/api/onchain/odl`),
-                    fetch(`${API_URL}/api/onchain/dex`)
-                ]);
-
-                if (escrowRes.status === 'fulfilled') {
-                    const data = await escrowRes.value.json();
-                    if (data.success) {
-                        onChainData.escrow = data.data;
-                        renderEscrowData(data.data);
-                    }
-                }
-
-                if (networkRes.status === 'fulfilled') {
-                    const data = await networkRes.value.json();
-                    if (data.success) {
-                        onChainData.network = data.data;
-                        renderNetworkData(data.data);
-                    }
-                }
-
-                if (odlRes.status === 'fulfilled') {
-                    const data = await odlRes.value.json();
-                    if (data.success) {
-                        onChainData.odl = data.data;
-                        renderODLData(data.data);
-                    }
-                }
-
-                if (dexRes.status === 'fulfilled') {
-                    const data = await dexRes.value.json();
-                    if (data.success) {
-                        onChainData.dex = data.data;
-                        renderDEXData(data.data);
-                    }
-                }
-
-            } catch (error) {
-                console.error('On-chain data error:', error);
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = '🔄 Refresh Data';
-                }
-            }
-        }
-
-        function renderEscrowData(data) {
-            document.getElementById('escrowBalance').textContent = formatOnChainNumber(data.totalEscrow) + ' XRP';
-            document.getElementById('escrowReleasesLeft').textContent = `${data.releasesRemaining} monthly releases remaining`;
-
-            const timeline = document.getElementById('escrowTimeline');
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const now = new Date();
-            
-            let html = '';
-            for (let i = 0; i < 6; i++) {
-                const releaseDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
-                const monthName = months[releaseDate.getMonth()];
-                const year = releaseDate.getFullYear();
-                const isPast = releaseDate < now;
-                
-                html += `
-                    <div class="escrow-item">
-                        <div class="escrow-date">${monthName} ${year}</div>
-                        <div class="escrow-amount">1,000,000,000 XRP</div>
-                        <div class="escrow-status ${isPast ? 'released' : 'upcoming'}">
-                            ${isPast ? '✓ Released' : 'Upcoming'}
-                        </div>
-                    </div>
-                `;
-            }
-            timeline.innerHTML = html;
-        }
-
-        function renderNetworkData(data) {
-            document.getElementById('ledgerIndex').textContent = data.ledgerIndex.toLocaleString();
-            document.getElementById('networkState').textContent = `State: ${data.serverState}`;
-
-            const grid = document.getElementById('networkGrid');
-            grid.innerHTML = `
-                <div class="network-item">
-                    <div class="network-item-value">${data.ledgerIndex.toLocaleString()}</div>
-                    <div class="network-item-label">Ledger Index</div>
-                </div>
-                <div class="network-item">
-                    <div class="network-item-value">${data.reserveBase} XRP</div>
-                    <div class="network-item-label">Base Reserve</div>
-                </div>
-                <div class="network-item">
-                    <div class="network-item-value">${data.reserveInc} XRP</div>
-                    <div class="network-item-label">Owner Reserve</div>
-                </div>
-                <div class="network-item">
-                    <div class="network-item-value">${data.peerCount}</div>
-                    <div class="network-item-label">Connected Peers</div>
-                </div>
-                <div class="network-item">
-                    <div class="network-item-value">${formatUptime(data.uptime)}</div>
-                    <div class="network-item-label">Node Uptime</div>
-                </div>
-                <div class="network-item">
-                    <div class="network-item-value" style="color: var(--accent-green);">${data.serverState}</div>
-                    <div class="network-item-label">Server State</div>
-                </div>
-            `;
-        }
-
-        function renderODLData(data) {
-            document.getElementById('odlCorridors').textContent = data.corridors.length;
-
-            const grid = document.getElementById('odlGrid');
-            const flags = { 'Mexico': '🇲🇽', 'Philippines': '🇵🇭', 'Australia': '🇦🇺', 'Japan': '🇯🇵', 'Brazil': '🇧🇷', 'Europe': '🇪🇺' };
-
-            grid.innerHTML = data.corridors.map(corridor => {
-                const flag = Object.entries(flags).find(([k]) => corridor.name.includes(k))?.[1] || '🌍';
-                return `
-                    <div class="odl-corridor">
-                        <span class="odl-corridor-icon">${flag}</span>
-                        <div class="odl-corridor-info">
-                            <div class="odl-corridor-name">${corridor.name}</div>
-                            <div class="odl-corridor-pair">${corridor.pair} via ${corridor.exchange}</div>
-                        </div>
-                        <span class="odl-corridor-status">${corridor.status.toUpperCase()}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderDEXData(data) {
-            document.getElementById('dexLiquidity').textContent = formatOnChainNumber(data.xrpUsdLiquidity) + ' XRP';
-            document.getElementById('dexOrders').textContent = `${data.activeOrders} active orders`;
-
-            const pairs = document.getElementById('dexPairs');
-            pairs.innerHTML = data.pairs.map(pair => `
-                <div class="dex-pair">
-                    <div class="dex-pair-name">${pair.pair}</div>
-                    <div class="dex-pair-liquidity">${typeof pair.liquidity === 'number' ? formatOnChainNumber(pair.liquidity) + ' XRP' : pair.liquidity}</div>
-                    <div class="dex-pair-orders">${pair.orders} orders</div>
-                </div>
-            `).join('');
-        }
-
-        function formatOnChainNumber(num) {
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-            return num.toFixed(2);
-        }
-
-        function formatUptime(seconds) {
-            const days = Math.floor(seconds / 86400);
-            const hours = Math.floor((seconds % 86400) / 3600);
-            if (days > 0) return `${days}d ${hours}h`;
-            return `${hours}h`;
         }
     </script>
 </body>
