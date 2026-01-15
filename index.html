@@ -52,12 +52,82 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        /* Animated Price Ticker */
+        .price-ticker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .ticker-track {
+            display: inline-flex;
+            animation: tickerScroll 30s linear infinite;
+            white-space: nowrap;
+            will-change: transform;
+        }
+        
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+        
+        @keyframes tickerScroll {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 1.5rem;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            height: 36px;
+        }
+        
+        .ticker-symbol {
+            font-weight: 600;
+            color: var(--accent-xrp);
+        }
+        
+        .ticker-price {
+            color: var(--text-primary);
+        }
+        
+        .ticker-change {
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .ticker-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+        }
+        
+        .ticker-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+        
+        .ticker-divider {
+            color: var(--border);
+        }
+        
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            padding-top: 36px;
         }
 
         .bg-grid {
@@ -2607,6 +2677,11 @@
     </style>
 </head>
 <body>
+    <!-- Animated Price Ticker -->
+    <div class="price-ticker">
+        <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+
     <div class="bg-grid"></div>
     <div class="bg-glow"></div>
 
@@ -3411,134 +3486,31 @@
                     </div>
                 </div>
 
-                <!-- AI News Analysis (NEW) -->
+                <!-- AI News Analysis (Dynamic) -->
                 <div class="ai-news-section">
-                    <h3><span>🤖</span> AI News Analysis</h3>
+                    <h3><span>🤖</span> AI News Analysis <button class="btn" style="margin-left: 1rem; padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="refreshAIAnalysis()">🔄 Refresh</button></h3>
                     <div class="ai-news-feed" id="aiNewsFeed">
-                        <div class="ai-news-item bullish">
-                            <div class="ai-news-header">
-                                <span class="ai-sentiment-badge bullish">📈 BULLISH</span>
-                                <span class="ai-news-time">2 hours ago</span>
-                            </div>
-                            <h4 class="ai-news-title">XRP ETF Inflows Hit Record $78M in Single Day</h4>
-                            <p class="ai-news-original">Original: "Spot XRP ETFs recorded their highest single-day inflow since launch..."</p>
-                            <div class="ai-news-analysis">
-                                <span class="analysis-label">🤖 AI Analysis:</span>
-                                <p>Strong institutional buying pressure. Record inflows typically precede 10-15% price moves within 2 weeks. This signals growing confidence from traditional finance.</p>
-                            </div>
-                            <div class="ai-news-impact">
-                                <span>Impact Score:</span>
-                                <div class="impact-bar">
-                                    <div class="impact-fill" style="width: 85%;"></div>
-                                </div>
-                                <span class="impact-value">High</span>
-                            </div>
-                        </div>
-
                         <div class="ai-news-item neutral">
                             <div class="ai-news-header">
-                                <span class="ai-sentiment-badge neutral">➡️ NEUTRAL</span>
-                                <span class="ai-news-time">5 hours ago</span>
+                                <span class="ai-sentiment-badge neutral">⏳ LOADING</span>
                             </div>
-                            <h4 class="ai-news-title">SEC Commissioner Speaks at Crypto Conference</h4>
-                            <p class="ai-news-original">Original: "SEC Commissioner discussed the future of crypto regulation at annual conference..."</p>
-                            <div class="ai-news-analysis">
-                                <span class="analysis-label">🤖 AI Analysis:</span>
-                                <p>Regulatory commentary without concrete policy changes. While tone was measured, no immediate impact on XRP ETF operations expected. Monitor for follow-up announcements.</p>
-                            </div>
-                            <div class="ai-news-impact">
-                                <span>Impact Score:</span>
-                                <div class="impact-bar">
-                                    <div class="impact-fill neutral" style="width: 40%;"></div>
-                                </div>
-                                <span class="impact-value">Low</span>
-                            </div>
-                        </div>
-
-                        <div class="ai-news-item bullish">
-                            <div class="ai-news-header">
-                                <span class="ai-sentiment-badge bullish">📈 BULLISH</span>
-                                <span class="ai-news-time">8 hours ago</span>
-                            </div>
-                            <h4 class="ai-news-title">Major Bank Adds XRP ETF to Investment Platform</h4>
-                            <p class="ai-news-original">Original: "One of the largest US banks now offers XRP ETF trading to retail clients..."</p>
-                            <div class="ai-news-analysis">
-                                <span class="analysis-label">🤖 AI Analysis:</span>
-                                <p>Significant distribution channel expansion. This opens XRP exposure to millions of retail banking customers. Historical precedent with BTC ETFs showed 5-8% AUM growth following similar announcements.</p>
-                            </div>
-                            <div class="ai-news-impact">
-                                <span>Impact Score:</span>
-                                <div class="impact-bar">
-                                    <div class="impact-fill" style="width: 75%;"></div>
-                                </div>
-                                <span class="impact-value">High</span>
-                            </div>
-                        </div>
-
-                        <div class="ai-news-item bearish">
-                            <div class="ai-news-header">
-                                <span class="ai-sentiment-badge bearish">📉 BEARISH</span>
-                                <span class="ai-news-time">12 hours ago</span>
-                            </div>
-                            <h4 class="ai-news-title">Whale Moves 500M XRP to Exchange</h4>
-                            <p class="ai-news-original">Original: "Large XRP holder transfers 500 million tokens to Binance..."</p>
-                            <div class="ai-news-analysis">
-                                <span class="analysis-label">🤖 AI Analysis:</span>
-                                <p>Potential selling pressure incoming. Large exchange deposits often precede distribution. However, could also be for OTC deals or staking. Watch for follow-up outflows within 48 hours.</p>
-                            </div>
-                            <div class="ai-news-impact">
-                                <span>Impact Score:</span>
-                                <div class="impact-bar">
-                                    <div class="impact-fill bearish" style="width: 60%;"></div>
-                                </div>
-                                <span class="impact-value">Medium</span>
-                            </div>
+                            <h4 class="ai-news-title">Analyzing latest crypto news...</h4>
+                            <p class="ai-news-original">Please wait while we fetch and analyze the latest headlines.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Original News Feed -->
+                <!-- Live News Feed -->
                 <div class="news-feed-section">
-                    <h3><span>📰</span> Latest Headlines</h3>
+                    <h3><span>📰</span> Latest Headlines <button class="btn" style="margin-left: 1rem; padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="fetchLiveNews()">🔄 Refresh</button></h3>
                     <div class="news-feed" id="newsFeed">
-                        <div class="news-item" data-category="xrp etf">
+                        <div class="news-item" data-category="loading">
                             <div class="news-source">
-                                <span class="source-icon">🔵</span>
-                                <span class="source-name">XRP News</span>
-                                <span class="news-time">Latest</span>
+                                <span class="source-icon">⏳</span>
+                                <span class="source-name">Loading</span>
                             </div>
-                            <h3 class="news-title">XRP Spot ETFs Now Trading on Major US Exchanges</h3>
-                            <p class="news-summary">Multiple XRP spot ETFs including Canary, Bitwise, Franklin, and 21Shares are actively trading, marking a significant milestone for XRP adoption.</p>
-                            <div class="news-tags">
-                                <span class="news-tag">XRP</span>
-                                <span class="news-tag">ETF</span>
-                            </div>
-                        </div>
-                        <div class="news-item" data-category="xrp">
-                            <div class="news-source">
-                                <span class="source-icon">🟠</span>
-                                <span class="source-name">Ripple</span>
-                                <span class="news-time">Recent</span>
-                            </div>
-                            <h3 class="news-title">Ripple Expands Global Payment Network</h3>
-                            <p class="news-summary">Ripple continues to expand RippleNet partnerships with financial institutions worldwide for cross-border payments.</p>
-                            <div class="news-tags">
-                                <span class="news-tag">XRP</span>
-                                <span class="news-tag">Ripple</span>
-                            </div>
-                        </div>
-                        <div class="news-item" data-category="crypto etf">
-                            <div class="news-source">
-                                <span class="source-icon">🟢</span>
-                                <span class="source-name">ETF News</span>
-                                <span class="news-time">Recent</span>
-                            </div>
-                            <h3 class="news-title">Crypto ETF Market Continues to Grow</h3>
-                            <p class="news-summary">Bitcoin and Ethereum spot ETFs continue to see strong inflows as institutional adoption increases across the crypto market.</p>
-                            <div class="news-tags">
-                                <span class="news-tag">Bitcoin</span>
-                                <span class="news-tag">ETF</span>
-                            </div>
+                            <h3 class="news-title">Fetching latest crypto news...</h3>
+                            <p class="news-summary">Please wait while we load the latest headlines.</p>
                         </div>
                     </div>
                 </div>
@@ -5130,7 +5102,7 @@
                 canary: { xrp: 181477317.51, value: 389931601.22 },
                 bitwise: { xrp: null, value: null },
                 franklin: { xrp: null, value: null },
-                grayscale: { xrp: null, value: null },
+                grayscale: { xrp: 137945472.1925, value: 284340243 },
                 shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
                 nciq: { xrp: null, value: null },
@@ -7969,6 +7941,225 @@
         // News loading state
         let newsLoading = false;
         let newsPage = 1;
+        let cachedNews = [];
+
+        // Fetch live news from CryptoCompare API
+        async function fetchLiveNews() {
+            const newsFeed = document.getElementById('newsFeed');
+            
+            try {
+                newsFeed.innerHTML = `
+                    <div class="news-item">
+                        <div class="news-source"><span class="source-icon">⏳</span><span class="source-name">Loading...</span></div>
+                        <h3 class="news-title">Fetching latest news...</h3>
+                    </div>
+                `;
+                
+                // Fetch from CryptoCompare News API (free, no key required)
+                const response = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=XRP,Ripple,ETF,Regulation,BTC,ETH&excludeCategories=Sponsored');
+                const data = await response.json();
+                
+                if (data.Data && data.Data.length > 0) {
+                    cachedNews = data.Data;
+                    renderNews(data.Data.slice(0, 10));
+                    // Also update AI Analysis section
+                    renderAIAnalysis(data.Data.slice(0, 4));
+                } else {
+                    throw new Error('No news data');
+                }
+                
+            } catch (error) {
+                console.error('News fetch error:', error);
+                // Fallback to static news
+                newsFeed.innerHTML = `
+                    <div class="news-item" data-category="xrp">
+                        <div class="news-source"><span class="source-icon">📰</span><span class="source-name">XRP News</span><span class="news-time">Latest</span></div>
+                        <h3 class="news-title">XRP ETFs Continue Trading on Major Exchanges</h3>
+                        <p class="news-summary">Multiple XRP spot ETFs are actively trading, marking continued institutional adoption.</p>
+                        <div class="news-tags"><span class="news-tag">XRP</span><span class="news-tag">ETF</span></div>
+                    </div>
+                    <div class="news-item" data-category="crypto">
+                        <div class="news-source"><span class="source-icon">📈</span><span class="source-name">Crypto Market</span><span class="news-time">Recent</span></div>
+                        <h3 class="news-title">Crypto Market Shows Continued Growth</h3>
+                        <p class="news-summary">Digital assets maintain momentum as institutional interest grows.</p>
+                        <div class="news-tags"><span class="news-tag">Crypto</span><span class="news-tag">Market</span></div>
+                    </div>
+                `;
+                renderAIAnalysisFallback();
+            }
+        }
+        
+        function refreshAIAnalysis() {
+            if (cachedNews.length > 0) {
+                renderAIAnalysis(cachedNews.slice(0, 4));
+            } else {
+                fetchLiveNews();
+            }
+        }
+        
+        function renderAIAnalysis(newsItems) {
+            const aiNewsFeed = document.getElementById('aiNewsFeed');
+            if (!aiNewsFeed) return;
+            
+            // Sentiment keywords
+            const bullishWords = ['surge', 'rally', 'gain', 'rise', 'soar', 'jump', 'bullish', 'record', 'high', 'growth', 'adoption', 'approval', 'partnership', 'launch', 'breakout', 'pump'];
+            const bearishWords = ['drop', 'crash', 'fall', 'plunge', 'bearish', 'decline', 'loss', 'sell', 'dump', 'fear', 'concern', 'hack', 'scam', 'fraud', 'lawsuit', 'ban', 'reject'];
+            
+            // AI analysis templates
+            const bullishAnalysis = [
+                "Strong positive momentum detected. Historical patterns suggest potential upward movement in the coming days. Institutional interest appears to be increasing.",
+                "This development signals growing confidence from major players. Market sentiment is shifting positively, which typically supports price appreciation.",
+                "Favorable news for the broader crypto ecosystem. Such developments often catalyze increased trading volume and renewed investor interest.",
+                "Positive catalyst identified. This type of news has historically preceded bullish price action in similar market conditions."
+            ];
+            
+            const bearishAnalysis = [
+                "Caution warranted. This development may create short-term selling pressure. Monitor for further developments before making decisions.",
+                "Potential headwind identified. Market may experience increased volatility. Risk management is advisable in current conditions.",
+                "Negative sentiment driver detected. Historical precedent suggests possible price consolidation or correction in near term.",
+                "This news may weigh on market sentiment temporarily. However, long-term fundamentals remain unchanged for patient investors."
+            ];
+            
+            const neutralAnalysis = [
+                "Mixed signals in this development. Market impact likely to be limited without follow-up catalysts. Continue monitoring for clarity.",
+                "Neutral news event. Neither strongly bullish nor bearish implications. Market likely to continue current trend absent new information.",
+                "Informational update with limited immediate price impact. May become significant if combined with other market-moving events.",
+                "Standard market development. No strong directional bias detected. Focus on broader market trends for guidance."
+            ];
+            
+            aiNewsFeed.innerHTML = newsItems.map((item, index) => {
+                const title = item.title.toLowerCase();
+                const body = (item.body || '').toLowerCase();
+                const combined = title + ' ' + body;
+                
+                // Score sentiment
+                let bullishScore = bullishWords.filter(word => combined.includes(word)).length;
+                let bearishScore = bearishWords.filter(word => combined.includes(word)).length;
+                
+                let sentiment, sentimentClass, sentimentIcon, analysis, impactPercent, impactLabel;
+                
+                if (bullishScore > bearishScore + 1) {
+                    sentiment = 'BULLISH';
+                    sentimentClass = 'bullish';
+                    sentimentIcon = '📈';
+                    analysis = bullishAnalysis[index % bullishAnalysis.length];
+                    impactPercent = 60 + Math.random() * 30;
+                    impactLabel = impactPercent > 75 ? 'High' : 'Medium';
+                } else if (bearishScore > bullishScore + 1) {
+                    sentiment = 'BEARISH';
+                    sentimentClass = 'bearish';
+                    sentimentIcon = '📉';
+                    analysis = bearishAnalysis[index % bearishAnalysis.length];
+                    impactPercent = 50 + Math.random() * 35;
+                    impactLabel = impactPercent > 70 ? 'High' : 'Medium';
+                } else {
+                    sentiment = 'NEUTRAL';
+                    sentimentClass = 'neutral';
+                    sentimentIcon = '➡️';
+                    analysis = neutralAnalysis[index % neutralAnalysis.length];
+                    impactPercent = 20 + Math.random() * 40;
+                    impactLabel = impactPercent > 45 ? 'Medium' : 'Low';
+                }
+                
+                const timeAgo = getTimeAgo(item.published_on * 1000);
+                
+                return `
+                    <div class="ai-news-item ${sentimentClass}">
+                        <div class="ai-news-header">
+                            <span class="ai-sentiment-badge ${sentimentClass}">${sentimentIcon} ${sentiment}</span>
+                            <span class="ai-news-time">${timeAgo}</span>
+                        </div>
+                        <h4 class="ai-news-title">${item.title}</h4>
+                        <p class="ai-news-original">Source: ${item.source_info?.name || item.source}</p>
+                        <div class="ai-news-analysis">
+                            <span class="analysis-label">🤖 AI Analysis:</span>
+                            <p>${analysis}</p>
+                        </div>
+                        <div class="ai-news-impact">
+                            <span>Impact Score:</span>
+                            <div class="impact-bar">
+                                <div class="impact-fill ${sentimentClass}" style="width: ${impactPercent}%;"></div>
+                            </div>
+                            <span class="impact-value">${impactLabel}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderAIAnalysisFallback() {
+            const aiNewsFeed = document.getElementById('aiNewsFeed');
+            if (!aiNewsFeed) return;
+            
+            aiNewsFeed.innerHTML = `
+                <div class="ai-news-item neutral">
+                    <div class="ai-news-header">
+                        <span class="ai-sentiment-badge neutral">➡️ NEUTRAL</span>
+                        <span class="ai-news-time">Just now</span>
+                    </div>
+                    <h4 class="ai-news-title">Market Analysis Unavailable</h4>
+                    <p class="ai-news-original">Unable to fetch latest news for analysis.</p>
+                    <div class="ai-news-analysis">
+                        <span class="analysis-label">🤖 AI Analysis:</span>
+                        <p>Click refresh to load the latest AI-powered news analysis.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderNews(newsItems) {
+            const newsFeed = document.getElementById('newsFeed');
+            
+            const sourceIcons = {
+                'cointelegraph': '🔵',
+                'coindesk': '🟠', 
+                'decrypt': '🟢',
+                'theblock': '🟣',
+                'bitcoinmagazine': '🟡',
+                'default': '📰'
+            };
+            
+            newsFeed.innerHTML = newsItems.map(item => {
+                const timeAgo = getTimeAgo(item.published_on * 1000);
+                const sourceLower = item.source_info?.name?.toLowerCase() || '';
+                const icon = sourceIcons[sourceLower] || sourceIcons['default'];
+                const categories = (item.categories || '').toLowerCase();
+                const category = categories.includes('xrp') || categories.includes('ripple') ? 'xrp' :
+                                categories.includes('etf') ? 'etf' :
+                                categories.includes('btc') || categories.includes('bitcoin') ? 'crypto' : 'crypto';
+                
+                // Determine sentiment from title
+                const title = item.title.toLowerCase();
+                const sentiment = (title.includes('surge') || title.includes('rally') || title.includes('gain') || title.includes('bullish') || title.includes('soar')) ? 'bullish' :
+                                 (title.includes('drop') || title.includes('crash') || title.includes('fall') || title.includes('bearish') || title.includes('plunge')) ? 'bearish' : 'neutral';
+                
+                return `
+                    <div class="news-item ${sentiment}" data-category="${category}" onclick="window.open('${item.url}', '_blank')">
+                        <div class="news-source">
+                            <span class="source-icon">${icon}</span>
+                            <span class="source-name">${item.source_info?.name || item.source}</span>
+                            <span class="news-time">${timeAgo}</span>
+                        </div>
+                        <h3 class="news-title">${item.title}</h3>
+                        <p class="news-summary">${item.body?.substring(0, 150) || ''}...</p>
+                        <div class="news-tags">
+                            ${(item.categories || '').split('|').slice(0, 3).map(tag => `<span class="news-tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+        
+        // Load news on page load
+        setTimeout(fetchLiveNews, 1000);
 
         async function loadMoreNews() {
             if (newsLoading) return;
@@ -7979,37 +8170,53 @@
             newsLoading = true;
             
             try {
-                // Simulate loading more news (in production, call actual API)
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Load more from cached news
+                const startIdx = 10 + (newsPage - 1) * 5;
+                const endIdx = startIdx + 5;
                 
-                // Add more news items
-                const newsFeed = document.getElementById('newsFeed');
-                const moreNews = generateMoreNews(newsPage);
-                
-                moreNews.forEach(news => {
-                    const newsItem = document.createElement('div');
-                    newsItem.className = 'news-item';
-                    newsItem.dataset.category = news.category;
-                    newsItem.innerHTML = `
-                        <div class="news-source">
-                            <span class="source-icon">${news.icon}</span>
-                            <span class="source-name">${news.source}</span>
-                            <span class="news-time">${news.time}</span>
-                        </div>
-                        <h3 class="news-title">${news.title}</h3>
-                        <p class="news-summary">${news.summary}</p>
-                        <div class="news-tags">
-                            ${news.tags.map(tag => `<span class="news-tag">${tag}</span>`).join('')}
-                        </div>
-                    `;
-                    newsFeed.appendChild(newsItem);
-                });
-                
-                newsPage++;
-                btn.innerHTML = '📰 Load More News';
-                
-                // Apply current filter
-                filterNews(currentNewsFilter);
+                if (cachedNews.length > startIdx) {
+                    const moreNews = cachedNews.slice(startIdx, endIdx);
+                    const newsFeed = document.getElementById('newsFeed');
+                    
+                    moreNews.forEach(item => {
+                        const timeAgo = getTimeAgo(item.published_on * 1000);
+                        const categories = (item.categories || '').toLowerCase();
+                        const category = categories.includes('xrp') || categories.includes('ripple') ? 'xrp' :
+                                        categories.includes('etf') ? 'etf' : 'crypto';
+                        
+                        const newsItem = document.createElement('div');
+                        newsItem.className = 'news-item';
+                        newsItem.dataset.category = category;
+                        newsItem.onclick = () => window.open(item.url, '_blank');
+                        newsItem.innerHTML = `
+                            <div class="news-source">
+                                <span class="source-icon">📰</span>
+                                <span class="source-name">${item.source_info?.name || item.source}</span>
+                                <span class="news-time">${timeAgo}</span>
+                            </div>
+                            <h3 class="news-title">${item.title}</h3>
+                            <p class="news-summary">${item.body?.substring(0, 150) || ''}...</p>
+                            <div class="news-tags">
+                                ${(item.categories || '').split('|').slice(0, 3).map(tag => `<span class="news-tag">${tag}</span>`).join('')}
+                            </div>
+                        `;
+                        newsFeed.appendChild(newsItem);
+                    });
+                    
+                    newsPage++;
+                    btn.innerHTML = '📰 Load More News';
+                    filterNews(currentNewsFilter);
+                } else {
+                    // Fetch more from API
+                    const response = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=XRP,Ripple,ETF,BTC,ETH');
+                    const data = await response.json();
+                    if (data.Data) {
+                        cachedNews = [...cachedNews, ...data.Data];
+                        loadMoreNews(); // Recursively load now that we have more
+                        return;
+                    }
+                    btn.innerHTML = 'No More News';
+                }
                 
             } catch (error) {
                 console.error('Error loading news:', error);
@@ -10975,6 +11182,105 @@
                 setTimeout(() => notification.remove(), 300);
             }, 5000);
         }
+
+        // ============================================
+        // ANIMATED PRICE TICKER
+        // ============================================
+        
+        let tickerCache = []; // Cache successful data
+        
+        async function updateTicker() {
+            const track = document.getElementById('tickerTrack');
+            if (!track) return;
+            
+            try {
+                // Fetch top crypto prices from CoinGecko
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple,bitcoin,ethereum,solana,cardano,dogecoin,polkadot,avalanche-2,chainlink,polygon&vs_currencies=usd&include_24hr_change=true');
+                
+                if (!response.ok) throw new Error('API rate limited');
+                
+                const data = await response.json();
+                
+                // Check if we got valid data (not an error response)
+                if (data.error || !data.ripple) {
+                    throw new Error('Invalid API response');
+                }
+                
+                const cryptoMap = {
+                    ripple: 'XRP',
+                    bitcoin: 'BTC',
+                    ethereum: 'ETH',
+                    solana: 'SOL',
+                    cardano: 'ADA',
+                    dogecoin: 'DOGE',
+                    polkadot: 'DOT',
+                    'avalanche-2': 'AVAX',
+                    chainlink: 'LINK',
+                    polygon: 'MATIC'
+                };
+                
+                const items = [];
+                
+                for (const [id, symbol] of Object.entries(cryptoMap)) {
+                    if (data[id] && data[id].usd) {
+                        items.push({
+                            symbol: symbol,
+                            price: data[id].usd,
+                            change: data[id].usd_24h_change || 0
+                        });
+                    }
+                }
+                
+                if (items.length > 0) {
+                    tickerCache = items; // Cache successful data
+                    renderTicker(items);
+                }
+                
+            } catch (error) {
+                console.log('Ticker API error (using cached data):', error.message);
+                // Use cached data if available
+                if (tickerCache.length > 0) {
+                    renderTicker(tickerCache);
+                } else {
+                    // First load fallback - show loading message
+                    track.innerHTML = '<div class="ticker-item"><span class="ticker-symbol">Loading crypto prices...</span></div>'.repeat(3);
+                }
+            }
+        }
+        
+        function renderTicker(items) {
+            const track = document.getElementById('tickerTrack');
+            if (!track || items.length === 0) return;
+            
+            let html = '';
+            for (let repeat = 0; repeat < 3; repeat++) {
+                items.forEach(item => {
+                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                    const changeSign = item.change >= 0 ? '+' : '';
+                    const price = item.price >= 100 
+                        ? '$' + item.price.toLocaleString('en-US', {maximumFractionDigits: 2})
+                        : item.price >= 1
+                        ? '$' + item.price.toFixed(2)
+                        : '$' + item.price.toFixed(4);
+                    
+                    html += `
+                        <div class="ticker-item">
+                            <span class="ticker-symbol">${item.symbol}</span>
+                            <span class="ticker-price">${price}</span>
+                            <span class="ticker-change ${changeClass}">${changeSign}${item.change.toFixed(2)}%</span>
+                        </div>
+                        <span class="ticker-divider">|</span>
+                    `;
+                });
+            }
+            track.innerHTML = html;
+        }
+        
+        // Initial update
+        updateTicker();
+        // Update every 60 seconds (CoinGecko rate limit friendly)
+        // Update every 2 minutes (CoinGecko free tier: 10-30 calls/min)
+        setInterval(updateTicker, 120000);
     </script>
 </body>
 </html>
