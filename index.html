@@ -48,9 +48,40 @@
             --status-loading: #f97316;
             --status-success: #22c55e;
             --status-error: #ef4444;
+            
+            /* Glassmorphism */
+            --glass-bg: rgba(30, 41, 59, 0.6);
+            --glass-bg-light: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glass-blur: 12px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Glassmorphism Base Styles */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+        
+        .glass-light {
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+        }
+        
+        .glass-accent {
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid rgba(35, 247, 221, 0.2);
+            box-shadow: var(--glass-shadow), 0 0 40px rgba(35, 247, 221, 0.05);
+        }
         
         /* Animated Price Ticker */
         .price-ticker {
@@ -215,10 +246,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, var(--accent-xrp-dim), rgba(168, 85, 247, 0.1));
-            border: 1px solid var(--accent-xrp);
-            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.15), rgba(168, 85, 247, 0.1));
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid rgba(35, 247, 221, 0.4);
+            border-radius: 16px;
             padding: 0.75rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .xrp-price:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(35, 247, 221, 0.25);
         }
 
         .xrp-label {
@@ -481,13 +521,22 @@
         }
 
         .etf-group {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
             overflow: hidden;
             animation: fadeSlideIn 0.5s ease forwards;
             opacity: 0;
             transform: translateY(20px);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .etf-group:hover {
+            border-color: rgba(35, 247, 221, 0.2);
+            box-shadow: var(--glass-shadow), 0 0 30px rgba(35, 247, 221, 0.05);
         }
 
         .etf-group:nth-child(1) { animation-delay: 0.1s; }
@@ -514,8 +563,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 1.5rem;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            background: rgba(30, 41, 59, 0.5);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .group-title {
@@ -1170,22 +1219,26 @@
         }
 
         .summary-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
             padding: 1.25rem;
             text-align: center;
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: var(--glass-shadow);
         }
 
         .summary-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-xrp);
+            transform: translateY(-5px);
+            border-color: rgba(35, 247, 221, 0.3);
+            box-shadow: var(--glass-shadow), 0 0 20px rgba(35, 247, 221, 0.1);
         }
 
         .summary-card.highlight {
-            border-color: var(--accent-xrp);
-            background: linear-gradient(135deg, var(--bg-card), var(--accent-xrp-dim));
+            border-color: rgba(35, 247, 221, 0.4);
+            background: linear-gradient(135deg, var(--glass-bg), rgba(35, 247, 221, 0.15));
         }
 
         .summary-label {
@@ -2201,8 +2254,8 @@
         .calendar-header { margin-bottom: 1rem; }
         .calendar-header h3 { font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
         .calendar-events { display: flex; flex-direction: column; gap: 1rem; }
-        .calendar-event { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--accent-xrp); transition: transform 0.2s ease; }
-        .calendar-event:hover { transform: translateX(5px); }
+        .calendar-event { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); border-radius: 16px; border-left: 4px solid var(--accent-xrp); transition: all 0.3s ease; box-shadow: var(--glass-shadow); }
+        .calendar-event:hover { transform: translateX(5px); border-color: rgba(35, 247, 221, 0.3); }
         .event-date { display: flex; flex-direction: column; align-items: center; min-width: 50px; }
         .event-day { font-size: 1.5rem; font-weight: 700; color: var(--accent-xrp); }
         .event-month { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); }
@@ -2214,18 +2267,193 @@
         .tag-report { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
         .tag-market { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
 
-        .news-feed { display: flex; flex-direction: column; gap: 1rem; }
-        .news-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; transition: all 0.3s ease; cursor: pointer; }
-        .news-item:hover { border-color: var(--accent-xrp); transform: translateY(-3px); }
-        .news-source { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-        .source-icon { font-size: 1rem; }
-        .source-name { font-weight: 600; font-size: 0.85rem; }
-        .news-time { color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
-        .news-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.4; }
-        .news-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.75rem; }
-        .news-tags { display: flex; gap: 0.5rem; }
-        .news-tag { background: var(--accent-xrp-dim); color: var(--accent-xrp); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
-        .news-load-more { text-align: center; margin-top: 1.5rem; }
+        /* News Feed - Modern Card Redesign */
+        .news-feed { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 1.25rem; 
+        }
+        
+        .news-item { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(var(--glass-blur)); 
+            -webkit-backdrop-filter: blur(var(--glass-blur)); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 20px; 
+            overflow: hidden;
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .news-item:hover { 
+            border-color: rgba(35, 247, 221, 0.4); 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: var(--glass-shadow), 0 20px 40px rgba(35, 247, 221, 0.15); 
+        }
+        
+        .news-image {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .news-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+        }
+        
+        .news-image-icon {
+            font-size: 3rem;
+            z-index: 1;
+            filter: grayscale(20%);
+        }
+        
+        .news-sentiment-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+        
+        .news-sentiment-badge.bullish {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+        }
+        
+        .news-sentiment-badge.bearish {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+        }
+        
+        .news-sentiment-badge.neutral {
+            background: rgba(234, 179, 8, 0.9);
+            color: #1e293b;
+            box-shadow: 0 2px 10px rgba(234, 179, 8, 0.4);
+        }
+        
+        .news-source-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.3rem 0.7rem;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            z-index: 2;
+        }
+        
+        .news-body {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .news-source { display: none; }
+        
+        .news-title { 
+            font-size: 1rem; 
+            font-weight: 600; 
+            margin-bottom: 0.6rem; 
+            line-height: 1.4; 
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .news-summary { 
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            line-height: 1.5; 
+            margin-bottom: 1rem;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .news-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--glass-border);
+            margin-top: auto;
+        }
+        
+        .news-time-new { 
+            color: var(--text-muted); 
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .news-impact {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        .impact-dots {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .impact-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.2s ease;
+        }
+        
+        .impact-dot.active {
+            background: var(--accent-xrp);
+            box-shadow: 0 0 6px var(--accent-xrp);
+        }
+        
+        .impact-dot.high {
+            background: var(--accent-green);
+            box-shadow: 0 0 6px var(--accent-green);
+        }
+        
+        .impact-dot.medium {
+            background: var(--accent-orange);
+            box-shadow: 0 0 6px var(--accent-orange);
+        }
+        
+        .news-tags { display: none; }
+        .news-tag { display: none; }
+        .news-load-more { text-align: center; margin-top: 1.5rem; grid-column: 1 / -1; }
 
         /* ============================================
            PORTFOLIO TAB STYLES
@@ -2233,9 +2461,9 @@
         .portfolio-container { padding: 0; }
         .portfolio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
         .portfolio-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .portfolio-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; transition: all 0.3s ease; }
-        .portfolio-card:hover { transform: translateY(-3px); border-color: var(--accent-xrp); }
-        .portfolio-card.highlight { border-color: var(--accent-xrp); background: linear-gradient(135deg, var(--bg-card), var(--accent-xrp-dim)); }
+        .portfolio-card { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.25rem; text-align: center; transition: all 0.3s ease; box-shadow: var(--glass-shadow); }
+        .portfolio-card:hover { transform: translateY(-5px); border-color: rgba(35, 247, 221, 0.3); box-shadow: var(--glass-shadow), 0 0 20px rgba(35, 247, 221, 0.1); }
+        .portfolio-card.highlight { border-color: rgba(35, 247, 221, 0.4); background: linear-gradient(135deg, var(--glass-bg), rgba(35, 247, 221, 0.15)); }
         .portfolio-card-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
         .portfolio-card-value { font-size: 1.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
         .portfolio-card-change { font-size: 0.85rem; margin-top: 0.5rem; }
@@ -2407,7 +2635,7 @@
 
         /* Smart Insight Card */
         .smart-insight-section { margin-bottom: 1.5rem; }
-        .smart-insight-card { background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(239, 68, 68, 0.1)); border: 2px solid var(--accent-orange); border-radius: 16px; padding: 1.5rem; position: relative; overflow: hidden; }
+        .smart-insight-card { background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(239, 68, 68, 0.1)); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 2px solid var(--accent-orange); border-radius: 20px; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: var(--glass-shadow), 0 0 30px rgba(249, 115, 22, 0.1); }
         .smart-insight-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%); pointer-events: none; }
         .smart-insight-badge { display: inline-block; background: var(--accent-orange); color: white; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 1rem; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
@@ -2421,7 +2649,8 @@
         .ai-news-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
         .ai-news-section h3 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
         .ai-news-feed { display: flex; flex-direction: column; gap: 1rem; }
-        .ai-news-item { background: var(--bg-secondary); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--border); }
+        .ai-news-item { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.25rem; border-left: 4px solid var(--border); box-shadow: var(--glass-shadow); margin-bottom: 1rem; transition: all 0.3s ease; }
+        .ai-news-item:hover { transform: translateY(-3px); box-shadow: var(--glass-shadow), 0 0 15px rgba(35, 247, 221, 0.08); }
         .ai-news-item.bullish { border-left-color: var(--accent-green); }
         .ai-news-item.bearish { border-left-color: var(--accent-red); }
         .ai-news-item.neutral { border-left-color: var(--accent-orange); }
@@ -2608,8 +2837,8 @@
         .whale-main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 1.5rem; }
         @media (max-width: 1100px) { .whale-main-grid { grid-template-columns: 1fr; } }
         
-        .whale-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .whale-card-header { padding: 1rem 1.25rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .whale-card { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; box-shadow: var(--glass-shadow); }
+        .whale-card-header { padding: 1rem 1.25rem; background: rgba(30, 41, 59, 0.5); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
         .whale-card-header h3 { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .whale-badge { font-size: 0.7rem; padding: 0.25rem 0.75rem; background: rgba(35, 247, 221, 0.15); color: var(--accent-xrp); border-radius: 20px; font-weight: 600; }
         
@@ -8110,40 +8339,74 @@
         function renderNews(newsItems) {
             const newsFeed = document.getElementById('newsFeed');
             
-            const sourceIcons = {
-                'cointelegraph': '🔵',
-                'coindesk': '🟠', 
-                'decrypt': '🟢',
-                'theblock': '🟣',
-                'bitcoinmagazine': '🟡',
+            const categoryIcons = {
+                'xrp': '💎',
+                'ripple': '💎',
+                'etf': '📊',
+                'bitcoin': '₿',
+                'btc': '₿',
+                'ethereum': '⟠',
+                'eth': '⟠',
+                'regulation': '⚖️',
+                'defi': '🔗',
+                'nft': '🎨',
                 'default': '📰'
             };
             
             newsFeed.innerHTML = newsItems.map(item => {
                 const timeAgo = getTimeAgo(item.published_on * 1000);
-                const sourceLower = item.source_info?.name?.toLowerCase() || '';
-                const icon = sourceIcons[sourceLower] || sourceIcons['default'];
                 const categories = (item.categories || '').toLowerCase();
                 const category = categories.includes('xrp') || categories.includes('ripple') ? 'xrp' :
                                 categories.includes('etf') ? 'etf' :
                                 categories.includes('btc') || categories.includes('bitcoin') ? 'crypto' : 'crypto';
                 
+                // Get icon based on category
+                let icon = categoryIcons['default'];
+                for (const [key, value] of Object.entries(categoryIcons)) {
+                    if (categories.includes(key)) {
+                        icon = value;
+                        break;
+                    }
+                }
+                
                 // Determine sentiment from title
                 const title = item.title.toLowerCase();
-                const sentiment = (title.includes('surge') || title.includes('rally') || title.includes('gain') || title.includes('bullish') || title.includes('soar')) ? 'bullish' :
-                                 (title.includes('drop') || title.includes('crash') || title.includes('fall') || title.includes('bearish') || title.includes('plunge')) ? 'bearish' : 'neutral';
+                const bullishWords = ['surge', 'rally', 'gain', 'bullish', 'soar', 'jump', 'rise', 'record', 'high', 'growth', 'approval'];
+                const bearishWords = ['drop', 'crash', 'fall', 'bearish', 'plunge', 'decline', 'low', 'sell', 'dump', 'reject'];
+                
+                const bullishCount = bullishWords.filter(w => title.includes(w)).length;
+                const bearishCount = bearishWords.filter(w => title.includes(w)).length;
+                
+                const sentiment = bullishCount > bearishCount ? 'bullish' : 
+                                 bearishCount > bullishCount ? 'bearish' : 'neutral';
+                
+                const sentimentLabel = sentiment === 'bullish' ? '📈 Bullish' : 
+                                      sentiment === 'bearish' ? '📉 Bearish' : '➡️ Neutral';
+                
+                // Calculate impact (based on source reputation and recency)
+                const hoursAgo = (Date.now() - item.published_on * 1000) / 3600000;
+                const impactScore = Math.max(1, Math.min(3, Math.ceil(3 - hoursAgo / 8)));
                 
                 return `
                     <div class="news-item ${sentiment}" data-category="${category}" onclick="window.open('${item.url}', '_blank')">
-                        <div class="news-source">
-                            <span class="source-icon">${icon}</span>
-                            <span class="source-name">${item.source_info?.name || item.source}</span>
-                            <span class="news-time">${timeAgo}</span>
+                        <div class="news-image">
+                            <span class="news-image-icon">${icon}</span>
+                            <span class="news-sentiment-badge ${sentiment}">${sentimentLabel}</span>
+                            <span class="news-source-badge">${item.source_info?.name || item.source}</span>
                         </div>
-                        <h3 class="news-title">${item.title}</h3>
-                        <p class="news-summary">${item.body?.substring(0, 150) || ''}...</p>
-                        <div class="news-tags">
-                            ${(item.categories || '').split('|').slice(0, 3).map(tag => `<span class="news-tag">${tag}</span>`).join('')}
+                        <div class="news-body">
+                            <h3 class="news-title">${item.title}</h3>
+                            <p class="news-summary">${item.body?.substring(0, 120) || ''}...</p>
+                            <div class="news-footer">
+                                <span class="news-time-new">🕐 ${timeAgo}</span>
+                                <div class="news-impact">
+                                    <div class="impact-dots">
+                                        <span class="impact-dot ${impactScore >= 1 ? 'active' : ''} ${impactScore >= 3 ? 'high' : impactScore >= 2 ? 'medium' : ''}"></span>
+                                        <span class="impact-dot ${impactScore >= 2 ? 'active' : ''} ${impactScore >= 3 ? 'high' : impactScore >= 2 ? 'medium' : ''}"></span>
+                                        <span class="impact-dot ${impactScore >= 3 ? 'active high' : ''}"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -10373,13 +10636,19 @@
                 // Process burn data
                 if (burnResponse.ok) {
                     const burnInfo = await burnResponse.json();
-                    burnData = {
-                        currentSupply: burnInfo.current_supply,
-                        totalBurned: burnInfo.total_burned,
-                        burns: burnInfo.burns,
-                        ledgerIndex: burnInfo.ledger_index
-                    };
-                    console.log('Burn data loaded from API:', burnData);
+                    // Validate the data - current_supply should be ~99+ billion, not 0
+                    if (burnInfo.current_supply && burnInfo.current_supply > 99000000000) {
+                        burnData = {
+                            currentSupply: burnInfo.current_supply,
+                            totalBurned: burnInfo.total_burned,
+                            burns: burnInfo.burns,
+                            ledgerIndex: burnInfo.ledger_index
+                        };
+                        console.log('Burn data loaded from API:', burnData);
+                    } else {
+                        console.warn('Invalid burn data from API, using fallback');
+                        burnData = await fetchBurnDataFallback();
+                    }
                 } else {
                     // Fallback burn data
                     burnData = await fetchBurnDataFallback();
