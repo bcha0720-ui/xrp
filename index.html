@@ -5849,7 +5849,7 @@
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
             },
-			{    
+	    {    
                 date: "1/15/2026",
                 canary: { xrp: 181477317.51, value: 389931601.22 },
                 bitwise: { xrp: 152926509.81, value: 315589850.52 },
@@ -5861,7 +5861,7 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },			
+            },
             {    
                 date: "1/14/2026",
                 canary: { xrp: null, value: null},
@@ -12278,50 +12278,7 @@
         // ANIMATED PRICE TICKER
         // ============================================
         
-        let tickerCache = [
-            // Default fallback data
-            { symbol: 'XRP', price: 2.08, change: 0.5 },
-            { symbol: 'BTC', price: 104500, change: 1.2 },
-            { symbol: 'ETH', price: 3300, change: 0.8 },
-            { symbol: 'SOL', price: 185, change: 2.1 },
-            { symbol: 'ADA', price: 0.95, change: -0.3 },
-            { symbol: 'DOGE', price: 0.35, change: 1.5 },
-            { symbol: 'DOT', price: 7.20, change: 0.9 },
-            { symbol: 'AVAX', price: 38, change: 1.8 },
-            { symbol: 'LINK', price: 22, change: 0.6 },
-            { symbol: 'MATIC', price: 0.48, change: -0.2 }
-        ];
-        
-        function renderTicker(items) {
-            const track = document.getElementById('tickerTrack');
-            if (!track || items.length === 0) return;
-            
-            let html = '';
-            for (let repeat = 0; repeat < 3; repeat++) {
-                items.forEach(item => {
-                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
-                    const changeSign = item.change >= 0 ? '+' : '';
-                    const price = item.price >= 100 
-                        ? '$' + item.price.toLocaleString('en-US', {maximumFractionDigits: 2})
-                        : item.price >= 1
-                        ? '$' + item.price.toFixed(2)
-                        : '$' + item.price.toFixed(4);
-                    
-                    html += `
-                        <div class="ticker-item">
-                            <span class="ticker-symbol">${item.symbol}</span>
-                            <span class="ticker-price">${price}</span>
-                            <span class="ticker-change ${changeClass}">${changeSign}${item.change.toFixed(2)}%</span>
-                        </div>
-                        <span class="ticker-divider">|</span>
-                    `;
-                });
-            }
-            track.innerHTML = html;
-        }
-        
-        // Render ticker immediately with fallback
-        renderTicker(tickerCache);
+        let tickerCache = []; // Cache successful data
         
         async function updateTicker() {
             const track = document.getElementById('tickerTrack');
@@ -12372,12 +12329,46 @@
                 
             } catch (error) {
                 console.log('Ticker API error (using cached data):', error.message);
-                // Use cached data - already rendered on load
+                // Use cached data if available
+                if (tickerCache.length > 0) {
+                    renderTicker(tickerCache);
+                } else {
+                    // First load fallback - show loading message
+                    track.innerHTML = '<div class="ticker-item"><span class="ticker-symbol">Loading crypto prices...</span></div>'.repeat(3);
+                }
             }
         }
         
-        // Try to fetch live data after initial render
-        setTimeout(updateTicker, 2000);
+        function renderTicker(items) {
+            const track = document.getElementById('tickerTrack');
+            if (!track || items.length === 0) return;
+            
+            let html = '';
+            for (let repeat = 0; repeat < 3; repeat++) {
+                items.forEach(item => {
+                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                    const changeSign = item.change >= 0 ? '+' : '';
+                    const price = item.price >= 100 
+                        ? '$' + item.price.toLocaleString('en-US', {maximumFractionDigits: 2})
+                        : item.price >= 1
+                        ? '$' + item.price.toFixed(2)
+                        : '$' + item.price.toFixed(4);
+                    
+                    html += `
+                        <div class="ticker-item">
+                            <span class="ticker-symbol">${item.symbol}</span>
+                            <span class="ticker-price">${price}</span>
+                            <span class="ticker-change ${changeClass}">${changeSign}${item.change.toFixed(2)}%</span>
+                        </div>
+                        <span class="ticker-divider">|</span>
+                    `;
+                });
+            }
+            track.innerHTML = html;
+        }
+        
+        // Initial update
+        updateTicker();
         // Update every 2 minutes (CoinGecko free tier: 10-30 calls/min)
         setInterval(updateTicker, 120000);
 
