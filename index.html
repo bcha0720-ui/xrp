@@ -5836,8 +5836,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	
-   	    {
+	    {
                 date: "1/16/2026",
                 canary: { xrp: 181474831.52, value: 374525942.54 },
                 bitwise: { xrp: null, value: null },
@@ -5862,7 +5861,7 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },	
+            },			
             {    
                 date: "1/14/2026",
                 canary: { xrp: null, value: null},
@@ -12293,6 +12292,34 @@
             { symbol: 'MATIC', price: 0.48, change: -0.2 }
         ];
         
+        function renderTicker(items) {
+            const track = document.getElementById('tickerTrack');
+            if (!track || items.length === 0) return;
+            
+            let html = '';
+            for (let repeat = 0; repeat < 3; repeat++) {
+                items.forEach(item => {
+                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                    const changeSign = item.change >= 0 ? '+' : '';
+                    const price = item.price >= 100 
+                        ? '$' + item.price.toLocaleString('en-US', {maximumFractionDigits: 2})
+                        : item.price >= 1
+                        ? '$' + item.price.toFixed(2)
+                        : '$' + item.price.toFixed(4);
+                    
+                    html += `
+                        <div class="ticker-item">
+                            <span class="ticker-symbol">${item.symbol}</span>
+                            <span class="ticker-price">${price}</span>
+                            <span class="ticker-change ${changeClass}">${changeSign}${item.change.toFixed(2)}%</span>
+                        </div>
+                        <span class="ticker-divider">|</span>
+                    `;
+                });
+            }
+            track.innerHTML = html;
+        }
+        
         // Render ticker immediately with fallback
         renderTicker(tickerCache);
         
@@ -12347,34 +12374,6 @@
                 console.log('Ticker API error (using cached data):', error.message);
                 // Use cached data - already rendered on load
             }
-        }
-        
-        function renderTicker(items) {
-            const track = document.getElementById('tickerTrack');
-            if (!track || items.length === 0) return;
-            
-            let html = '';
-            for (let repeat = 0; repeat < 3; repeat++) {
-                items.forEach(item => {
-                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
-                    const changeSign = item.change >= 0 ? '+' : '';
-                    const price = item.price >= 100 
-                        ? '$' + item.price.toLocaleString('en-US', {maximumFractionDigits: 2})
-                        : item.price >= 1
-                        ? '$' + item.price.toFixed(2)
-                        : '$' + item.price.toFixed(4);
-                    
-                    html += `
-                        <div class="ticker-item">
-                            <span class="ticker-symbol">${item.symbol}</span>
-                            <span class="ticker-price">${price}</span>
-                            <span class="ticker-change ${changeClass}">${changeSign}${item.change.toFixed(2)}%</span>
-                        </div>
-                        <span class="ticker-divider">|</span>
-                    `;
-                });
-            }
-            track.innerHTML = html;
         }
         
         // Try to fetch live data after initial render
