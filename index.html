@@ -7742,13 +7742,47 @@
         let whaleDataFull = []; // Full 10K dataset
         let whaleData = []; // Currently displayed subset
         let isWhaleFetching = false;
+        let whaleDataTimestamp = null;
+        let lastWhaleManualRefresh = null;
         let whaleCount = 25; // Display count
         let whaleSortColumn = 'rank';
         let whaleSortAsc = true;
         let whaleDistributionChart = null;
         let burnData = null; // XRP burn tracking data
+        const WHALE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
+        const WHALE_REFRESH_COOLDOWN = 15 * 60 * 1000; // 15 min cooldown
         const RICH_LIST_API = 'https://api.xrpscan.com/api/v1/richlist';
         const LEDGER_API = 'https://api.xrpscan.com/api/v1/ledgers';
+        
+        // localStorage cache keys
+        const CACHE_KEYS = {
+            exchangeData: 'xrp_etf_exchange_data',
+            exchangeTimestamp: 'xrp_etf_exchange_timestamp',
+            exchangeLastRefresh: 'xrp_etf_exchange_last_refresh',
+            whaleData: 'xrp_etf_whale_data',
+            whaleTimestamp: 'xrp_etf_whale_timestamp',
+            whaleLastRefresh: 'xrp_etf_whale_last_refresh',
+            burnData: 'xrp_etf_burn_data'
+        };
+        
+        // localStorage helper functions
+        function saveToCache(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.warn('localStorage save failed:', e);
+            }
+        }
+        
+        function loadFromCache(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.warn('localStorage load failed:', e);
+                return null;
+            }
+        }
 
         // Known addresses for labeling
         const KNOWN_ADDRESSES = {
@@ -7806,6 +7840,22 @@
         }
 
         async function fetchExchangeData(forceRefresh = false) {
+            // Try to load from localStorage first
+            if (!exchangeDataTimestamp && !forceRefresh) {
+                const cachedData = loadFromCache(CACHE_KEYS.exchangeData);
+                const cachedTime = loadFromCache(CACHE_KEYS.exchangeTimestamp);
+                const cachedRefresh = loadFromCache(CACHE_KEYS.exchangeLastRefresh);
+                if (cachedData && cachedTime) {
+                    const cacheAge = Date.now() - cachedTime;
+                    if (cacheAge < EXCHANGE_CACHE_DURATION) {
+                        exchangeData = cachedData;
+                        exchangeDataTimestamp = cachedTime;
+                        lastManualRefresh = cachedRefresh;
+                        console.log('Loaded exchange data from localStorage');
+                    }
+                }
+            }
+            
             // Check manual refresh cooldown
             if (forceRefresh && lastManualRefresh) {
                 const cooldownRemaining = MANUAL_REFRESH_COOLDOWN - (Date.now() - lastManualRefresh);
@@ -7833,6 +7883,7 @@
                         : `${remainingMins}m`;
                     document.getElementById('exchangeStatus').innerHTML = 
                         `<span style="color: var(--accent-green);">● Cached (${displayTime})</span>`;
+                    updateDashboardOverview();
                     return;
                 }
             }
@@ -7924,12 +7975,18 @@
             exchangeDataTimestamp = Date.now();
             lastManualRefresh = Date.now();
             
+            // Save to localStorage for persistence
+            saveToCache(CACHE_KEYS.exchangeData, exchangeData);
+            saveToCache(CACHE_KEYS.exchangeTimestamp, exchangeDataTimestamp);
+            saveToCache(CACHE_KEYS.exchangeLastRefresh, lastManualRefresh);
+            console.log('Exchange data saved to localStorage');
+            
             // Calculate next refresh time
             const nextRefreshMins = Math.ceil(MANUAL_REFRESH_COOLDOWN / 60000);
             
             btn.disabled = false;
             btn.textContent = '🔄 Refresh Data';
-            statusEl.innerHTML = `<span style="color: var(--accent-green);">● Live</span> <span style="color: var(--text-muted); font-size: 0.75rem;">(next refresh in ${nextRefreshMins}m)</span>`;
+            statusEl.innerHTML = `<span style="color: var(--accent-green);">● Live</span> <span style="color: var(--text-muted); font-size: 0.75rem;">(cached for 1h)</span>`;
             isExchangeFetching = false;
             
             // Update global status and dashboard
@@ -11185,10 +11242,40 @@
         async function fetchWhaleData(forceRefresh = false) {
             if (isWhaleFetching) return;
             
+            // Try to load from localStorage first
+            if (!whaleDataTimestamp && !forceRefresh) {
+                const cachedData = loadFromCache(CACHE_KEYS.whaleData);
+                const cachedTime = loadFromCache(CACHE_KEYS.whaleTimestamp);
+                const cachedRefresh = loadFromCache(CACHE_KEYS.whaleLastRefresh);
+                const cachedBurn = loadFromCache(CACHE_KEYS.burnData);
+                if (cachedData && cachedTime) {
+                    const cacheAge = Date.now() - cachedTime;
+                    if (cacheAge < WHALE_CACHE_DURATION) {
+                        whaleDataFull = cachedData;
+                        whaleDataTimestamp = cachedTime;
+                        lastWhaleManualRefresh = cachedRefresh;
+                        if (cachedBurn) burnData = cachedBurn;
+                        console.log('Loaded whale data from localStorage');
+                    }
+                }
+            }
+            
+            // Check manual refresh cooldown
+            if (forceRefresh && lastWhaleManualRefresh) {
+                const cooldownRemaining = WHALE_REFRESH_COOLDOWN - (Date.now() - lastWhaleManualRefresh);
+                if (cooldownRemaining > 0) {
+                    const mins = Math.ceil(cooldownRemaining / 60000);
+                    showToast(`Please wait ${mins} minutes before refreshing Top 10K data`, 'warning');
+                    return;
+                }
+            }
+            
             // Use cached data if available and not forcing refresh
             if (!forceRefresh && whaleDataFull.length > 0) {
                 whaleData = whaleDataFull.slice(0, whaleCount);
                 renderWhaleTable();
+                updateWhaleStats();
+                if (burnData) updateBurnDisplay();
                 return;
             }
             
@@ -11275,6 +11362,15 @@
                 // Set display subset
                 whaleData = whaleDataFull.slice(0, whaleCount);
                 
+                // Save to localStorage
+                whaleDataTimestamp = Date.now();
+                lastWhaleManualRefresh = Date.now();
+                saveToCache(CACHE_KEYS.whaleData, whaleDataFull);
+                saveToCache(CACHE_KEYS.whaleTimestamp, whaleDataTimestamp);
+                saveToCache(CACHE_KEYS.whaleLastRefresh, lastWhaleManualRefresh);
+                saveToCache(CACHE_KEYS.burnData, burnData);
+                console.log('Whale data saved to localStorage');
+                
                 renderWhaleTable();
                 updateWhaleStats();
                 renderWhaleCharts();
@@ -11289,6 +11385,15 @@
                     whaleDataFull = await fetchRichListFallback();
                     burnData = await fetchBurnDataFallback();
                     whaleData = whaleDataFull.slice(0, whaleCount);
+                    
+                    // Save fallback to localStorage too
+                    whaleDataTimestamp = Date.now();
+                    lastWhaleManualRefresh = Date.now();
+                    saveToCache(CACHE_KEYS.whaleData, whaleDataFull);
+                    saveToCache(CACHE_KEYS.whaleTimestamp, whaleDataTimestamp);
+                    saveToCache(CACHE_KEYS.whaleLastRefresh, lastWhaleManualRefresh);
+                    saveToCache(CACHE_KEYS.burnData, burnData);
+                    
                     renderWhaleTable();
                     updateWhaleStats();
                     renderWhaleCharts();
