@@ -1,3 +1,77 @@
+        emailEnabled: emailEnabled,
+        hasApiKey: !!process.env.ANTHROPIC_API_KEY
+    });
+});
+
+// =====================================================
+// PROMPT BUILDER
+// =====================================================
+
+function buildInsightPrompt(data) {
+    const {
+        currentPrice = 0, priceChange24h = 0, priceChange7d = 0, priceChange30d = 0,
+        volume24h = 0, ma7 = 0, ma30 = 0, ma90 = 0,
+        etfHoldings = 0, exchangeHoldings = 0, etfVolume = 0, sentimentScore = 50
+    } = data;
+
+    return `You are an expert XRP market analyst. Analyze this data and provide professional insights.
+
+## CURRENT XRP MARKET DATA
+- Current Price: $${currentPrice.toFixed(4)}
+- 24h Change: ${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%
+- 7-Day Change: ${priceChange7d >= 0 ? '+' : ''}${priceChange7d.toFixed(2)}%
+- 30-Day Change: ${priceChange30d >= 0 ? '+' : ''}${priceChange30d.toFixed(2)}%
+- 7-Day MA: $${ma7.toFixed(4)} (Price is ${currentPrice > ma7 ? 'Above' : 'Below'})
+- 30-Day MA: $${ma30.toFixed(4)} (Price is ${currentPrice > ma30 ? 'Above' : 'Below'})
+- 90-Day MA: ${ma90 > 0 ? '$' + ma90.toFixed(4) : 'N/A'}
+- ETF Holdings: ${formatLargeNumber(etfHoldings)} XRP
+- Exchange Holdings: ${formatLargeNumber(exchangeHoldings)} XRP
+- Sentiment: ${sentimentScore}/100
+
+Provide 4 paragraphs: Market Overview, Technical Analysis, Institutional Flow, Outlook.
+Be concise, use specific numbers, no bullet points.`;
+}
+
+function formatLargeNumber(num) {
+    if (!num || num === 0) return '0';
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+    return num.toLocaleString();
+}
+
+// =====================================================
+// START SERVER
+// =====================================================
+
+app.listen(PORT, () => {
+    console.log('=========================================');
+    console.log(`🚀 XRP ETF Tracker API running on port ${PORT}`);
+    console.log('=========================================');
+    console.log('Endpoints:');
+    console.log('  GET  /api/etf-data');
+    console.log('  GET  /api/historical');
+    console.log('  POST /api/ai-insights');
+    console.log('  POST /api/chat');
+    console.log('  GET  /api/onchain/escrow');
+    console.log('  GET  /api/onchain/network');
+    console.log('  GET  /api/onchain/odl');
+    console.log('  GET  /api/onchain/dex');
+    console.log('  GET  /api/x-post          (preview X post)');
+    console.log('  POST /api/send-email      (manual trigger)');
+    console.log('  GET  /api/email-status    (check schedule)');
+    console.log('=========================================');
+    console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log('=========================================');
+    
+    // Start email scheduler
+    scheduleEmails();
+});
+briancha@X Downloads % clear
+
+briancha@X Downloads % more server.js
 // =====================================================
 // XRP ETF Tracker - Complete Backend Server
 // Includes: ETF Data API + Claude AI Insights + On-Chain + Chat + Email Reports
@@ -859,6 +933,80 @@ app.listen(PORT, () => {
     console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
     console.log('=========================================');
     
+    // Start email scheduler
+    scheduleEmails();
+});
+briancha@X Downloads % vi server.js  
+
+        aiEnabled: !!anthropic,
+        emailEnabled: emailEnabled,
+        hasApiKey: !!process.env.ANTHROPIC_API_KEY
+    });
+});
+
+// =====================================================
+// PROMPT BUILDER
+// =====================================================
+
+function buildInsightPrompt(data) {
+    const {
+        currentPrice = 0, priceChange24h = 0, priceChange7d = 0, priceChange30d = 0,
+        volume24h = 0, ma7 = 0, ma30 = 0, ma90 = 0,
+        etfHoldings = 0, exchangeHoldings = 0, etfVolume = 0, sentimentScore = 50
+    } = data;
+
+    return `You are an expert XRP market analyst. Analyze this data and provide professional insights.
+
+## CURRENT XRP MARKET DATA
+- Current Price: $${currentPrice.toFixed(4)}
+- 24h Change: ${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%
+- 7-Day Change: ${priceChange7d >= 0 ? '+' : ''}${priceChange7d.toFixed(2)}%
+- 30-Day Change: ${priceChange30d >= 0 ? '+' : ''}${priceChange30d.toFixed(2)}%
+- 7-Day MA: $${ma7.toFixed(4)} (Price is ${currentPrice > ma7 ? 'Above' : 'Below'})
+- 30-Day MA: $${ma30.toFixed(4)} (Price is ${currentPrice > ma30 ? 'Above' : 'Below'})
+- 90-Day MA: ${ma90 > 0 ? '$' + ma90.toFixed(4) : 'N/A'}
+- ETF Holdings: ${formatLargeNumber(etfHoldings)} XRP
+- Exchange Holdings: ${formatLargeNumber(exchangeHoldings)} XRP
+- Sentiment: ${sentimentScore}/100
+
+Provide 4 paragraphs: Market Overview, Technical Analysis, Institutional Flow, Outlook.
+Be concise, use specific numbers, no bullet points.`;
+}
+
+function formatLargeNumber(num) {
+    if (!num || num === 0) return '0';
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+    return num.toLocaleString();
+}
+
+// =====================================================
+// START SERVER
+// =====================================================
+
+app.listen(PORT, () => {
+    console.log('=========================================');
+    console.log(`🚀 XRP ETF Tracker API running on port ${PORT}`);
+    console.log('=========================================');
+    console.log('Endpoints:');
+    console.log('  GET  /api/etf-data');
+    console.log('  GET  /api/historical');
+    console.log('  POST /api/ai-insights');
+    console.log('  POST /api/chat');
+    console.log('  GET  /api/onchain/escrow');
+    console.log('  GET  /api/onchain/network');
+    console.log('  GET  /api/onchain/odl');
+    console.log('  GET  /api/onchain/dex');
+    console.log('  GET  /api/x-post          (preview X post)');
+    console.log('  POST /api/send-email      (manual trigger)');
+    console.log('  GET  /api/email-status    (check schedule)');
+    console.log('=========================================');
+    console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log('=========================================');
+
     // Start email scheduler
     scheduleEmails();
 });
