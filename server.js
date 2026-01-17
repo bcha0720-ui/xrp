@@ -82,10 +82,12 @@ function findRelevantDocs(query, topK = 3) {
 // =====================================================
 
 const ETF_SYMBOLS = {
-    'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
-    'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
-    'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
+    'XRP Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
+    'XRP Leveraged ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
+    'XRP Canadian ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO'],
+    'Bitcoin Spot ETFs': ['IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB', 'HODL', 'BRRR', 'EZBC', 'BTCW', 'BTCO'],
+    'Ethereum Spot ETFs': ['ETHA', 'FETH', 'ETHE', 'ETHW', 'CETH', 'ETHV', 'QETH', 'EZET'],
+    'Crypto Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
 
 const DESCRIPTIONS = {
@@ -857,6 +859,239 @@ app.get('/api/ai-insights/health', (req, res) => {
 });
 
 // =====================================================
+// SENTIMENT METER - Live Market Sentiment Analysis
+// =====================================================
+
+// Cache for sentiment data
+let sentimentCache = { data: null, timestamp: 0 };
+const SENTIMENT_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
+
+// Exchange wallet addresses for tracking
+const EXCHANGE_WALLETS = {
+    'Binance': 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh',
+    'Uphold': 'rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh',
+    'Bitso': 'rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS',
+    'Kraken': 'raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN',
+    'Bitstamp': 'rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G'
+};
+
+async function fetchExchangeBalance(address) {
+    try {
+        const response = await fetch('https://s1.ripple.com:51234/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                method: 'account_info',
+                params: [{ account: address, ledger_index: 'validated' }]
+            })
+        });
+        const data = await response.json();
+        if (data.result?.account_data?.Balance) {
+            return parseInt(data.result.account_data.Balance) / 1000000;
+        }
+        return 0;
+    } catch (error) {
+        return 0;
+    }
+}
+
+async function fetchXRPMarketData() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/ripple?localization=false&tickers=false&community_data=false&developer_data=false');
+        const data = await response.json();
+        return {
+            price: data.market_data?.current_price?.usd || 0,
+            change24h: data.market_data?.price_change_percentage_24h || 0,
+            change7d: data.market_data?.price_change_percentage_7d || 0,
+            change30d: data.market_data?.price_change_percentage_30d || 0,
+            volume24h: data.market_data?.total_volume?.usd || 0,
+            marketCap: data.market_data?.market_cap?.usd || 0
+        };
+    } catch (error) {
+        console.error('Market data fetch error:', error.message);
+        return null;
+    }
+}
+
+async function calculateSentiment() {
+    try {
+        console.log('Calculating sentiment...');
+        
+        // Fetch market data
+        const marketData = await fetchXRPMarketData();
+        if (!marketData) {
+            return { score: 50, label: 'Neutral', signals: ['Unable to fetch market data'] };
+        }
+        
+        // Fetch ETF data
+        const etfData = await fetchAllETFData();
+        
+        // Fetch exchange balances
+        let totalExchangeBalance = 0;
+        const exchangeBalances = {};
+        for (const [name, address] of Object.entries(EXCHANGE_WALLETS)) {
+            const balance = await fetchExchangeBalance(address);
+            exchangeBalances[name] = balance;
+            totalExchangeBalance += balance;
+        }
+        
+        // Calculate sentiment signals
+        const signals = [];
+        let score = 50; // Start neutral
+        
+        // 1. Price Momentum (24h) - Weight: 20 points
+        if (marketData.change24h > 5) {
+            score += 15;
+            signals.push({ factor: '24h Price', impact: 'bullish', detail: `+${marketData.change24h.toFixed(2)}% (Strong momentum)` });
+        } else if (marketData.change24h > 2) {
+            score += 10;
+            signals.push({ factor: '24h Price', impact: 'bullish', detail: `+${marketData.change24h.toFixed(2)}% (Positive)` });
+        } else if (marketData.change24h > 0) {
+            score += 5;
+            signals.push({ factor: '24h Price', impact: 'slightly_bullish', detail: `+${marketData.change24h.toFixed(2)}%` });
+        } else if (marketData.change24h > -2) {
+            score -= 5;
+            signals.push({ factor: '24h Price', impact: 'slightly_bearish', detail: `${marketData.change24h.toFixed(2)}%` });
+        } else if (marketData.change24h > -5) {
+            score -= 10;
+            signals.push({ factor: '24h Price', impact: 'bearish', detail: `${marketData.change24h.toFixed(2)}% (Negative)` });
+        } else {
+            score -= 15;
+            signals.push({ factor: '24h Price', impact: 'bearish', detail: `${marketData.change24h.toFixed(2)}% (Strong decline)` });
+        }
+        
+        // 2. Weekly Trend (7d) - Weight: 15 points
+        if (marketData.change7d > 10) {
+            score += 12;
+            signals.push({ factor: '7d Trend', impact: 'bullish', detail: `+${marketData.change7d.toFixed(2)}% (Strong uptrend)` });
+        } else if (marketData.change7d > 0) {
+            score += 6;
+            signals.push({ factor: '7d Trend', impact: 'slightly_bullish', detail: `+${marketData.change7d.toFixed(2)}%` });
+        } else if (marketData.change7d > -10) {
+            score -= 6;
+            signals.push({ factor: '7d Trend', impact: 'slightly_bearish', detail: `${marketData.change7d.toFixed(2)}%` });
+        } else {
+            score -= 12;
+            signals.push({ factor: '7d Trend', impact: 'bearish', detail: `${marketData.change7d.toFixed(2)}% (Downtrend)` });
+        }
+        
+        // 3. Monthly Trend (30d) - Weight: 10 points
+        if (marketData.change30d > 20) {
+            score += 8;
+            signals.push({ factor: '30d Trend', impact: 'bullish', detail: `+${marketData.change30d.toFixed(2)}% (Strong rally)` });
+        } else if (marketData.change30d > 0) {
+            score += 4;
+            signals.push({ factor: '30d Trend', impact: 'slightly_bullish', detail: `+${marketData.change30d.toFixed(2)}%` });
+        } else {
+            score -= 4;
+            signals.push({ factor: '30d Trend', impact: 'slightly_bearish', detail: `${marketData.change30d.toFixed(2)}%` });
+        }
+        
+        // 4. ETF Volume Analysis - Weight: 15 points
+        let totalETFVolume = 0;
+        const spotETFs = etfData['Spot ETFs'] || [];
+        spotETFs.forEach(etf => {
+            totalETFVolume += etf.daily?.dollars || 0;
+        });
+        
+        if (totalETFVolume > 50000000) { // > $50M
+            score += 12;
+            signals.push({ factor: 'ETF Volume', impact: 'bullish', detail: `$${formatLargeNumber(totalETFVolume)} (High institutional interest)` });
+        } else if (totalETFVolume > 20000000) { // > $20M
+            score += 6;
+            signals.push({ factor: 'ETF Volume', impact: 'slightly_bullish', detail: `$${formatLargeNumber(totalETFVolume)} (Moderate activity)` });
+        } else if (totalETFVolume > 5000000) { // > $5M
+            score += 2;
+            signals.push({ factor: 'ETF Volume', impact: 'neutral', detail: `$${formatLargeNumber(totalETFVolume)} (Normal activity)` });
+        } else {
+            score -= 3;
+            signals.push({ factor: 'ETF Volume', impact: 'slightly_bearish', detail: `$${formatLargeNumber(totalETFVolume)} (Low activity)` });
+        }
+        
+        // 5. Exchange Holdings Analysis - Weight: 10 points
+        // Lower exchange holdings = bullish (coins moving to cold storage)
+        // This is a simplified heuristic - in production you'd compare to historical data
+        const exchangeHoldingsBillions = totalExchangeBalance / 1e9;
+        if (exchangeHoldingsBillions < 10) {
+            score += 8;
+            signals.push({ factor: 'Exchange Holdings', impact: 'bullish', detail: `${exchangeHoldingsBillions.toFixed(2)}B XRP (Low - accumulation signal)` });
+        } else if (exchangeHoldingsBillions < 15) {
+            score += 3;
+            signals.push({ factor: 'Exchange Holdings', impact: 'slightly_bullish', detail: `${exchangeHoldingsBillions.toFixed(2)}B XRP (Moderate)` });
+        } else {
+            score -= 3;
+            signals.push({ factor: 'Exchange Holdings', impact: 'slightly_bearish', detail: `${exchangeHoldingsBillions.toFixed(2)}B XRP (High - potential sell pressure)` });
+        }
+        
+        // Clamp score between 0 and 100
+        score = Math.max(0, Math.min(100, score));
+        
+        // Determine label
+        let label, color;
+        if (score >= 70) {
+            label = 'Bullish';
+            color = '#22c55e'; // green
+        } else if (score >= 55) {
+            label = 'Slightly Bullish';
+            color = '#84cc16'; // lime
+        } else if (score >= 45) {
+            label = 'Neutral';
+            color = '#eab308'; // yellow
+        } else if (score >= 30) {
+            label = 'Slightly Bearish';
+            color = '#f97316'; // orange
+        } else {
+            label = 'Bearish';
+            color = '#ef4444'; // red
+        }
+        
+        return {
+            score: Math.round(score),
+            label,
+            color,
+            signals,
+            marketData: {
+                price: marketData.price,
+                change24h: marketData.change24h,
+                change7d: marketData.change7d,
+                change30d: marketData.change30d,
+                volume24h: marketData.volume24h
+            },
+            etfVolume: totalETFVolume,
+            exchangeHoldings: totalExchangeBalance,
+            timestamp: new Date().toISOString()
+        };
+    } catch (error) {
+        console.error('Sentiment calculation error:', error);
+        return { score: 50, label: 'Neutral', error: error.message };
+    }
+}
+
+// Sentiment API Endpoint
+app.get('/api/sentiment', async (req, res) => {
+    try {
+        const forceRefresh = req.query.refresh === 'true';
+        
+        // Check cache
+        if (!forceRefresh && sentimentCache.data && 
+            Date.now() - sentimentCache.timestamp < SENTIMENT_CACHE_DURATION) {
+            return res.json({ ...sentimentCache.data, cached: true });
+        }
+        
+        // Calculate fresh sentiment
+        const sentiment = await calculateSentiment();
+        
+        // Update cache
+        sentimentCache = { data: sentiment, timestamp: Date.now() };
+        
+        res.json({ ...sentiment, cached: false });
+    } catch (error) {
+        console.error('Sentiment API error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// =====================================================
 // PROMPT BUILDER
 // =====================================================
 
@@ -907,6 +1142,7 @@ app.listen(PORT, () => {
     console.log('  GET  /api/historical');
     console.log('  POST /api/ai-insights');
     console.log('  POST /api/chat');
+    console.log('  GET  /api/sentiment         (live sentiment meter)');
     console.log('  GET  /api/onchain/escrow');
     console.log('  GET  /api/onchain/network');
     console.log('  GET  /api/onchain/odl');

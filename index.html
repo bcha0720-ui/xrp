@@ -3349,6 +3349,167 @@
         .btn-generate-report:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(35, 247, 221, 0.4); }
         .btn-generate-report:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .report-status { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; }
+
+        /* ========== SENTIMENT METER STYLES ========== */
+        .sentiment-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border: 1px solid rgba(35, 247, 221, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .sentiment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .sentiment-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sentiment-refresh {
+            background: rgba(35, 247, 221, 0.1);
+            border: 1px solid rgba(35, 247, 221, 0.3);
+            color: #23f7dd;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .sentiment-refresh:hover {
+            background: rgba(35, 247, 221, 0.2);
+        }
+        .sentiment-refresh:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .sentiment-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .sentiment-gauge {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            margin-bottom: 16px;
+        }
+        .sentiment-gauge-bg {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            border-radius: 100px 100px 0 0;
+            background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #eab308 50%, #84cc16 75%, #22c55e 100%);
+            overflow: hidden;
+        }
+        .sentiment-gauge-mask {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            width: 160px;
+            height: 80px;
+            background: #0f172a;
+            border-radius: 80px 80px 0 0;
+        }
+        .sentiment-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 70px;
+            background: #f8fafc;
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 1s ease-out;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        .sentiment-needle::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #f8fafc;
+            border-radius: 50%;
+        }
+        .sentiment-score {
+            font-size: 48px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+        .sentiment-label {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+        .sentiment-signals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .signal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            border-left: 3px solid;
+        }
+        .signal-item.bullish { border-color: #22c55e; }
+        .signal-item.slightly_bullish { border-color: #84cc16; }
+        .signal-item.neutral { border-color: #eab308; }
+        .signal-item.slightly_bearish { border-color: #f97316; }
+        .signal-item.bearish { border-color: #ef4444; }
+        .signal-factor {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .signal-detail {
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: right;
+        }
+        .sentiment-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .sentiment-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        .sentiment-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(35, 247, 221, 0.2);
+            border-top-color: #23f7dd;
+            border-radius: 50%;
+            animation: sentimentSpin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes sentimentSpin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -3780,6 +3941,25 @@
         <!-- Analytics Tab Content -->
         <div id="analyticsTab" class="tab-content">
             <div class="analytics-container">
+                <!-- ========== SENTIMENT METER ========== -->
+                <div class="sentiment-card" id="sentimentMeter">
+                    <div class="sentiment-header">
+                        <div class="sentiment-title">
+                            📊 Live Market Sentiment
+                        </div>
+                        <button class="sentiment-refresh" onclick="refreshSentiment()" id="sentimentRefreshBtn">
+                            ↻ Refresh
+                        </button>
+                    </div>
+                    <div id="sentimentContent">
+                        <div class="sentiment-loading">
+                            <div class="spinner"></div>
+                            <div>Analyzing market sentiment...</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ========== END SENTIMENT METER ========== -->
+
                 <div class="analytics-header">
                     <h2 class="section-title"><span>📊</span> Exchange Analytics</h2>
                     <div class="analytics-controls">
@@ -8313,7 +8493,7 @@
             }
 
             try {
-                const response = await fetch('https://xrp-gtve.onrender.com/api/etf-data');
+                const response = await fetch(`${API_URL}/api/etf-data`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
@@ -12578,97 +12758,133 @@
         setTimeout(fetchXRPLData, 1500);
         // Refresh every 15 seconds for near real-time data
         setInterval(fetchXRPLData, 15000);
-    </script>
-</body>
-</html 
-// ==========================================
-// CORE CONFIGURATION
-// ==========================================
-const API_BASE_URL = 'https://xrp-gtve.onrender.com'; // Your Render URL
-let cachedData = null;
 
-// The IDs here MUST match the keys in server.js
-const GROUP_CONFIG = [
-    { id: 'Spot ETFs', title: 'Spot ETFs', icon: '💎', color: 'spot' },
-    { id: 'Futures ETFs', title: 'Futures ETFs', icon: '📈', color: 'futures' },
-    { id: 'Index ETFs', title: 'Index ETFs', icon: '📊', color: 'index' },
-    { id: 'Canada ETFs', title: 'Canada ETFs', icon: '🍁', color: 'canada' }
-];
+        // ========== SENTIMENT METER FUNCTIONS ==========
+        let sentimentData = null;
 
-// ==========================================
-// DATA FETCHING (The "Matching" Part)
-// ==========================================
-async function fetchData(isAutoRefresh = false) {
-    console.log("Fetching from:", `${API_BASE_URL}/api/etf-data`);
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/etf-data`);
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        
-        const result = await response.json();
-        
-        // result.data contains the keys from server.js
-        if (result.data) {
-            cachedData = result.data;
-            renderETFData(result.data);
-            
-            // Update the top price ticker if data exists
-            if (result.data['Spot ETFs'] && result.data['Spot ETFs'].length > 0) {
-                const price = result.data['Spot ETFs'][0].price;
-                document.getElementById('xrp-price').textContent = `$${price.toFixed(4)}`;
+        async function fetchSentiment(forceRefresh = false) {
+            try {
+                const url = `${API_URL}/api/sentiment${forceRefresh ? '?refresh=true' : ''}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sentiment');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Sentiment fetch error:', error);
+                return null;
             }
         }
-    } catch (error) {
-        console.error("Connection Failed:", error);
-        showErrorUI();
-    }
-}
 
-// ==========================================
-// RENDERING TABLES
-// ==========================================
-function renderETFData(data) {
-    const container = document.getElementById('etf-groups-container');
-    if (!container) return;
-    container.innerHTML = '';
+        function formatSentimentNumber(num) {
+            if (!num || num === 0) return '0';
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
 
-    GROUP_CONFIG.forEach(group => {
-        const items = data[group.id] || []; // This is where the match happens
+        function renderSentiment(data) {
+            const contentEl = document.getElementById('sentimentContent');
+            if (!contentEl) return;
+            
+            if (!data || data.error) {
+                contentEl.innerHTML = `
+                    <div class="sentiment-loading">
+                        <div style="font-size: 32px; margin-bottom: 16px;">⚠️</div>
+                        <div>Unable to calculate sentiment</div>
+                        <div style="font-size: 12px; margin-top: 8px;">${data?.error || 'Try again later'}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Calculate needle rotation (-90 = 0, 0 = 50, 90 = 100)
+            const rotation = (data.score / 100) * 180 - 90;
+            
+            // Render signals
+            let signalsHtml = '';
+            if (data.signals && data.signals.length > 0) {
+                data.signals.forEach(signal => {
+                    signalsHtml += `
+                        <div class="signal-item ${signal.impact}">
+                            <span class="signal-factor">${signal.factor}</span>
+                            <span class="signal-detail">${signal.detail}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            contentEl.innerHTML = `
+                <div class="sentiment-gauge-container">
+                    <div class="sentiment-gauge">
+                        <div class="sentiment-gauge-bg"></div>
+                        <div class="sentiment-gauge-mask"></div>
+                        <div class="sentiment-needle" style="transform: translateX(-50%) rotate(${rotation}deg);"></div>
+                    </div>
+                    <div class="sentiment-score">${data.score}</div>
+                    <div class="sentiment-label" style="background: ${data.color}20; color: ${data.color};">
+                        ${data.label}
+                    </div>
+                </div>
+                
+                <div class="sentiment-signals">
+                    ${signalsHtml}
+                </div>
+                
+                <div class="sentiment-footer">
+                    <span>XRP: $${data.marketData?.price?.toFixed(4) || '—'} | ETF Vol: $${formatSentimentNumber(data.etfVolume)} | Exchange: ${formatSentimentNumber(data.exchangeHoldings)} XRP</span>
+                    <span>${data.cached ? '● Cached' : '● Live'} • ${new Date(data.timestamp).toLocaleTimeString()}</span>
+                </div>
+            `;
+            
+            sentimentData = data;
+        }
+
+        async function refreshSentiment() {
+            const btn = document.getElementById('sentimentRefreshBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '↻ Loading...';
+            }
+            
+            const contentEl = document.getElementById('sentimentContent');
+            if (contentEl) {
+                contentEl.innerHTML = `
+                    <div class="sentiment-loading">
+                        <div class="spinner"></div>
+                        <div>Recalculating sentiment...</div>
+                    </div>
+                `;
+            }
+            
+            const data = await fetchSentiment(true);
+            renderSentiment(data);
+            
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '↻ Refresh';
+            }
+        }
+
+        async function initSentiment() {
+            const data = await fetchSentiment();
+            renderSentiment(data);
+        }
+
+        // Initialize sentiment when Analytics tab is shown or on page load
+        setTimeout(initSentiment, 2000);
         
-        const section = document.createElement('div');
-        section.className = 'group-section mb-12';
-        section.innerHTML = `
-            <div class="flex items-center mb-4">
-                <span class="text-2xl mr-2">${group.icon}</span>
-                <h2 class="text-xl font-bold">${group.title}</h2>
-                <div class="ml-auto text-sm text-slate-500">${items.length} Assets</div>
-            </div>
-            <div class="glass-panel rounded-xl overflow-hidden overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-800/50 text-xs uppercase text-slate-400">
-                        <tr>
-                            <th class="px-6 py-4">Symbol</th>
-                            <th class="px-6 py-4 text-right">Price</th>
-                            <th class="px-6 py-4 text-right">Volume (Shares)</th>
-                            <th class="px-6 py-4 text-right">Volume (USD)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-700">
-                        ${items.map(item => `
-                            <tr class="hover:bg-slate-700/30">
-                                <td class="px-6 py-4 font-bold text-blue-400">${item.symbol}</td>
-                                <td class="px-6 py-4 text-right font-mono">$${item.price.toFixed(3)}</td>
-                                <td class="px-6 py-4 text-right text-slate-400">${item.daily.shares.toLocaleString()}</td>
-                                <td class="px-6 py-4 text-right text-emerald-400">$${item.daily.dollars.toLocaleString()}</td>
-                            </tr>
-                        `).join('') || '<tr><td colspan="4" class="p-8 text-center">No matching data found</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        container.appendChild(section);
-    });
-}
-
-// Initial Call
-window.addEventListener('DOMContentLoaded', fetchData);>
+        // Auto-refresh sentiment every 5 minutes
+        setInterval(() => {
+            if (document.getElementById('analyticsTab')?.classList.contains('active')) {
+                fetchSentiment().then(renderSentiment);
+            }
+        }, 5 * 60 * 1000);
+        // ========== END SENTIMENT METER ==========
+    </script>
+</body>
+</html>
