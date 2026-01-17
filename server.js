@@ -1,6 +1,6 @@
 // =====================================================
 // XRP ETF Tracker - Complete Backend Server
-// Includes: ETF Data API + Claude AI Insights + On-Chain + Chat
+// Includes: ETF Data API + Claude AI Insights + On-Chain + Chat + Email Reports
 // =====================================================
 
 const express = require('express');
@@ -23,6 +23,26 @@ if (process.env.ANTHROPIC_API_KEY) {
     console.log('✅ Anthropic AI enabled');
 } else {
     console.log('⚠️ No ANTHROPIC_API_KEY - AI insights disabled');
+}
+
+// =====================================================
+// EMAIL CONFIGURATION (Resend)
+// =====================================================
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_RECIPIENT = 'bcha0720@gmail.com';
+const EMAIL_FROM = 'XRP Tracker <onboarding@resend.dev>'; // Use Resend's default for testing
+
+// Schedule times in PST (converted to UTC for server)
+// PST is UTC-8, so: 8AM PST = 16:00 UTC, 1PM PST = 21:00 UTC, 4PM PST = 00:00 UTC (next day)
+const SCHEDULE_HOURS_UTC = [16, 21, 0]; // 8AM, 1PM, 4PM PST
+
+let emailEnabled = false;
+if (RESEND_API_KEY) {
+    emailEnabled = true;
+    console.log('✅ Email notifications enabled');
+} else {
+    console.log('⚠️ No RESEND_API_KEY - Email disabled');
 }
 
 // =====================================================
@@ -180,241 +200,475 @@ async function fetchAllETFData() {
         for (const symbol of symbols) {
             const data = await fetchYahooFinanceData(symbol);
             if (data) groupData.push(data);
-            await new Promise(resolve => setTimeout(resolve, 100));
         }
-        results[groupName] = groupData;
+        if (groupData.length > 0) results[groupName] = groupData;
     }
     return results;
 }
 
 // =====================================================
-// API ENDPOINTS - CORE
+// FETCH XRP PRICE
 // =====================================================
 
-// Health check
-app.get('/', (req, res) => {
-    res.json({
-        status: 'ok',
-        service: 'XRP ETF Tracker API',
-        endpoints: [
-            'GET /api/etf-data',
-            'GET /api/historical',
-            'POST /api/ai-insights',
-            'POST /api/chat',
-            'GET /api/onchain/escrow',
-            'GET /api/onchain/network',
-            'GET /api/onchain/odl',
-            'GET /api/onchain/dex'
-        ],
-        aiEnabled: !!anthropic
+async function fetchXRPPrice() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true&include_7d_change=true');
+        const data = await response.json();
+        return {
+            price: data.ripple?.usd || 0,
+            change24h: data.ripple?.usd_24h_change || 0
+        };
+    } catch (error) {
+        console.error('XRP price fetch error:', error.message);
+        return { price: 0, change24h: 0 };
+    }
+}
+
+// =====================================================
+// EMAIL SUMMARY GENERATOR
+// =====================================================
+
+async function generateXPostSummary() {
+    try {
+        // Fetch current data
+        const xrpData = await fetchXRPPrice();
+        const etfData = await fetchAllETFData();
+        
+        // Calculate ETF totals
+        let topFlows = [];
+        
+        const xrpETFs = etfData['XRP Spot ETFs'] || [];
+        const btcETFs = etfData['Bitcoin Spot ETFs'] || [];
+        
+        xrpETFs.forEach(etf => {
+            if (etf.daily?.dollars) {
+                topFlows.push({ symbol: etf.symbol, flow: etf.daily.dollars });
+            }
+        });
+        
+        btcETFs.slice(0, 3).forEach(etf => {
+            if (etf.daily?.dollars) {
+                topFlows.push({ symbol: etf.symbol, flow: etf.daily.dollars });
+            }
+        });
+        
+        // Sort by absolute flow value
+        topFlows.sort((a, b) => Math.abs(b.flow) - Math.abs(a.flow));
+        topFlows = topFlows.slice(0, 4);
+        
+        // Format the X post
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' });
+        
+        const priceChange = xrpData.change24h >= 0 ? `+${xrpData.change24h.toFixed(2)}%` : `${xrpData.change24h.toFixed(2)}%`;
+        
+        // Build flows text
+        let flowsText = '';
+        topFlows.forEach(f => {
+            const sign = f.flow >= 0 ? '+' : '';
+            const amount = Math.abs(f.flow) >= 1e9 
+                ? (f.flow / 1e9).toFixed(1) + 'B'
+                : Math.abs(f.flow) >= 1e6 
+                    ? (f.flow / 1e6).toFixed(1) + 'M'
+                    : (f.flow / 1e3).toFixed(0) + 'K';
+            flowsText += `• ${f.symbol} ${sign}$${amount}\n`;
+        });
+        
+        const xPost = `📊 XRP ETF Update - ${dateStr} ${timeStr} PST
+
+💰 $XRP: $${xrpData.price.toFixed(4)} (${priceChange})
+
+🔥 Top Flows Today:
+${flowsText}
+🔗 Track live: xrp-etf.vercel.app
+
+#XRP #XRPETF #Crypto #Ripple`;
+
+        // Character count
+        const charCount = xPost.length;
+        
+        return {
+            post: xPost,
+            charCount,
+            isValid: charCount <= 280,
+            data: {
+                price: xrpData.price,
+                change: xrpData.change24h,
+                topFlows
+            }
+        };
+    } catch (error) {
+        console.error('Error generating X post:', error);
+        return null;
+    }
+}
+
+// =====================================================
+// SEND EMAIL VIA RESEND
+// =====================================================
+
+async function sendEmail(to, subject, htmlContent, textContent) {
+    if (!RESEND_API_KEY) {
+        console.log('⚠️ Email not sent - No API key');
+        return false;
+    }
+    
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: EMAIL_FROM,
+                to: [to],
+                subject: subject,
+                html: htmlContent,
+                text: textContent
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            console.log(`✅ Email sent to ${to}: ${subject}`);
+            return true;
+        } else {
+            console.error('❌ Email error:', result);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Email send failed:', error.message);
+        return false;
+    }
+}
+
+async function sendXPostEmail() {
+    const summary = await generateXPostSummary();
+    if (!summary) {
+        console.error('Failed to generate summary');
+        return false;
+    }
+    
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true, 
+        timeZone: 'America/Los_Angeles' 
     });
-});
+    const dateStr = now.toLocaleDateString('en-US', { 
+        weekday: 'short',
+        month: 'short', 
+        day: 'numeric',
+        timeZone: 'America/Los_Angeles'
+    });
+    
+    const subject = `📊 XRP Update - Ready to Post (${dateStr} ${timeStr} PST)`;
+    
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #23f7dd; margin: 0; }
+        .post-box { background: #1e293b; border: 2px solid #23f7dd; border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .post-content { white-space: pre-wrap; font-size: 15px; line-height: 1.5; color: #f8fafc; }
+        .char-count { text-align: right; font-size: 12px; color: ${summary.isValid ? '#22c55e' : '#ef4444'}; margin-top: 10px; }
+        .divider { border-top: 1px solid #334155; margin: 20px 0; }
+        .footer { text-align: center; color: #64748b; font-size: 12px; }
+        .btn { display: inline-block; background: #23f7dd; color: #0f172a; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐦 Ready to Post on X</h1>
+            <p style="color: #94a3b8;">${dateStr} • ${timeStr} PST</p>
+        </div>
+        
+        <p style="text-align: center; color: #23f7dd;">👇 COPY & POST 👇</p>
+        
+        <div class="post-box">
+            <div class="post-content">${summary.post}</div>
+            <div class="char-count">${summary.charCount}/280 characters ${summary.isValid ? '✅' : '⚠️'}</div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(summary.post)}" class="btn">Post to X →</a>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="footer">
+            <p>XRP ETF Tracker • Automated Update</p>
+            <p>View live data: <a href="https://xrp-etf.vercel.app" style="color: #23f7dd;">xrp-etf.vercel.app</a></p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+    const textContent = `
+XRP UPDATE - READY TO POST
+${dateStr} ${timeStr} PST
+━━━━━━━━━━━━━━━━━━━━
+
+COPY & POST TO X 👇
+
+${summary.post}
+
+━━━━━━━━━━━━━━━━━━━━
+Characters: ${summary.charCount}/280 ${summary.isValid ? '✅' : '⚠️'}
+
+Post directly: https://twitter.com/intent/tweet?text=${encodeURIComponent(summary.post)}
+`;
+
+    return await sendEmail(EMAIL_RECIPIENT, subject, htmlContent, textContent);
+}
+
+// =====================================================
+// SCHEDULED EMAIL JOBS
+// =====================================================
+
+function scheduleEmails() {
+    if (!emailEnabled) {
+        console.log('⚠️ Email scheduling skipped - not enabled');
+        return;
+    }
+    
+    // Check every minute if it's time to send
+    setInterval(async () => {
+        const now = new Date();
+        const utcHour = now.getUTCHours();
+        const utcMinute = now.getUTCMinutes();
+        
+        // Only send at the start of the hour (minute 0-1)
+        if (utcMinute > 1) return;
+        
+        if (SCHEDULE_HOURS_UTC.includes(utcHour)) {
+            console.log(`⏰ Scheduled email time: ${utcHour}:00 UTC`);
+            await sendXPostEmail();
+        }
+    }, 60000); // Check every minute
+    
+    console.log('📅 Email scheduler started');
+    console.log(`   Schedule (UTC): ${SCHEDULE_HOURS_UTC.map(h => h + ':00').join(', ')}`);
+    console.log(`   Schedule (PST): 8:00 AM, 1:00 PM, 4:00 PM`);
+}
+
+// =====================================================
+// API ENDPOINTS
+// =====================================================
 
 // ETF Data endpoint
 app.get('/api/etf-data', async (req, res) => {
     try {
-        if (etfDataCache.data && etfDataCache.timestamp) {
-            const cacheAge = Date.now() - etfDataCache.timestamp;
-            if (cacheAge < ETF_CACHE_DURATION) {
-                return res.json({
-                    data: etfDataCache.data,
-                    timestamp: new Date(etfDataCache.timestamp).toISOString(),
-                    cached: true,
-                    cacheAge: Math.round(cacheAge / 1000)
-                });
-            }
-        }
-        
-        console.log('Fetching fresh ETF data...');
-        const data = await fetchAllETFData();
-        etfDataCache = { data: data, timestamp: Date.now() };
-        
-        res.json({
-            data: data,
-            timestamp: new Date().toISOString(),
-            cached: false
-        });
-    } catch (error) {
-        console.error('ETF Data Error:', error);
-        if (etfDataCache.data) {
+        if (etfDataCache.data && etfDataCache.timestamp &&
+            Date.now() - etfDataCache.timestamp < ETF_CACHE_DURATION) {
             return res.json({
-                data: etfDataCache.data,
                 timestamp: new Date(etfDataCache.timestamp).toISOString(),
                 cached: true,
-                stale: true
+                data: etfDataCache.data
             });
         }
-        res.status(500).json({ error: 'Failed to fetch ETF data' });
+
+        const data = await fetchAllETFData();
+        etfDataCache = { data, timestamp: Date.now() };
+
+        res.json({
+            timestamp: new Date().toISOString(),
+            cached: false,
+            data
+        });
+    } catch (error) {
+        console.error('ETF data error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 // Historical data endpoint
 app.get('/api/historical', async (req, res) => {
-    const period = req.query.period || '1mo';
-    const validPeriods = ['1mo', '3mo', '6mo', '1y'];
-    if (!validPeriods.includes(period)) {
-        return res.status(400).json({ error: 'Invalid period' });
-    }
-    
+    const period = req.query.period || 'daily';
     try {
-        const symbol = 'GXRP';
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=${period}`;
-        const response = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const data = await response.json();
-        const result = data.chart?.result?.[0];
-        
-        res.json({
-            symbol,
-            period,
-            timestamps: result?.timestamp || [],
-            prices: result?.indicators?.quote?.[0]?.close || [],
-            volumes: result?.indicators?.quote?.[0]?.volume || []
-        });
+        const data = await fetchAllETFData();
+        const chartData = [];
+
+        for (const [groupName, etfs] of Object.entries(data)) {
+            etfs.forEach(etf => {
+                chartData.push({
+                    symbol: etf.symbol,
+                    group: groupName,
+                    price: etf.price,
+                    volume: etf[period]?.shares || 0,
+                    value: etf[period]?.dollars || 0
+                });
+            });
+        }
+
+        res.json({ period, data: chartData });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch historical data' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// =====================================================
-// AI INSIGHTS ENDPOINT
-// =====================================================
-
+// AI Insights endpoint
 app.post('/api/ai-insights', async (req, res) => {
     if (!anthropic) {
-        return res.status(503).json({
-            error: 'AI insights not available',
-            message: 'ANTHROPIC_API_KEY not configured'
+        return res.status(503).json({ error: 'AI not configured' });
+    }
+
+    const ip = req.ip || req.connection.remoteAddress;
+    if (isRateLimited(ip)) {
+        return res.status(429).json({ error: 'Rate limited. Try again in a minute.' });
+    }
+
+    try {
+        const now = Date.now();
+        if (insightCache.data && now - insightCache.timestamp < AI_CACHE_DURATION) {
+            return res.json({ ...insightCache.data, cached: true });
+        }
+
+        const marketData = req.body || {};
+        const prompt = buildInsightPrompt(marketData);
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1024,
+            messages: [{ role: 'user', content: prompt }]
         });
+
+        const insight = response.content[0]?.text || 'Unable to generate insights.';
+        const result = {
+            insight,
+            timestamp: new Date().toISOString(),
+            sentiment: marketData.sentimentScore || 50
+        };
+
+        insightCache = { data: result, timestamp: now };
+        res.json(result);
+    } catch (error) {
+        console.error('AI error:', error);
+        res.status(500).json({ error: 'AI generation failed' });
+    }
+});
+
+// Chat endpoint
+app.post('/api/chat', async (req, res) => {
+    if (!anthropic) {
+        return res.status(503).json({ error: 'AI not configured' });
+    }
+
+    const ip = req.ip || req.connection.remoteAddress;
+    if (isRateLimited(ip)) {
+        return res.status(429).json({ error: 'Rate limited' });
+    }
+
+    try {
+        const { message, context } = req.body;
+        if (!message) {
+            return res.status(400).json({ error: 'Message required' });
+        }
+
+        const relevantDocs = findRelevantDocs(message);
+        let systemPrompt = `You are an XRP and crypto ETF expert assistant. Be concise and helpful.`;
+
+        if (relevantDocs.length > 0) {
+            systemPrompt += `\n\nRelevant information:\n${relevantDocs.map(d => `- ${d.title}: ${d.content}`).join('\n')}`;
+        }
+
+        if (context) {
+            systemPrompt += `\n\nCurrent market context: XRP price $${context.xrpPrice || 'N/A'}, ETF holdings: ${context.etfHoldings || 'N/A'}`;
+        }
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 512,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: message }]
+        });
+
+        res.json({
+            response: response.content[0]?.text || 'Unable to respond.',
+            sources: relevantDocs.map(d => d.title)
+        });
+    } catch (error) {
+        console.error('Chat error:', error);
+        res.status(500).json({ error: 'Chat failed' });
+    }
+});
+
+// =====================================================
+// EMAIL API ENDPOINTS
+// =====================================================
+
+// Generate X post summary (preview)
+app.get('/api/x-post', async (req, res) => {
+    try {
+        const summary = await generateXPostSummary();
+        if (summary) {
+            res.json(summary);
+        } else {
+            res.status(500).json({ error: 'Failed to generate summary' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Manually trigger email (for testing)
+app.post('/api/send-email', async (req, res) => {
+    const { secret } = req.body;
+    
+    // Simple protection - require a secret to send manually
+    if (secret !== process.env.EMAIL_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
     
     try {
-        const clientIP = req.ip || req.connection?.remoteAddress || 'unknown';
-        if (isRateLimited(clientIP)) {
-            return res.status(429).json({ error: 'Rate limited', retryAfter: 60 });
-        }
-
-        const { marketData, forceRefresh } = req.body;
-        if (!marketData) {
-            return res.status(400).json({ error: 'Market data is required' });
-        }
-
-        if (!forceRefresh && insightCache.data && (Date.now() - insightCache.timestamp) < AI_CACHE_DURATION) {
-            return res.json({
-                success: true,
-                analysis: insightCache.data,
-                cached: true
-            });
-        }
-
-        const prompt = buildInsightPrompt(marketData);
-        console.log('Calling Claude AI for insights...');
-        
-        const message = await anthropic.messages.create({
-            model: 'claude-3-5-haiku-20241022',
-            max_tokens: 1000,
-            messages: [{ role: 'user', content: prompt }]
-        });
-
-        const analysis = message.content[0].text;
-        insightCache = { data: analysis, timestamp: Date.now() };
-
-        res.json({
-            success: true,
-            analysis: analysis,
-            cached: false
-        });
+        const success = await sendXPostEmail();
+        res.json({ success, message: success ? 'Email sent!' : 'Failed to send email' });
     } catch (error) {
-        console.error('AI Insights Error:', error.message);
-        if (insightCache.data) {
-            return res.json({
-                success: true,
-                analysis: insightCache.data,
-                cached: true,
-                stale: true
-            });
-        }
-        res.status(500).json({ error: 'Failed to generate insights' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// =====================================================
-// CHAT ENDPOINT (Enhanced with RAG)
-// =====================================================
-
-app.post('/api/chat', async (req, res) => {
-    if (!anthropic) {
-        return res.json({ success: false, error: 'AI not configured' });
-    }
-
-    try {
-        const { question, marketData, language = 'en' } = req.body;
-        
-        // Find relevant knowledge base documents
-        const relevantDocs = findRelevantDocs(question, 3);
-        const ragContext = relevantDocs.length > 0 
-            ? relevantDocs.map(d => `[${d.title}]: ${d.content}`).join('\n\n')
-            : '';
-
-        const langInstruction = language === 'ko' ? 'Respond in Korean.' 
-            : language === 'ja' ? 'Respond in Japanese.' : 'Respond in English.';
-
-        const prompt = `You are a helpful XRP AI assistant. ${langInstruction}
-
-## Current Market Data
-- Price: $${(marketData?.currentPrice || 0).toFixed(4)}
-- 24h Change: ${(marketData?.priceChange24h || 0).toFixed(2)}%
-- 7d Change: ${(marketData?.priceChange7d || 0).toFixed(2)}%
-- 7d MA: $${(marketData?.ma7 || 0).toFixed(4)}
-- 30d MA: $${(marketData?.ma30 || 0).toFixed(4)}
-- Sentiment: ${marketData?.sentiment || 50}/100
-
-${ragContext ? `## Knowledge Base\n${ragContext}\n` : ''}
-
-## Question
-${question}
-
-Be concise (under 150 words). Use HTML formatting (<br>, <strong>, <em>). Add disclaimer for financial questions.`;
-
-        const message = await anthropic.messages.create({
-            model: 'claude-3-5-haiku-20241022',
-            max_tokens: 512,
-            messages: [{ role: 'user', content: prompt }]
-        });
-
-        res.json({
-            success: true,
-            reply: message.content[0].text,
-            sourcesUsed: relevantDocs.map(d => d.title)
-        });
-    } catch (error) {
-        console.error('Chat error:', error.message);
-        res.json({ success: false, error: error.message });
-    }
+// Email status
+app.get('/api/email-status', (req, res) => {
+    res.json({
+        enabled: emailEnabled,
+        recipient: EMAIL_RECIPIENT,
+        schedule: {
+            times: ['8:00 AM PST', '1:00 PM PST', '4:00 PM PST'],
+            utcHours: SCHEDULE_HOURS_UTC
+        }
+    });
 });
 
 // =====================================================
-// ON-CHAIN ANALYTICS ENDPOINTS
+// ON-CHAIN ENDPOINTS
 // =====================================================
 
 // Escrow data
 app.get('/api/onchain/escrow', async (req, res) => {
     try {
-        if (onChainCache.escrow && onChainCache.lastUpdate && 
+        if (onChainCache.escrow && onChainCache.lastUpdate &&
             Date.now() - onChainCache.lastUpdate < ONCHAIN_CACHE_DURATION) {
             return res.json({ success: true, data: onChainCache.escrow, cached: true });
         }
 
+        const escrowAccount = 'rrrrrrrrrrrrrrrrrrrrrhoLvTp';
         const response = await fetch('https://s1.ripple.com:51234/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 method: 'account_info',
-                params: [{ account: 'rEhKZcz5Ndjm9BzZmmKrtvhXPnSWByssDv', ledger_index: 'validated' }]
+                params: [{ account: escrowAccount, ledger_index: 'validated' }]
             })
         });
 
@@ -537,6 +791,7 @@ app.get('/api/ai-insights/health', (req, res) => {
     res.json({
         status: 'ok',
         aiEnabled: !!anthropic,
+        emailEnabled: emailEnabled,
         hasApiKey: !!process.env.ANTHROPIC_API_KEY
     });
 });
@@ -596,7 +851,14 @@ app.listen(PORT, () => {
     console.log('  GET  /api/onchain/network');
     console.log('  GET  /api/onchain/odl');
     console.log('  GET  /api/onchain/dex');
+    console.log('  GET  /api/x-post          (preview X post)');
+    console.log('  POST /api/send-email      (manual trigger)');
+    console.log('  GET  /api/email-status    (check schedule)');
     console.log('=========================================');
     console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
     console.log('=========================================');
+    
+    // Start email scheduler
+    scheduleEmails();
 });
