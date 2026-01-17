@@ -12580,4 +12580,95 @@
         setInterval(fetchXRPLData, 15000);
     </script>
 </body>
-</html>
+</html 
+// ==========================================
+// CORE CONFIGURATION
+// ==========================================
+const API_BASE_URL = 'https://xrp-gtve.onrender.com'; // Your Render URL
+let cachedData = null;
+
+// The IDs here MUST match the keys in server.js
+const GROUP_CONFIG = [
+    { id: 'Spot ETFs', title: 'Spot ETFs', icon: '💎', color: 'spot' },
+    { id: 'Futures ETFs', title: 'Futures ETFs', icon: '📈', color: 'futures' },
+    { id: 'Index ETFs', title: 'Index ETFs', icon: '📊', color: 'index' },
+    { id: 'Canada ETFs', title: 'Canada ETFs', icon: '🍁', color: 'canada' }
+];
+
+// ==========================================
+// DATA FETCHING (The "Matching" Part)
+// ==========================================
+async function fetchData(isAutoRefresh = false) {
+    console.log("Fetching from:", `${API_BASE_URL}/api/etf-data`);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/etf-data`);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const result = await response.json();
+        
+        // result.data contains the keys from server.js
+        if (result.data) {
+            cachedData = result.data;
+            renderETFData(result.data);
+            
+            // Update the top price ticker if data exists
+            if (result.data['Spot ETFs'] && result.data['Spot ETFs'].length > 0) {
+                const price = result.data['Spot ETFs'][0].price;
+                document.getElementById('xrp-price').textContent = `$${price.toFixed(4)}`;
+            }
+        }
+    } catch (error) {
+        console.error("Connection Failed:", error);
+        showErrorUI();
+    }
+}
+
+// ==========================================
+// RENDERING TABLES
+// ==========================================
+function renderETFData(data) {
+    const container = document.getElementById('etf-groups-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    GROUP_CONFIG.forEach(group => {
+        const items = data[group.id] || []; // This is where the match happens
+        
+        const section = document.createElement('div');
+        section.className = 'group-section mb-12';
+        section.innerHTML = `
+            <div class="flex items-center mb-4">
+                <span class="text-2xl mr-2">${group.icon}</span>
+                <h2 class="text-xl font-bold">${group.title}</h2>
+                <div class="ml-auto text-sm text-slate-500">${items.length} Assets</div>
+            </div>
+            <div class="glass-panel rounded-xl overflow-hidden overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-800/50 text-xs uppercase text-slate-400">
+                        <tr>
+                            <th class="px-6 py-4">Symbol</th>
+                            <th class="px-6 py-4 text-right">Price</th>
+                            <th class="px-6 py-4 text-right">Volume (Shares)</th>
+                            <th class="px-6 py-4 text-right">Volume (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        ${items.map(item => `
+                            <tr class="hover:bg-slate-700/30">
+                                <td class="px-6 py-4 font-bold text-blue-400">${item.symbol}</td>
+                                <td class="px-6 py-4 text-right font-mono">$${item.price.toFixed(3)}</td>
+                                <td class="px-6 py-4 text-right text-slate-400">${item.daily.shares.toLocaleString()}</td>
+                                <td class="px-6 py-4 text-right text-emerald-400">$${item.daily.dollars.toLocaleString()}</td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="4" class="p-8 text-center">No matching data found</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        container.appendChild(section);
+    });
+}
+
+// Initial Call
+window.addEventListener('DOMContentLoaded', fetchData);>
