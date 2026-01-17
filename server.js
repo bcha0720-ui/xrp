@@ -78,26 +78,23 @@ const ETF_CACHE_DURATION = 60 * 1000; // 1 minute
 // FETCH ETF DATA FROM YAHOO FINANCE
 // =====================================================
 
+const yahooFinance = require('yahoo-finance2').default;
+
 async function fetchYahooFinanceData(symbol) {
     try {
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+        // yahoo-finance2 handles the headers and crumbs for you
+        const result = await yahooFinance.chart(symbol, { period1: '2025-01-01', interval: '1d' });
         
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const result = data.chart?.result?.[0];
-        
-        if (!result) {
-            return null;
-        }
+        if (!result || !result.meta) return null;
+
+        const price = result.meta.regularMarketPrice;
+        const quotes = result.indicators.quote[0];
+        // ... rest of your calculation logic ...
+    } catch (error) {
+        console.error(`Error fetching ${symbol}:`, error.message);
+        return null;
+    }
+}
         
         const meta = result.meta;
         const quotes = result.indicators?.quote?.[0];
