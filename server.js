@@ -225,36 +225,85 @@ async function fetchXRPPrice() {
 }
 
 // =====================================================
-// EMAIL SUMMARY GENERATOR
+// EMAIL SUMMARY GENERATOR - Real Data from XRPL
 // =====================================================
+
+// Exchange wallet addresses
+const EXCHANGE_WALLETS = {
+    'Binance': ['rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'],
+    'Uphold': ['rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh'],
+    'Bitso': ['rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS'],
+    'Kraken': ['raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN'],
+    'Bitstamp': ['rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G'],
+    'Coinbase': ['rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe'],
+    'Robinhood': ['rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6']
+};
+
+async function fetchWalletBalance(address) {
+    try {
+        const response = await fetch('https://s1.ripple.com:51234/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                method: 'account_info',
+                params: [{ account: address, ledger_index: 'validated' }]
+            })
+        });
+        const data = await response.json();
+        if (data.result?.account_data?.Balance) {
+            return parseInt(data.result.account_data.Balance) / 1000000;
+        }
+        return 0;
+    } catch (error) {
+        console.error(`Balance fetch error for ${address}:`, error.message);
+        return 0;
+    }
+}
+
+async function fetchExchangeHoldings() {
+    console.log('Fetching exchange holdings from XRPL...');
+    const holdings = {};
+    let total = 0;
+    
+    for (const [exchange, addresses] of Object.entries(EXCHANGE_WALLETS)) {
+        let exchangeTotal = 0;
+        for (const addr of addresses) {
+            const balance = await fetchWalletBalance(addr);
+            exchangeTotal += balance;
+        }
+        holdings[exchange] = exchangeTotal;
+        total += exchangeTotal;
+        console.log(`  ${exchange}: ${formatLargeNumber(exchangeTotal)} XRP`);
+    }
+    
+    console.log(`Total exchange holdings: ${formatLargeNumber(total)} XRP`);
+    return { holdings, total };
+}
 
 async function generateXPostSummary() {
     try {
-        // Fetch current data
+        console.log('Generating X post with real data...');
+        
+        // Fetch real XRP price from CoinGecko
         const xrpData = await fetchXRPPrice();
+        console.log(`XRP Price: $${xrpData.price}, Change: ${xrpData.change24h}%`);
+        
+        // Fetch real exchange holdings from XRPL
+        const exchangeData = await fetchExchangeHoldings();
+        
+        // Sort exchanges by holdings
+        const sortedExchanges = Object.entries(exchangeData.holdings)
+            .filter(([_, bal]) => bal > 0)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+        
+        // Also get XRP Spot ETF data
         const etfData = await fetchAllETFData();
-        
-        // Calculate ETF totals
-        let topFlows = [];
-        
         const xrpETFs = etfData['XRP Spot ETFs'] || [];
-        const btcETFs = etfData['Bitcoin Spot ETFs'] || [];
-        
+        let etfTotalVolume = 0;
         xrpETFs.forEach(etf => {
-            if (etf.daily?.dollars) {
-                topFlows.push({ symbol: etf.symbol, flow: etf.daily.dollars });
-            }
+            etfTotalVolume += etf.daily?.dollars || 0;
         });
-        
-        btcETFs.slice(0, 3).forEach(etf => {
-            if (etf.daily?.dollars) {
-                topFlows.push({ symbol: etf.symbol, flow: etf.daily.dollars });
-            }
-        });
-        
-        // Sort by absolute flow value
-        topFlows.sort((a, b) => Math.abs(b.flow) - Math.abs(a.flow));
-        topFlows = topFlows.slice(0, 4);
         
         // Format the X post
         const now = new Date();
@@ -263,29 +312,40 @@ async function generateXPostSummary() {
         
         const priceChange = xrpData.change24h >= 0 ? `+${xrpData.change24h.toFixed(2)}%` : `${xrpData.change24h.toFixed(2)}%`;
         
-        // Build flows text
-        let flowsText = '';
-        topFlows.forEach(f => {
-            const sign = f.flow >= 0 ? '+' : '';
-            const amount = Math.abs(f.flow) >= 1e9 
-                ? (f.flow / 1e9).toFixed(1) + 'B'
-                : Math.abs(f.flow) >= 1e6 
-                    ? (f.flow / 1e6).toFixed(1) + 'M'
-                    : (f.flow / 1e3).toFixed(0) + 'K';
-            flowsText += `• ${f.symbol} ${sign}$${amount}\n`;
-        });
+        // Build exchange holdings text
+        let exchangeText = sortedExchanges.map(([name, bal]) => 
+            `• ${name}: ${formatLargeNumber(bal)}`
+        ).join('\n');
         
-        const xPost = `📊 XRP ETF Update - ${dateStr} ${timeStr} PST
+        // Build the X post
+        let xPost = `📊 XRP Update - ${dateStr} ${timeStr} PST
 
 💰 $XRP: $${xrpData.price.toFixed(4)} (${priceChange})
 
-🔥 Top Flows Today:
-${flowsText}
-🔗 Track live: xrp-etf.vercel.app
+🏦 Exchange Holdings:
+${exchangeText}
 
-#XRP #XRPETF #Crypto #Ripple`;
+📈 Total: ${formatLargeNumber(exchangeData.total)} XRP`;
 
-        // Character count
+        // Add ETF volume if available
+        if (etfTotalVolume > 0) {
+            xPost += `\n💎 ETF Vol: $${formatLargeNumber(etfTotalVolume)}`;
+        }
+
+        xPost += `\n\n#XRP #Crypto #Ripple`;
+        
+        // If too long, shorten
+        if (xPost.length > 280) {
+            xPost = `📊 XRP - ${dateStr}
+
+💰 $${xrpData.price.toFixed(2)} (${priceChange})
+🏦 Exchanges: ${formatLargeNumber(exchangeData.total)} XRP
+
+Top: ${sortedExchanges.slice(0, 3).map(e => e[0]).join(', ')}
+
+#XRP #Crypto`;
+        }
+        
         const charCount = xPost.length;
         
         return {
@@ -295,7 +355,9 @@ ${flowsText}
             data: {
                 price: xrpData.price,
                 change: xrpData.change24h,
-                topFlows
+                exchangeTotal: exchangeData.total,
+                exchanges: exchangeData.holdings,
+                etfVolume: etfTotalVolume
             }
         };
     } catch (error) {
