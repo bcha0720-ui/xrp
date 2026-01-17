@@ -28,13 +28,12 @@ if (process.env.ANTHROPIC_API_KEY) {
 // ETF SYMBOLS & DESCRIPTIONS
 // =====================================================
 
+// Change these keys to match your frontend mapping exactly
 const ETF_SYMBOLS = {
-    'XRP Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'XRP Leveraged ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
-    'XRP Canadian ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO'],
-    'Bitcoin Spot ETFs': ['IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB', 'HODL', 'BRRR', 'EZBC', 'BTCW', 'BTCO'],
-    'Ethereum Spot ETFs': ['ETHA', 'FETH', 'ETHE', 'ETHW', 'CETH', 'ETHV', 'QETH', 'EZET'],
-    'Crypto Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
+    'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
+    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'], // Changed from Leveraged
+    'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO'],
+    'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
 
 const DESCRIPTIONS = {
@@ -53,14 +52,7 @@ const DESCRIPTIONS = {
     'XRPR': 'REX-Osprey XRP',
     'XRPK': 'T-REX 2X Long XRP',
     'XRPT': 'Volatility Shares 2x XRP',
-    'XXRP': 'Teucrium 2x Long XRP',
-    'IBIT': 'iShares Bitcoin Trust',
-    'FBTC': 'Fidelity Wise Origin Bitcoin',
-    'GBTC': 'Grayscale Bitcoin Trust',
-    'ARKB': 'ARK 21Shares Bitcoin',
-    'ETHA': 'iShares Ethereum Trust',
-    'FETH': 'Fidelity Ethereum Fund',
-    'ETHE': 'Grayscale Ethereum Trust'
+    'XXRP': 'Teucrium 2x Long XRP'
 };
 
 // Cache
