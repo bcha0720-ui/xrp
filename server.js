@@ -207,36 +207,114 @@ async function fetchAllETFData() {
 }
 
 // =====================================================
-// FETCH XRP PRICE
+// FETCH XRP PRICE (Multiple sources with fallback)
 // =====================================================
 
 async function fetchXRPPrice() {
+    // Try CoinGecko first
     try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true&include_7d_change=true');
-        const data = await response.json();
-        return {
-            price: data.ripple?.usd || 0,
-            change24h: data.ripple?.usd_24h_change || 0
-        };
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true', {
+            timeout: 5000
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.ripple?.usd && data.ripple.usd > 0) {
+                console.log('XRP price from CoinGecko:', data.ripple.usd);
+                return {
+                    price: data.ripple.usd,
+                    change24h: data.ripple.usd_24h_change || 0,
+                    source: 'CoinGecko'
+                };
+            }
+        }
     } catch (error) {
-        console.error('XRP price fetch error:', error.message);
-        return { price: 0, change24h: 0 };
+        console.log('CoinGecko failed:', error.message);
     }
+    
+    // Try Binance as fallback
+    try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=XRPUSDT', {
+            timeout: 5000
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.lastPrice) {
+                const price = parseFloat(data.lastPrice);
+                const change = parseFloat(data.priceChangePercent);
+                console.log('XRP price from Binance:', price);
+                return {
+                    price: price,
+                    change24h: change,
+                    source: 'Binance'
+                };
+            }
+        }
+    } catch (error) {
+        console.log('Binance failed:', error.message);
+    }
+    
+    // Try Kraken as last resort
+    try {
+        const response = await fetch('https://api.kraken.com/0/public/Ticker?pair=XRPUSD', {
+            timeout: 5000
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.result?.XXRPZUSD) {
+                const price = parseFloat(data.result.XXRPZUSD.c[0]);
+                console.log('XRP price from Kraken:', price);
+                return {
+                    price: price,
+                    change24h: 0,
+                    source: 'Kraken'
+                };
+            }
+        }
+    } catch (error) {
+        console.log('Kraken failed:', error.message);
+    }
+    
+    console.error('All price sources failed!');
+    return { price: 0, change24h: 0, source: 'none' };
 }
 
 // =====================================================
 // EMAIL SUMMARY GENERATOR - Real Data from XRPL
 // =====================================================
 
-// Exchange wallet addresses
+// Major exchange wallet addresses (CORRECT ONES with large balances)
 const EXCHANGE_WALLETS = {
-    'Binance': ['rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'],
-    'Uphold': ['rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh'],
-    'Bitso': ['rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS'],
-    'Kraken': ['raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN'],
-    'Bitstamp': ['rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G'],
-    'Coinbase': ['rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe'],
-    'Robinhood': ['rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6']
+    'Binance': [
+        'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh',
+        'rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf',
+        'rJb5KsHsDHF1YS5B5DU6QCkH5NsPaKQTcy'
+    ],
+    'Uphold': [
+        'rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh',
+        'rPUMWgB9Lzm8jB1z5pGpGUkkYRH4v2V3bK'
+    ],
+    'Bitso': [
+        'rG6FZ31hDHN1K5Dkbma3PSB5uVCuVVRzfn',
+        'rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS'
+    ],
+    'Kraken': [
+        'rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh',
+        'rN7GK8JdAyY6HQMRNpCdjLHuKBcLHu8TH8'
+    ],
+    'Bitstamp': [
+        'rrpNnNLKrartuEqfJGpqyDwPj1AFPg9vn1',
+        'rGFuMiw48HdbnrUbkRYuitXTmfrDBNTCnX'
+    ],
+    'Coinbase': [
+        'rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg',
+        'rhi1vMeV2pQZdhvZsXps9gCdZ9gHriLAWc'
+    ],
+    'Bithumb': [
+        'rPsmHDMkheWZvbAkTA8A9bVnUdadPn7XBK'
+    ],
+    'Huobi': [
+        'rKrfhZJ3wTJ1wE2G44UFMkXFZWXwEPMqRb'
+    ]
 };
 
 async function fetchWalletBalance(address) {
@@ -271,38 +349,80 @@ async function fetchExchangeHoldings() {
             const balance = await fetchWalletBalance(addr);
             exchangeTotal += balance;
         }
-        holdings[exchange] = exchangeTotal;
-        total += exchangeTotal;
-        console.log(`  ${exchange}: ${formatLargeNumber(exchangeTotal)} XRP`);
+        if (exchangeTotal > 0) {
+            holdings[exchange] = exchangeTotal;
+            total += exchangeTotal;
+            console.log(`  ${exchange}: ${formatLargeNumber(exchangeTotal)} XRP`);
+        }
     }
     
     console.log(`Total exchange holdings: ${formatLargeNumber(total)} XRP`);
     return { holdings, total };
 }
 
+async function generateAIEmailSummary(marketData) {
+    if (!anthropic) {
+        return null;
+    }
+    
+    try {
+        const prompt = `Write a 2-sentence XRP market insight for Twitter/X (max 100 chars). Current data:
+- XRP Price: $${marketData.price.toFixed(4)} (${marketData.change24h >= 0 ? '+' : ''}${marketData.change24h.toFixed(2)}% 24h)
+- Exchange Holdings: ${formatLargeNumber(marketData.exchangeTotal)} XRP
+- ETF Volume: $${formatLargeNumber(marketData.etfVolume)}
+
+Be concise, insightful, mention key levels or trends. No hashtags.`;
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+        });
+        
+        return response.content[0]?.text || null;
+    } catch (error) {
+        console.error('AI summary error:', error.message);
+        return null;
+    }
+}
+
 async function generateXPostSummary() {
     try {
         console.log('Generating X post with real data...');
         
-        // Fetch real XRP price from CoinGecko
+        // Fetch real XRP price (with fallbacks)
         const xrpData = await fetchXRPPrice();
-        console.log(`XRP Price: $${xrpData.price}, Change: ${xrpData.change24h}%`);
+        console.log(`XRP Price: $${xrpData.price} from ${xrpData.source}, Change: ${xrpData.change24h}%`);
         
         // Fetch real exchange holdings from XRPL
         const exchangeData = await fetchExchangeHoldings();
         
-        // Sort exchanges by holdings
+        // Sort exchanges by holdings (top 5)
         const sortedExchanges = Object.entries(exchangeData.holdings)
             .filter(([_, bal]) => bal > 0)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
         
-        // Also get XRP Spot ETF data
+        // Get XRP Spot ETF data
         const etfData = await fetchAllETFData();
-        const xrpETFs = etfData['XRP Spot ETFs'] || [];
+        const spotETFs = etfData['Spot ETFs'] || [];
         let etfTotalVolume = 0;
-        xrpETFs.forEach(etf => {
-            etfTotalVolume += etf.daily?.dollars || 0;
+        let topETF = null;
+        
+        spotETFs.forEach(etf => {
+            const vol = etf.daily?.dollars || 0;
+            etfTotalVolume += vol;
+            if (!topETF || vol > (topETF.volume || 0)) {
+                topETF = { symbol: etf.symbol, volume: vol, price: etf.price };
+            }
+        });
+        
+        // Generate AI summary
+        const aiSummary = await generateAIEmailSummary({
+            price: xrpData.price,
+            change24h: xrpData.change24h,
+            exchangeTotal: exchangeData.total,
+            etfVolume: etfTotalVolume
         });
         
         // Format the X post
@@ -324,24 +444,38 @@ async function generateXPostSummary() {
 
 🏦 Exchange Holdings:
 ${exchangeText}
-
 📈 Total: ${formatLargeNumber(exchangeData.total)} XRP`;
 
-        // Add ETF volume if available
+        // Add ETF data if available
         if (etfTotalVolume > 0) {
-            xPost += `\n💎 ETF Vol: $${formatLargeNumber(etfTotalVolume)}`;
+            xPost += `
+
+💎 ETF Volume: $${formatLargeNumber(etfTotalVolume)}`;
+            if (topETF) {
+                xPost += ` (Top: ${topETF.symbol})`;
+            }
         }
 
-        xPost += `\n\n#XRP #Crypto #Ripple`;
+        // Add AI summary if available
+        if (aiSummary) {
+            xPost += `
+
+🤖 ${aiSummary}`;
+        }
+
+        xPost += `
+
+#XRP #Crypto #Ripple`;
         
-        // If too long, shorten
+        // If too long, create shorter version
         if (xPost.length > 280) {
-            xPost = `📊 XRP - ${dateStr}
+            xPost = `📊 XRP - ${dateStr} ${timeStr} PST
 
 💰 $${xrpData.price.toFixed(2)} (${priceChange})
-🏦 Exchanges: ${formatLargeNumber(exchangeData.total)} XRP
+🏦 ${formatLargeNumber(exchangeData.total)} on exchanges
+💎 ETF Vol: $${formatLargeNumber(etfTotalVolume)}
 
-Top: ${sortedExchanges.slice(0, 3).map(e => e[0]).join(', ')}
+${aiSummary ? '🤖 ' + aiSummary.substring(0, 80) + '...' : ''}
 
 #XRP #Crypto`;
         }
@@ -354,10 +488,13 @@ Top: ${sortedExchanges.slice(0, 3).map(e => e[0]).join(', ')}
             isValid: charCount <= 280,
             data: {
                 price: xrpData.price,
+                priceSource: xrpData.source,
                 change: xrpData.change24h,
                 exchangeTotal: exchangeData.total,
                 exchanges: exchangeData.holdings,
-                etfVolume: etfTotalVolume
+                etfVolume: etfTotalVolume,
+                topETF: topETF,
+                aiSummary: aiSummary
             }
         };
     } catch (error) {
