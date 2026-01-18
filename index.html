@@ -217,21 +217,26 @@
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));
-            border-radius: 12px;
+            width: 56px;
+            height: 56px;
+            background: #23292f;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--bg-primary);
+            padding: 8px;
+            box-shadow: 0 4px 15px rgba(35, 247, 221, 0.3);
+            border: 2px solid rgba(35, 247, 221, 0.3);
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
         }
 
         .logo h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
+            font-size: 2.2rem;
+            font-weight: 700;
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-xrp) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -584,7 +589,7 @@
         }
 
         .group-icon.index { background: rgba(59, 130, 246, 0.2); }
-        .group-icon.spot { background: rgba(34, 197, 94, 0.2); }
+        .group-icon.spot { background: rgba(35, 247, 221, 0.2); }
         .group-icon.futures { background: rgba(249, 115, 22, 0.2); }
         .group-icon.canada { background: rgba(168, 85, 247, 0.2); }
 
@@ -1288,48 +1293,12 @@
             overflow-x: auto;
             max-height: 600px;
             overflow-y: auto;
-            position: relative;
         }
 
         .holdings-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             min-width: 1200px;
-        }
-
-        /* Sticky header row - ETF names */
-        .holdings-table thead tr:first-child th {
-            position: sticky;
-            top: 0;
-            background: var(--bg-secondary);
-            z-index: 20;
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-
-        /* Sticky sub-header row - XRP/VALUE */
-        .holdings-table thead tr:nth-child(2) th {
-            position: sticky;
-            top: 45px;
-            background: var(--bg-secondary);
-            z-index: 20;
-            padding: 0.5rem 1rem;
-            text-align: right;
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent-xrp);
-            border-bottom: 2px solid var(--accent-xrp);
-            white-space: nowrap;
         }
 
         .holdings-table th {
@@ -1348,20 +1317,8 @@
             white-space: nowrap;
         }
 
-        .holdings-table th:first-child,
-        .holdings-table td:first-child {
-            position: sticky;
-            left: 0;
-            background: var(--bg-secondary);
-            z-index: 15;
+        .holdings-table th:first-child {
             text-align: left;
-        }
-
-        /* Corner cell - both sticky row and column */
-        .holdings-table thead tr:first-child th:first-child,
-        .holdings-table thead tr:nth-child(2) th:first-child {
-            z-index: 25;
-            background: var(--bg-secondary);
         }
 
         .holdings-table th.etf-header {
@@ -1386,14 +1343,9 @@
             text-align: left;
             font-weight: 600;
             color: var(--accent-xrp);
-            background: var(--bg-card);
         }
 
-        .holdings-table tr:hover td {
-            background: var(--bg-card-hover);
-        }
-
-        .holdings-table tr:hover td:first-child {
+        .holdings-table tr:hover {
             background: var(--bg-card-hover);
         }
 
@@ -1679,6 +1631,17 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        .xrp-mini-logo {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+        }
+
+        .xrp-mini-logo svg {
+            width: 100%;
+            height: 100%;
         }
 
         .dashboard-grid {
@@ -3416,7 +3379,12 @@
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon">XRP</div>
+                <div class="logo-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="32" fill="#23292f"/>
+                        <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#fff"/>
+                    </svg>
+                </div>
                 <h1>XRP ETF Tracker</h1>
             </div>
             <div class="xrp-price" id="xrpPrice">
@@ -3447,7 +3415,8 @@
         <div class="dashboard-overview">
             <div class="dashboard-overview-header">
                 <div class="dashboard-overview-title">
-                    <span>📊</span> XRP Holdings - Exchange & SPOT ETFs
+                    <span class="xrp-mini-logo"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="#23292f"/><path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/></svg></span>
+                    XRP Holdings - Exchange & SPOT ETFs
                 </div>
                 <div class="header-buttons">
                     <div class="language-switcher">
@@ -3672,7 +3641,12 @@
                         <span>📋</span>
                         Daily Holdings Data
                     </div>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">Data updated manually</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Data updated manually</span>
+                        <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
+                            ↻ Recalculate Values
+                        </button>
+                    </div>
                 </div>
                 <div class="holdings-table-wrapper">
                     <table class="holdings-table" id="holdingsTable">
