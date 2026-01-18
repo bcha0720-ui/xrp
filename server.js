@@ -82,12 +82,10 @@ function findRelevantDocs(query, topK = 3) {
 // =====================================================
 
 const ETF_SYMBOLS = {
-    'XRP Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'XRP Leveraged ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
-    'XRP Canadian ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO'],
-    'Bitcoin Spot ETFs': ['IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB', 'HODL', 'BRRR', 'EZBC', 'BTCW', 'BTCO'],
-    'Ethereum Spot ETFs': ['ETHA', 'FETH', 'ETHE', 'ETHW', 'CETH', 'ETHV', 'QETH', 'EZET'],
-    'Crypto Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
+    'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
+    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
+    'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
+    'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
 
 const DESCRIPTIONS = {
@@ -299,7 +297,7 @@ async function generateXPostSummary() {
         
         // Also get XRP Spot ETF data
         const etfData = await fetchAllETFData();
-        const xrpETFs = etfData['XRP Spot ETFs'] || [];
+        const xrpETFs = etfData['Spot ETFs'] || [];
         let etfTotalVolume = 0;
         xrpETFs.forEach(etf => {
             etfTotalVolume += etf.daily?.dollars || 0;
