@@ -9591,6 +9591,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         marketData,
+                        forceRefresh: true,
                         language: currentLanguage // Send language preference to API
                     })
                 });

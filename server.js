@@ -592,11 +592,14 @@ app.post('/api/ai-insights', async (req, res) => {
 
     try {
         const now = Date.now();
-        if (insightCache.data && now - insightCache.timestamp < AI_CACHE_DURATION) {
-            return res.json({ ...insightCache.data, cached: true });
+        const forceRefresh = req.body.forceRefresh === true;
+        
+        // Check cache (skip if force refresh)
+        if (!forceRefresh && insightCache.data && now - insightCache.timestamp < AI_CACHE_DURATION) {
+            return res.json({ ...insightCache.data, cached: true, success: true });
         }
 
-        const marketData = req.body || {};
+        const marketData = req.body.marketData || req.body || {};
         const prompt = buildInsightPrompt(marketData);
 
         const response = await anthropic.messages.create({
@@ -607,6 +610,8 @@ app.post('/api/ai-insights', async (req, res) => {
 
         const insight = response.content[0]?.text || 'Unable to generate insights.';
         const result = {
+            success: true,
+            analysis: insight,
             insight,
             timestamp: new Date().toISOString(),
             sentiment: marketData.sentimentScore || 50
@@ -616,7 +621,7 @@ app.post('/api/ai-insights', async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error('AI error:', error);
-        res.status(500).json({ error: 'AI generation failed' });
+        res.status(500).json({ error: 'AI generation failed', success: false });
     }
 });
 
