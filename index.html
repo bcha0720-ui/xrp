@@ -2525,9 +2525,34 @@
         
         .xrpl-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 1400px) {
+            .xrpl-stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 1000px) {
+            .xrpl-stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .xrpl-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .xrpl-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
         }
         
         .xrpl-stat-card {
@@ -2537,6 +2562,7 @@
             padding: 1rem;
             text-align: center;
             transition: all 0.3s ease;
+            min-width: 0;
         }
         
         .xrpl-stat-card:hover {
@@ -2551,14 +2577,15 @@
         
         .xrpl-stat-value {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--accent-xrp);
             margin-bottom: 0.25rem;
+            word-break: break-word;
         }
         
         .xrpl-stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.03em;
@@ -4241,9 +4268,19 @@
                     
                     <div class="xrpl-stats-grid">
                         <div class="xrpl-stat-card">
+                            <div class="xrpl-stat-icon">💵</div>
+                            <div class="xrpl-stat-value" id="xrplXrpPrice">--</div>
+                            <div class="xrpl-stat-label">XRP Price (USD)</div>
+                        </div>
+                        <div class="xrpl-stat-card">
                             <div class="xrpl-stat-icon">📦</div>
                             <div class="xrpl-stat-value" id="xrplLedgerIndex">--</div>
                             <div class="xrpl-stat-label">Ledger Index</div>
+                        </div>
+                        <div class="xrpl-stat-card">
+                            <div class="xrpl-stat-icon">✅</div>
+                            <div class="xrpl-stat-value" id="xrplSuccessPayments">--</div>
+                            <div class="xrpl-stat-label">Successful Payments</div>
                         </div>
                         <div class="xrpl-stat-card">
                             <div class="xrpl-stat-icon">📊</div>
@@ -4251,24 +4288,24 @@
                             <div class="xrpl-stat-label">Transactions (24h)</div>
                         </div>
                         <div class="xrpl-stat-card">
-                            <div class="xrpl-stat-icon">💰</div>
-                            <div class="xrpl-stat-value" id="xrplFeeAvg">--</div>
-                            <div class="xrpl-stat-label">Avg Fee (drops)</div>
-                        </div>
-                        <div class="xrpl-stat-card">
-                            <div class="xrpl-stat-icon">🔥</div>
-                            <div class="xrpl-stat-value" id="xrplBurnedTotal">--</div>
-                            <div class="xrpl-stat-label">Total Burned</div>
-                        </div>
-                        <div class="xrpl-stat-card">
                             <div class="xrpl-stat-icon">👛</div>
                             <div class="xrpl-stat-value" id="xrplAccounts">--</div>
-                            <div class="xrpl-stat-label">Active Accounts</div>
+                            <div class="xrpl-stat-label">Accounts Created</div>
                         </div>
                         <div class="xrpl-stat-card">
                             <div class="xrpl-stat-icon">⏱️</div>
                             <div class="xrpl-stat-value" id="xrplCloseTime">--</div>
-                            <div class="xrpl-stat-label">Avg Close Time</div>
+                            <div class="xrpl-stat-label">Ledger Interval</div>
+                        </div>
+                        <div class="xrpl-stat-card">
+                            <div class="xrpl-stat-icon">⚡</div>
+                            <div class="xrpl-stat-value" id="xrplTPS">--</div>
+                            <div class="xrpl-stat-label">TPS (tx/s)</div>
+                        </div>
+                        <div class="xrpl-stat-card">
+                            <div class="xrpl-stat-icon">🔥</div>
+                            <div class="xrpl-stat-value" id="xrplBurnedTotal">--</div>
+                            <div class="xrpl-stat-label">XRP Burned (All Time)</div>
                         </div>
                     </div>
                     
@@ -12411,10 +12448,31 @@
             const ledger = xrplData.ledger;
             const server = xrplData.server;
             
+            // Update XRP Price (use global currentXRPPrice)
+            const xrpPrice = document.getElementById('xrplXrpPrice');
+            if (xrpPrice) {
+                if (currentXRPPrice && currentXRPPrice > 0) {
+                    xrpPrice.textContent = '$' + currentXRPPrice.toFixed(2);
+                } else {
+                    xrpPrice.textContent = '--';
+                }
+            }
+            
             // Update Ledger Index
             const ledgerIndex = document.getElementById('xrplLedgerIndex');
             if (ledgerIndex && ledger?.ledger_index) {
                 ledgerIndex.textContent = parseInt(ledger.ledger_index).toLocaleString();
+            }
+            
+            // Update Successful Payments (count Payment type transactions)
+            const successPayments = document.getElementById('xrplSuccessPayments');
+            if (successPayments) {
+                const payments = xrplData.transactions?.filter(tx => 
+                    tx.TransactionType === 'Payment' && tx.meta?.TransactionResult === 'tesSUCCESS'
+                ) || [];
+                // Estimate daily successful payments
+                const estimatedDailyPayments = Math.round(payments.length * 1500 * 24);
+                successPayments.textContent = estimatedDailyPayments > 0 ? estimatedDailyPayments.toLocaleString() : (payments.length + ' in ledger');
             }
             
             // Update Transaction Count (from current ledger)
@@ -12426,20 +12484,33 @@
                 txCount.textContent = estimatedDaily > 0 ? estimatedDaily.toLocaleString() : (txInLedger + ' in ledger');
             }
             
-            // Update Average Fee
-            const feeAvg = document.getElementById('xrplFeeAvg');
-            if (feeAvg && server?.validated_ledger?.base_fee_xrp) {
-                const baseFeeDrops = Math.round(parseFloat(server.validated_ledger.base_fee_xrp) * 1000000);
-                feeAvg.textContent = baseFeeDrops.toString();
-            } else if (feeAvg && ledger?.transactions) {
-                // Calculate from transactions
-                const fees = xrplData.transactions
-                    .filter(tx => tx.Fee)
-                    .map(tx => parseInt(tx.Fee));
-                if (fees.length > 0) {
-                    const avg = Math.round(fees.reduce((a, b) => a + b, 0) / fees.length);
-                    feeAvg.textContent = avg.toString();
-                }
+            // Update Accounts Created (estimate from ledger data)
+            const accounts = document.getElementById('xrplAccounts');
+            if (accounts) {
+                const accountCreates = xrplData.transactions?.filter(tx => 
+                    tx.TransactionType === 'Payment' && tx.meta?.AffectedNodes?.some(n => n.CreatedNode?.LedgerEntryType === 'AccountRoot')
+                ) || [];
+                // Estimate daily account creations
+                const estimatedDailyAccounts = Math.round(accountCreates.length * 1500 * 24);
+                accounts.textContent = estimatedDailyAccounts > 0 ? estimatedDailyAccounts.toLocaleString() : '~2,500/day';
+            }
+            
+            // Update Ledger Interval (Close Time)
+            const closeTime = document.getElementById('xrplCloseTime');
+            if (closeTime && server?.validated_ledger) {
+                const avgCloseTime = server.validated_ledger.close_time_resolution || 4;
+                closeTime.textContent = avgCloseTime + ' sec';
+            } else if (closeTime) {
+                closeTime.textContent = '3-4 sec';
+            }
+            
+            // Update TPS (Transactions Per Second)
+            const tps = document.getElementById('xrplTPS');
+            if (tps) {
+                const txInLedger = xrplData.transactions?.length || 0;
+                const avgLedgerTime = 3.5; // Average ledger close time in seconds
+                const tpsValue = txInLedger / avgLedgerTime;
+                tps.textContent = tpsValue.toFixed(2) + ' tx/s';
             }
             
             // Update Total XRP Burned (from ledger total_coins)
@@ -12448,20 +12519,7 @@
                 const currentSupply = parseInt(ledger.total_coins) / 1000000;
                 const initialSupply = 100000000000;
                 const totalBurned = initialSupply - currentSupply;
-                burnedTotal.textContent = Math.round(totalBurned).toLocaleString() + ' XRP';
-            }
-            
-            // Update Active Accounts (from server info)
-            const accounts = document.getElementById('xrplAccounts');
-            if (accounts && server?.validated_ledger?.seq) {
-                // Estimate based on ledger growth
-                accounts.textContent = '5.8M+';
-            }
-            
-            // Update Close Time
-            const closeTime = document.getElementById('xrplCloseTime');
-            if (closeTime) {
-                closeTime.textContent = '3-4s';
+                burnedTotal.textContent = totalBurned.toLocaleString(undefined, {maximumFractionDigits: 2}) + ' XRP';
             }
             
             // Render transactions
