@@ -12442,19 +12442,41 @@
             updateXRPLDisplay();
         }
         
-        function updateXRPLDisplay() {
+        async function updateXRPLDisplay() {
             if (!xrplData) return;
             
             const ledger = xrplData.ledger;
             const server = xrplData.server;
             
-            // Update XRP Price (use global currentXRPPrice)
-            const xrpPrice = document.getElementById('xrplXrpPrice');
-            if (xrpPrice) {
+            // Update XRP Price (use global currentXRPPrice or fetch it)
+            const xrpPriceEl = document.getElementById('xrplXrpPrice');
+            if (xrpPriceEl) {
                 if (currentXRPPrice && currentXRPPrice > 0) {
-                    xrpPrice.textContent = '$' + currentXRPPrice.toFixed(2);
+                    xrpPriceEl.textContent = '$' + currentXRPPrice.toFixed(2);
                 } else {
-                    xrpPrice.textContent = '--';
+                    // Try to fetch price directly
+                    xrpPriceEl.textContent = 'Loading...';
+                    try {
+                        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd');
+                        const priceData = await priceResponse.json();
+                        if (priceData.ripple?.usd) {
+                            currentXRPPrice = priceData.ripple.usd;
+                            xrpPriceEl.textContent = '$' + currentXRPPrice.toFixed(2);
+                        } else {
+                            // Try Binance as backup
+                            const binanceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=XRPUSDT');
+                            const binanceData = await binanceRes.json();
+                            if (binanceData.price) {
+                                currentXRPPrice = parseFloat(binanceData.price);
+                                xrpPriceEl.textContent = '$' + currentXRPPrice.toFixed(2);
+                            } else {
+                                xrpPriceEl.textContent = '--';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch XRP price:', e);
+                        xrpPriceEl.textContent = '--';
+                    }
                 }
             }
             
@@ -12467,31 +12489,47 @@
             // Update Successful Payments (count Payment type transactions)
             const successPayments = document.getElementById('xrplSuccessPayments');
             if (successPayments) {
-                const payments = xrplData.transactions?.filter(tx => 
-                    tx.TransactionType === 'Payment' && tx.meta?.TransactionResult === 'tesSUCCESS'
-                ) || [];
-                // Estimate daily successful payments
-                const estimatedDailyPayments = Math.round(payments.length * 1500 * 24);
-                successPayments.textContent = estimatedDailyPayments > 0 ? estimatedDailyPayments.toLocaleString() : (payments.length + ' in ledger');
+                const transactions = xrplData.transactions || [];
+                // Count payments - check both expanded and non-expanded formats
+                const payments = transactions.filter(tx => {
+                    const txType = tx.TransactionType || tx.tx?.TransactionType;
+                    const result = tx.meta?.TransactionResult || tx.metaData?.TransactionResult || 'tesSUCCESS';
+                    return txType === 'Payment' && result === 'tesSUCCESS';
+                });
+                // Estimate daily successful payments (~24,600 ledgers/day)
+                const ledgersPerDay = 24600;
+                const estimatedDailyPayments = Math.round(payments.length * ledgersPerDay);
+                if (payments.length > 0) {
+                    successPayments.textContent = estimatedDailyPayments.toLocaleString();
+                } else {
+                    // Fallback: estimate based on total tx count (typically ~35% are payments)
+                    const totalTx = transactions.length;
+                    const estimatedPayments = Math.round(totalTx * 0.35 * ledgersPerDay);
+                    successPayments.textContent = estimatedPayments > 0 ? estimatedPayments.toLocaleString() : '--';
+                }
             }
             
             // Update Transaction Count (from current ledger)
             const txCount = document.getElementById('xrplTxCount');
             if (txCount) {
                 const txInLedger = xrplData.transactions?.length || ledger?.transactions?.length || 0;
-                // Estimate daily: ~1500 ledgers/hour * 24 hours * avg tx per ledger
-                const estimatedDaily = Math.round(txInLedger * 1500 * 24);
+                // Estimate daily: ~24,600 ledgers per day
+                const ledgersPerDay = 24600;
+                const estimatedDaily = Math.round(txInLedger * ledgersPerDay);
                 txCount.textContent = estimatedDaily > 0 ? estimatedDaily.toLocaleString() : (txInLedger + ' in ledger');
             }
             
             // Update Accounts Created (estimate from ledger data)
             const accounts = document.getElementById('xrplAccounts');
             if (accounts) {
-                const accountCreates = xrplData.transactions?.filter(tx => 
-                    tx.TransactionType === 'Payment' && tx.meta?.AffectedNodes?.some(n => n.CreatedNode?.LedgerEntryType === 'AccountRoot')
-                ) || [];
+                const transactions = xrplData.transactions || [];
+                const accountCreates = transactions.filter(tx => {
+                    const nodes = tx.meta?.AffectedNodes || tx.metaData?.AffectedNodes || [];
+                    return nodes.some(n => n.CreatedNode?.LedgerEntryType === 'AccountRoot');
+                });
                 // Estimate daily account creations
-                const estimatedDailyAccounts = Math.round(accountCreates.length * 1500 * 24);
+                const ledgersPerDay = 24600;
+                const estimatedDailyAccounts = Math.round(accountCreates.length * ledgersPerDay);
                 accounts.textContent = estimatedDailyAccounts > 0 ? estimatedDailyAccounts.toLocaleString() : '~2,500/day';
             }
             
