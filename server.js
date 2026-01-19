@@ -1269,6 +1269,67 @@ app.get('/api/onchain/rich-list', async (req, res) => {
     }
 });
 // =====================================================
+// XRPSCAN RICH LIST INTEGRATION (Updated)
+// =====================================================
+
+let richListCache = { data: null, timestamp: 0 };
+const RICH_LIST_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes cache
+
+app.get('/api/onchain/rich-list', async (req, res) => {
+    const now = Date.now();
+    
+    // 1. Check Cache to avoid Rate Limits
+    if (richListCache.data && (now - richListCache.timestamp < RICH_LIST_CACHE_DURATION)) {
+        return res.json({ ...richListCache.data, cached: true });
+    }
+
+    try {
+        // 2. Fetch live data from XRPScan
+        // Note: Using the metrics endpoint for distribution and the richlist endpoint for top accounts
+        const [metricsRes, richListRes] = await Promise.all([
+            fetch('https://api.xrpscan.com/api/v1/metrics'),
+            fetch('https://api.xrpscan.com/api/v1/account/richlist?limit=50')
+        ]);
+
+        if (!metricsRes.ok || !richListRes.ok) {
+            throw new Error('XRPScan API is currently unavailable');
+        }
+
+        const metrics = await metricsRes.json();
+        const topAccountsRaw = await richListRes.json();
+
+        // 3. Format data for your frontend
+        const formattedData = {
+            stats: {
+                totalAccounts: metrics.accounts || 0,
+                ledgerIndex: metrics.ledger_index || 0,
+                updatedAt: new Date().toISOString()
+            },
+            distribution: metrics.distribution || [], // Wealth brackets
+            topAccounts: topAccountsRaw.map((acc, index) => ({
+                rank: index + 1,
+                address: acc.account,
+                balance: parseFloat(acc.balance),
+                label: KNOWN_WALLET_LABELS[acc.account] || acc.label || 'Individual Whale'
+            }))
+        };
+
+        // 4. Update Cache
+        richListCache = { data: formattedData, timestamp: now };
+        
+        res.json({ ...formattedData, cached: false });
+
+    } catch (error) {
+        console.error('Rich List Error:', error.message);
+        
+        // If API fails, try to return stale cache or error
+        if (richListCache.data) {
+            return res.json({ ...richListCache.data, cached: true, warning: "Using stale data" });
+        }
+        res.status(503).json({ error: "XRPScan API unreachable. Please try again later." });
+    }
+});
+// =====================================================
 // START SERVER
 // =====================================================
 
