@@ -1219,56 +1219,6 @@ function formatLargeNumber(num) {
 }
 
 // =====================================================
-// XRPSCAN RICH LIST INTEGRATION
-// =====================================================
-
-let richListCache = { data: null, timestamp: 0 };
-const RICH_LIST_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
-
-async function fetchRichListData() {
-    // Check cache first
-    const now = Date.now();
-    if (richListCache.data && (now - richListCache.timestamp < RICH_LIST_CACHE_DURATION)) {
-        return richListCache.data;
-    }
-
-    try {
-        // XRPScan Metrics API provides distribution data
-        const response = await fetch('https://api.xrpscan.com/api/v1/metrics', {
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) throw new Error(`XRPScan API error: ${response.status}`);
-        
-        const data = await response.json();
-        
-        // Structure the data for your frontend
-        const richListData = {
-            topAccounts: data.top_accounts || [], // Top balance holders
-            distribution: data.distribution || {}, // Wealth brackets
-            lastUpdate: new Date().toISOString()
-        };
-
-        // Update cache
-        richListCache = { data: richListData, timestamp: now };
-        return richListData;
-    } catch (error) {
-        console.error('Failed to fetch Rich List:', error.message);
-        // Return old cache if available, or an empty object
-        return richListCache.data || { error: "Data temporarily unavailable" };
-    }
-}
-
-// New API Route for the Rich List
-app.get('/api/onchain/rich-list', async (req, res) => {
-    try {
-        const data = await fetchRichListData();
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-// =====================================================
 // XRPSCAN RICH LIST INTEGRATION (Updated)
 // =====================================================
 
