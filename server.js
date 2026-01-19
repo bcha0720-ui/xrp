@@ -1219,147 +1219,55 @@ function formatLargeNumber(num) {
 }
 
 // =====================================================
-// RICH LIST API - Top XRP Holders
+// XRPSCAN RICH LIST INTEGRATION
 // =====================================================
 
-// Known wallet labels
-const KNOWN_WALLET_LABELS = {
-    'rPyCqm8EjQBfAHjC51roJqnJAGiqk1kDMZ': 'Bithumb',
-    'rs8ZPbYqgqx99muLA8Ftjsnza': 'Binance',
-    'rsXT3AQqz7VtMfZJAXKw': 'Uphold',
-    'rMQ98K56jXe1mu1': 'Ripple',
-    'rDxJNbV2YbcbJXwb': 'Upbit',
-    'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh': 'Binance',
-    'rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf': 'Binance',
-    'rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh': 'Uphold',
-    'rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS': 'Bitso',
-    'raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN': 'Kraken',
-    'rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G': 'Bitstamp',
-    'rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe': 'Coinbase',
-    'rHWcuuZoFvDS6gNbmHSdpb7u1hZzxvCoMt': 'Ripple Escrow',
-    'rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9': 'Ripple'
-};
+let richListCache = { data: null, timestamp: 0 };
+const RICH_LIST_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
-// Cache for rich list
-let richListCache = {
-    data: null,
-    timestamp: 0
-};
-const RICHLIST_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
-
-app.get('/api/richlist', async (req, res) => {
-    const forceRefresh = req.query.refresh === 'true';
-    
-    // Check cache
-    if (!forceRefresh && richListCache.data && (Date.now() - richListCache.timestamp < RICHLIST_CACHE_DURATION)) {
-        return res.json({ ...richListCache.data, cached: true });
+async function fetchRichListData() {
+    // Check cache first
+    const now = Date.now();
+    if (richListCache.data && (now - richListCache.timestamp < RICH_LIST_CACHE_DURATION)) {
+        return richListCache.data;
     }
-    
+
     try {
-        console.log('Fetching rich list from XRPScan...');
-        
-        // Try XRPScan API first (more reliable)
-        const response = await fetch('https://api.xrpscan.com/api/v1/account/richlist?limit=100', {
-            headers: {
-                'User-Agent': 'XRP-ETF-Tracker/1.0'
-            }
+        // XRPScan Metrics API provides distribution data
+        const response = await fetch('https://api.xrpscan.com/api/v1/metrics', {
+            headers: { 'Accept': 'application/json' }
         });
+
+        if (!response.ok) throw new Error(`XRPScan API error: ${response.status}`);
         
-        if (response.ok) {
-            const data = await response.json();
-            
-            if (data && Array.isArray(data)) {
-                const accounts = data.map((acc, index) => ({
-                    rank: index + 1,
-                    address: acc.account || acc.address,
-                    balance: parseFloat(acc.balance) || 0,
-                    name: KNOWN_WALLET_LABELS[acc.account || acc.address] || acc.label || 'Unknown',
-                    percentage: acc.percentage || 0
-                }));
-                
-                const totalXRP = accounts.reduce((sum, a) => sum + a.balance, 0);
-                
-                const result = {
-                    accounts,
-                    stats: {
-                        total_xrp: totalXRP,
-                        count: accounts.length,
-                        fetched_at: new Date().toISOString()
-                    },
-                    source: 'xrpscan'
-                };
-                
-                richListCache = { data: result, timestamp: Date.now() };
-                
-                return res.json(result);
-            }
-        }
+        const data = await response.json();
         
-        // Fallback: fetch from XRPL directly (top accounts by balance)
-        console.log('XRPScan failed, trying XRPL fallback...');
-        
-        const xrplResponse = await fetch('https://s1.ripple.com:51234/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                method: 'ledger_data',
-                params: [{
-                    ledger_index: 'validated',
-                    type: 'account'
-                }]
-            })
-        });
-        
-        if (xrplResponse.ok) {
-            const xrplData = await xrplResponse.json();
-            // Process XRPL response...
-            // This is more complex, so we'll use static fallback for now
-        }
-        
-        // Final fallback: return static top 100 based on current known data
-        const fallbackAccounts = [
-            { rank: 1, address: 'rPyCqm8EjQBfAHjC51roJqnJAGiqk1kDMZ', balance: 1830000000, name: 'Bithumb' },
-            { rank: 2, address: 'rs8ZPbYqgqx99muLA8Ftjsnza', balance: 1710000000, name: 'Binance' },
-            { rank: 3, address: 'rsXT3AQqz7VtMfZJAXKw', balance: 1510000000, name: 'Uphold' },
-            { rank: 4, address: 'rMQ98K56jXe1mu1', balance: 1330000000, name: 'Ripple' },
-            { rank: 5, address: 'rDxJNbV2YbcbJXwb', balance: 1250000000, name: 'Upbit' },
-            { rank: 6, address: 'rLD5k36bHjRViQ', balance: 1210000000, name: 'Unknown' },
-            { rank: 7, address: 'rKveEyR1Mb3PEv', balance: 845920000, name: 'Ripple' },
-            { rank: 8, address: 'rJ9Ey7HbgaUDt7', balance: 713000000, name: 'Unknown' },
-            { rank: 9, address: 'rw7m3CtVDYQnsA', balance: 570280000, name: 'bitbank' },
-            { rank: 10, address: 'rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS', balance: 520000000, name: 'Bitso' }
-        ];
-        
-        // Generate more accounts for top 100
-        for (let i = 11; i <= 100; i++) {
-            const balance = Math.floor(500000000 * Math.pow(0.95, i - 10));
-            fallbackAccounts.push({
-                rank: i,
-                address: 'r' + Math.random().toString(36).substring(2, 15),
-                balance: balance,
-                name: balance > 100000000 ? 'Exchange' : 'Unknown'
-            });
-        }
-        
-        const result = {
-            accounts: fallbackAccounts,
-            stats: {
-                total_xrp: fallbackAccounts.reduce((sum, a) => sum + a.balance, 0),
-                count: fallbackAccounts.length,
-                fetched_at: new Date().toISOString()
-            },
-            source: 'fallback'
+        // Structure the data for your frontend
+        const richListData = {
+            topAccounts: data.top_accounts || [], // Top balance holders
+            distribution: data.distribution || {}, // Wealth brackets
+            lastUpdate: new Date().toISOString()
         };
-        
-        richListCache = { data: result, timestamp: Date.now() };
-        res.json(result);
-        
+
+        // Update cache
+        richListCache = { data: richListData, timestamp: now };
+        return richListData;
     } catch (error) {
-        console.error('Rich list error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Failed to fetch Rich List:', error.message);
+        // Return old cache if available, or an empty object
+        return richListCache.data || { error: "Data temporarily unavailable" };
+    }
+}
+
+// New API Route for the Rich List
+app.get('/api/onchain/rich-list', async (req, res) => {
+    try {
+        const data = await fetchRichListData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 // =====================================================
 // START SERVER
 // =====================================================
