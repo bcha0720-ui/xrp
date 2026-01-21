@@ -104,14 +104,7 @@ const DESCRIPTIONS = {
     'XRPR': 'REX-Osprey XRP',
     'XRPK': 'T-REX 2X Long XRP',
     'XRPT': 'Volatility Shares 2x XRP',
-    'XXRP': 'Teucrium 2x Long XRP',
-    'IBIT': 'iShares Bitcoin Trust',
-    'FBTC': 'Fidelity Wise Origin Bitcoin',
-    'GBTC': 'Grayscale Bitcoin Trust',
-    'ARKB': 'ARK 21Shares Bitcoin',
-    'ETHA': 'iShares Ethereum Trust',
-    'FETH': 'Fidelity Ethereum Fund',
-    'ETHE': 'Grayscale Ethereum Trust'
+    'XXRP': 'Teucrium 2x Long XRP'
 };
 
 // =====================================================
@@ -223,19 +216,64 @@ async function fetchXRPPrice() {
 }
 
 // =====================================================
-// EMAIL SUMMARY GENERATOR - Real Data from XRPL
+// EMAIL SUMMARY GENERATOR - Using Rich List Data
 // =====================================================
 
-// Exchange wallet addresses
-const EXCHANGE_WALLETS = {
-    'Binance': ['rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'],
-    'Uphold': ['rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh'],
-    'Bitso': ['rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS'],
-    'Kraken': ['raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN'],
-    'Bitstamp': ['rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G'],
-    'Coinbase': ['rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe'],
-    'Robinhood': ['rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6']
-};
+async function generateWeeklyEmailSummary() {
+    try {
+        // Fetch current XRP price
+        const priceData = await fetchXRPPrice();
+        const currentPrice = priceData.price || 0;
+        const change24h = priceData.change24h || 0;
+
+        // Fetch rich list (use force refresh to get fresh data)
+        const richRes = await fetch('http://localhost:' + PORT + '/api/richlist?refresh=true');
+        const richData = await richRes.json();
+
+        if (!richData.accounts || !richData.stats) {
+            throw new Error('Rich list data unavailable');
+        }
+
+        const { accounts, stats } = richData;
+
+        // Summarize key holders (top 10 as example)
+        const topHoldersSummary = accounts.slice(0, 10).map(a => 
+            `- ${a.name} (${a.status}): ${a.balance.toLocaleString()} XRP (${a.percentage}%)`
+        ).join('\n');
+
+        // Key stats
+        const whaleCount = stats.whale_accounts;
+        const top10Dominance = stats.top10_dominance;
+        const totalInSlice = stats.total_xrp.toLocaleString();
+
+        // Build plain text email body
+        const summary = `
+Weekly XRP Snapshot (${new Date().toLocaleDateString()})
+
+Current Price: $$  {currentPrice.toFixed(4)} (  $$ {change24h >= 0 ? '+' : ''} $${change24h.toFixed(2)}% 24h)
+
+Rich List Highlights (XRPSCAN top ~${accounts.length} accounts):
+- Total XRP in slice: ${totalInSlice} XRP
+- Whales (≥1M XRP): ${whaleCount}
+- Top 10 dominance: ${top10Dominance}%
+
+Top 10 Holders:
+${topHoldersSummary}
+
+Note: Data from XRPSCAN rich list slice. Full top 10K not available via this source.
+Full dashboard: https://xrp-1-0jnc.onrender.com
+
+Stay informed — XRP Army 🚀
+`;
+
+        return summary;
+
+    } catch (err) {
+        console.error('Email summary generation failed:', err.message);
+        return `Weekly XRP Report failed to generate: ${err.message}`;
+    }
+}
+
 
 async function fetchWalletBalance(address) {
     try {
@@ -1218,65 +1256,97 @@ function formatLargeNumber(num) {
     return num.toLocaleString();
 }
 
-// =====================================================
-// XRPSCAN RICH LIST INTEGRATION (Updated)
-// =====================================================
+// ... (all your existing code above this point remains unchanged)
+
+// Existing routes are here, e.g.:
+// app.get('/api/etf-data', async (req, res) => { ... });
+// app.get('/api/sentiment', async (req, res) => { ... });
+// app.get('/api/richlist', ...)  ← old version if you have one
+
+// ────────────────────────────────────────────────
+// NEW / IMPROVED RICH LIST ENDPOINT
+// Place it here, replacing any old /api/richlist if it exists
+// ────────────────────────────────────────────────
 
 let richListCache = { data: null, timestamp: 0 };
-const RICH_LIST_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes cache
+const RICHLIST_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes - adjust as needed
 
-app.get('/api/onchain/rich-list', async (req, res) => {
-    const now = Date.now();
+app.get('/api/richlist', async (req, res) => {
+    const forceRefresh = req.query.refresh === 'true';
     
-    // 1. Check Cache to avoid Rate Limits
-    if (richListCache.data && (now - richListCache.timestamp < RICH_LIST_CACHE_DURATION)) {
+    if (!forceRefresh && richListCache.data && (Date.now() - richListCache.timestamp < RICHLIST_CACHE_DURATION)) {
         return res.json({ ...richListCache.data, cached: true });
     }
-
+    
     try {
-        // 2. Fetch live data from XRPScan
-        // Note: Using the metrics endpoint for distribution and the richlist endpoint for top accounts
-        const [metricsRes, richListRes] = await Promise.all([
-            fetch('https://api.xrpscan.com/api/v1/metrics'),
-            fetch('https://api.xrpscan.com/api/v1/account/richlist?limit=50')
-        ]);
-
-        if (!metricsRes.ok || !richListRes.ok) {
-            throw new Error('XRPScan API is currently unavailable');
+        console.log('Fetching rich list from XRPSCAN...');
+        
+        const response = await fetch('https://api.xrpscan.com/api/v1/balances', {
+            headers: { 'User-Agent': 'XRP-ETF-Tracker/1.0' }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`XRPSCAN returned ${response.status}`);
         }
-
-        const metrics = await metricsRes.json();
-        const topAccountsRaw = await richListRes.json();
-
-        // 3. Format data for your frontend
-        const formattedData = {
-            stats: {
-                totalAccounts: metrics.accounts || 0,
-                ledgerIndex: metrics.ledger_index || 0,
-                updatedAt: new Date().toISOString()
-            },
-            distribution: metrics.distribution || [], // Wealth brackets
-            topAccounts: topAccountsRaw.map((acc, index) => ({
+        
+        const data = await response.json();
+        
+        if (!Array.isArray(data)) {
+            throw new Error('Invalid response: not an array');
+        }
+        
+        // Process the returned slice (usually ~500-600 items)
+        const accounts = data.map((acc, index) => {
+            const balanceXRP = Number(acc.balance) / 1_000_000; // drops → XRP
+            
+            let displayName = 'Unknown Whale';
+            let status = 'Whale';
+            
+            if (acc.name && acc.name.name) {
+                displayName = acc.name.name;
+                // Optional: mark known exchanges
+                if (['Binance', 'Uphold', 'Bitso', 'Kraken', 'Bitstamp', 'Coinbase', 'Robinhood', 'Ripple'].some(e => displayName.includes(e))) {
+                    status = 'Exchange';
+                } else if (displayName === 'Ripple') {
+                    status = 'Ripple Escrow'; // or just 'Ripple'
+                }
+            }
+            
+            return {
                 rank: index + 1,
                 address: acc.account,
-                balance: parseFloat(acc.balance),
-                label: KNOWN_WALLET_LABELS[acc.account] || acc.label || 'Individual Whale'
-            }))
+                balance: balanceXRP,
+                name: displayName,
+                percentage: 0,          // calculate below
+                status
+            };
+        });
+        
+        // Compute percentages based on this slice's total
+        const totalInSlice = accounts.reduce((sum, a) => sum + a.balance, 0);
+        accounts.forEach(a => {
+            a.percentage = ((a.balance / totalInSlice) * 100).toFixed(2);
+        });
+        
+        // Stats (note: these are for the returned slice, not true top 10K)
+        const stats = {
+            total_xrp: totalInSlice,
+            count: accounts.length,
+            whale_accounts: accounts.filter(a => a.balance >= 1_000_000).length,
+            top10_dominance: accounts.slice(0, 10).reduce((sum, a) => sum + Number(a.percentage), 0).toFixed(1),
+            fetched_at: new Date().toISOString(),
+            note: 'Based on XRPSCAN rich list slice (~top 500–600)'
         };
-
-        // 4. Update Cache
-        richListCache = { data: formattedData, timestamp: now };
         
-        res.json({ ...formattedData, cached: false });
-
+        const result = { accounts, stats, source: 'xrpscan' };
+        
+        richListCache = { data: result, timestamp: Date.now() };
+        res.json(result);
+        
     } catch (error) {
-        console.error('Rich List Error:', error.message);
-        
-        // If API fails, try to return stale cache or error
-        if (richListCache.data) {
-            return res.json({ ...richListCache.data, cached: true, warning: "Using stale data" });
-        }
-        res.status(503).json({ error: "XRPScan API unreachable. Please try again later." });
+        console.error('Rich list fetch failed:', error.message);
+        // Keep a minimal fallback or return error
+        res.status(503).json({ error: 'Rich list unavailable', fallback: true });
     }
 });
 // =====================================================
