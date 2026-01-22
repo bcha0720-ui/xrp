@@ -5940,8 +5940,8 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	   {       
-         date: "1/22/2026",
+            {       
+                date: "1/22/2026",
                 canary: { xrp: 181885628.7, value: 356203723.94 },
                 bitwise: { xrp: null, value: null },
                 franklin: { xrp: null, value: null },
@@ -5953,7 +5953,7 @@
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
             },
-			{
+            {
                 date: "1/21/2026",
                 canary: { xrp: 181888120.32, value: 346082528.08 },
                 bitwise: { xrp: 155612822.31, value: 304733477.69 },
@@ -5965,21 +5965,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },     		
-           {       
-			    date: "1/20/2026",
-                canary: { xrp: null, value: null },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: 140652628.11, value: 267622568.56 },
-                grayscale: { xrp: null, value: null },
-                shares21: { xrp: null, value: null },
-                rex: { xrp: null, value: null },
-                nciq: { xrp: null, value: null },
-                bitw: { xrp: null, value: null },
-                gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null }
-            },
-		{
+            },     				
+            {
                 date: "1/16/2026",
                 canary: { xrp: 181474831.52, value: 374525942.54 },
                 bitwise: { xrp: null, value: null },
@@ -11470,11 +11457,20 @@
                     const richListData = await richListResponse.json();
                     
                     if (richListData.accounts && richListData.accounts.length > 0) {
-                        whaleDataFull = richListData.accounts.map(acc => ({
-                            rank: acc.rank,
+                        // First map the data
+                        let accounts = richListData.accounts.map(acc => ({
                             address: acc.address,
                             balance: acc.balance,
                             name: KNOWN_ADDRESSES[acc.address] || acc.name || 'Unknown'
+                        }));
+                        
+                        // Sort by balance descending (highest first)
+                        accounts.sort((a, b) => b.balance - a.balance);
+                        
+                        // Assign ranks based on sorted order
+                        whaleDataFull = accounts.map((acc, index) => ({
+                            ...acc,
+                            rank: index + 1
                         }));
                         
                         // Store stats
@@ -11485,7 +11481,8 @@
                         console.log('Rich list loaded from API:', {
                             accounts: whaleDataFull.length,
                             total: richListData.stats?.total_xrp?.toLocaleString(),
-                            cached: richListData.cached
+                            cached: richListData.cached,
+                            topHolder: whaleDataFull[0]
                         });
                     }
                 } else {
@@ -11654,13 +11651,23 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (Array.isArray(data) && data.length > 0) {
-                        return data.map((acc, index) => ({
-                            rank: index + 1,
+                        // Map data
+                        let accounts = data.map((acc) => ({
                             address: acc.account,
                             balance: Number(acc.balance) / 1_000_000,
                             name: acc.name?.name || 'Unknown'
                         }));
+                        
+                        // Sort by balance descending
+                        accounts.sort((a, b) => b.balance - a.balance);
+                        
+                        // Assign ranks
+                        return accounts.map((acc, index) => ({
+                            ...acc,
+                            rank: index + 1
+                        }));
                     }
+                }
                 }
             } catch (e) {
                 console.error('Direct XRPScan fetch failed:', e);
@@ -11763,25 +11770,14 @@
         
         function updateWhaleStats() {
             // Use FULL dataset for stats, not just displayed subset
-            if (whaleDataFull.length === 0) return;
+            if (!whaleDataFull || whaleDataFull.length === 0) return;
             
-            // Use API stats if available, otherwise calculate
-            let total, whaleAccounts, mean, median;
-            
-            if (whaleStats && whaleStats.total_xrp) {
-                // Use stats from API
-                total = whaleStats.total_xrp;
-                whaleAccounts = whaleStats.whale_count;
-                mean = whaleStats.mean_balance;
-                median = whaleStats.median_balance;
-            } else {
-                // Calculate from data
-                total = whaleDataFull.reduce((sum, w) => sum + w.balance, 0);
-                whaleAccounts = whaleDataFull.filter(w => w.balance >= 1000000).length;
-                const balances = whaleDataFull.map(w => w.balance).sort((a, b) => a - b);
-                mean = total / whaleDataFull.length;
-                median = balances[Math.floor(balances.length / 2)];
-            }
+            // Calculate from data (more reliable than API stats)
+            const total = whaleDataFull.reduce((sum, w) => sum + (w.balance || 0), 0);
+            const whaleAccounts = whaleDataFull.filter(w => w.balance >= 1000000).length;
+            const balances = whaleDataFull.map(w => w.balance || 0).sort((a, b) => a - b);
+            const mean = whaleDataFull.length > 0 ? total / whaleDataFull.length : 0;
+            const median = balances.length > 0 ? balances[Math.floor(balances.length / 2)] : 0;
             
             document.getElementById('whaleTotalXRP').textContent = formatHoldingsNumber(total);
             document.getElementById('whaleAccountCount').textContent = whaleDataFull.length.toLocaleString();
@@ -11790,7 +11786,7 @@
             document.getElementById('whaleMedianBalance').textContent = formatHoldingsNumber(median);
             
             // Top 10 dominance (from full dataset)
-            const top10Total = whaleDataFull.slice(0, 10).reduce((sum, w) => sum + w.balance, 0);
+            const top10Total = whaleDataFull.slice(0, 10).reduce((sum, w) => sum + (w.balance || 0), 0);
             const top10Pct = total > 0 ? (top10Total / total * 100) : 0;
             document.getElementById('whaleTop10Pct').textContent = top10Pct.toFixed(1) + '%';
             
@@ -11808,32 +11804,52 @@
         }
         
         function updateConcentrationBar(id, value, total) {
+            const bar = document.getElementById(id);
+            const valueEl = document.getElementById(id + 'Value');
+            if (!bar || !valueEl) return;
+            
             const pct = total > 0 ? (value / total * 100) : 0;
-            document.getElementById(id).style.width = Math.min(pct, 100) + '%';
-            document.getElementById(id + 'Value').textContent = pct.toFixed(1) + '%';
+            bar.style.width = Math.min(pct, 100) + '%';
+            valueEl.textContent = pct.toFixed(1) + '%';
         }
         
         function updateWhaleActivity() {
             const container = document.getElementById('whaleActivity');
+            if (!container) return;
+            
             const now = new Date();
+            
+            if (!whaleDataFull || whaleDataFull.length === 0) {
+                container.innerHTML = `
+                    <div class="activity-item">
+                        <span class="activity-icon">⏳</span>
+                        <span class="activity-text">Waiting for data...</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            const bigWhales = whaleDataFull.filter(w => w.balance >= 100000000).length;
+            const millionaires = whaleDataFull.filter(w => w.balance >= 1000000).length;
+            const knownWallets = whaleDataFull.filter(w => KNOWN_ADDRESSES[w.address]).length;
             
             container.innerHTML = `
                 <div class="activity-item">
                     <span class="activity-icon">📊</span>
-                    <span class="activity-text">10K rich list loaded</span>
+                    <span class="activity-text">Rich list loaded</span>
                     <span class="activity-time">${now.toLocaleTimeString()}</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">🐋</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => w.balance >= 100000000).length} accounts with 100M+ XRP</span>
+                    <span class="activity-text">${bigWhales} accounts with 100M+ XRP</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">💰</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => w.balance >= 1000000).length.toLocaleString()} accounts with 1M+ XRP</span>
+                    <span class="activity-text">${millionaires.toLocaleString()} accounts with 1M+ XRP</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">🏦</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => KNOWN_ADDRESSES[w.address]).length} known exchange wallets</span>
+                    <span class="activity-text">${knownWallets} known exchange wallets</span>
                 </div>
             `;
         }
