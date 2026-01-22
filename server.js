@@ -1282,7 +1282,10 @@ app.get('/api/richlist', async (req, res) => {
         console.log('Fetching rich list from XRPSCAN...');
         
         const response = await fetch('https://api.xrpscan.com/api/v1/balances', {
-            headers: { 'User-Agent': 'XRP-ETF-Tracker/1.0' }
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json'
+            }
         });
         
         if (!response.ok) {
@@ -1291,24 +1294,30 @@ app.get('/api/richlist', async (req, res) => {
         
         const data = await response.json();
         
+        // Log raw first entry for debugging
+        if (data.length > 0) {
+            console.log('Raw first entry from XRPSCAN:', JSON.stringify(data[0]));
+        }
+        
         if (!Array.isArray(data)) {
             throw new Error('Invalid response: not an array');
         }
         
-        // Process the returned slice (usually ~500-600 items)
+        // Process the returned data
         const accounts = data.map((acc, index) => {
-            const balanceXRP = Number(acc.balance) / 1_000_000; // drops → XRP
+            // XRPScan returns balance in DROPS (1 XRP = 1,000,000 drops)
+            const rawBalance = Number(acc.balance);
+            const balanceXRP = rawBalance / 1_000_000;
             
-            let displayName = 'Unknown Whale';
+            let displayName = 'Unknown';
             let status = 'Whale';
             
             if (acc.name && acc.name.name) {
                 displayName = acc.name.name;
-                // Optional: mark known exchanges
-                if (['Binance', 'Uphold', 'Bitso', 'Kraken', 'Bitstamp', 'Coinbase', 'Robinhood', 'Ripple'].some(e => displayName.includes(e))) {
+                if (['Binance', 'Uphold', 'Bitso', 'Kraken', 'Bitstamp', 'Coinbase', 'Robinhood', 'Bithumb', 'Upbit', 'bitbank', 'Bitfinex', 'OKX', 'Huobi', 'KuCoin', 'Crypto.com', 'Gemini', 'Gate.io'].some(e => displayName.includes(e))) {
                     status = 'Exchange';
-                } else if (displayName === 'Ripple') {
-                    status = 'Ripple Escrow'; // or just 'Ripple'
+                } else if (displayName.includes('Ripple')) {
+                    status = 'Ripple';
                 }
             }
             
@@ -1316,26 +1325,34 @@ app.get('/api/richlist', async (req, res) => {
                 rank: index + 1,
                 address: acc.account,
                 balance: balanceXRP,
+                rawBalance: rawBalance, // Include raw for debugging
                 name: displayName,
-                percentage: 0,          // calculate below
+                percentage: 0,
                 status
             };
         });
         
+        // Log first processed account
+        if (accounts.length > 0) {
+            console.log('Processed first account:', accounts[0]);
+        }
+        
         // Compute percentages based on this slice's total
         const totalInSlice = accounts.reduce((sum, a) => sum + a.balance, 0);
         accounts.forEach(a => {
-            a.percentage = ((a.balance / totalInSlice) * 100).toFixed(2);
+            a.percentage = ((a.balance / totalInSlice) * 100).toFixed(4);
         });
         
-        // Stats (note: these are for the returned slice, not true top 10K)
+        // Stats
         const stats = {
             total_xrp: totalInSlice,
             count: accounts.length,
             whale_accounts: accounts.filter(a => a.balance >= 1_000_000).length,
-            top10_dominance: accounts.slice(0, 10).reduce((sum, a) => sum + Number(a.percentage), 0).toFixed(1),
+            top10_dominance: accounts.slice(0, 10).reduce((sum, a) => sum + Number(a.percentage), 0).toFixed(2),
+            mean_balance: totalInSlice / accounts.length,
+            median_balance: accounts[Math.floor(accounts.length / 2)]?.balance || 0,
             fetched_at: new Date().toISOString(),
-            note: 'Based on XRPSCAN rich list slice (~top 500–600)'
+            source: 'xrpscan'
         };
         
         const result = { accounts, stats, source: 'xrpscan' };
@@ -1345,8 +1362,26 @@ app.get('/api/richlist', async (req, res) => {
         
     } catch (error) {
         console.error('Rich list fetch failed:', error.message);
-        // Keep a minimal fallback or return error
-        res.status(503).json({ error: 'Rich list unavailable', fallback: true });
+        
+        // Return cached data if available (even if stale)
+        if (richListCache.data) {
+            console.log('Returning stale cached data');
+            return res.json({ ...richListCache.data, cached: true, stale: true });
+        }
+        
+        // Return error with empty structure so frontend doesn't break
+        res.status(503).json({ 
+            error: 'Rich list temporarily unavailable', 
+            accounts: [],
+            stats: {
+                total_xrp: 0,
+                count: 0,
+                whale_accounts: 0,
+                top10_dominance: 0,
+                fetched_at: new Date().toISOString(),
+                source: 'error'
+            }
+        });
     }
 });
 // =====================================================
