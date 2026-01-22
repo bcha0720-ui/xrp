@@ -1304,7 +1304,7 @@ app.get('/api/richlist', async (req, res) => {
         }
         
         // Process the returned data
-        const accounts = data.map((acc, index) => {
+        let accounts = data.map((acc) => {
             // XRPScan returns balance in DROPS (1 XRP = 1,000,000 drops)
             const rawBalance = Number(acc.balance);
             const balanceXRP = rawBalance / 1_000_000;
@@ -1322,19 +1322,26 @@ app.get('/api/richlist', async (req, res) => {
             }
             
             return {
-                rank: index + 1,
                 address: acc.account,
                 balance: balanceXRP,
-                rawBalance: rawBalance, // Include raw for debugging
                 name: displayName,
                 percentage: 0,
                 status
             };
         });
         
+        // Sort by balance descending (highest first)
+        accounts.sort((a, b) => b.balance - a.balance);
+        
+        // Assign ranks after sorting
+        accounts = accounts.map((acc, index) => ({
+            ...acc,
+            rank: index + 1
+        }));
+        
         // Log first processed account
         if (accounts.length > 0) {
-            console.log('Processed first account:', accounts[0]);
+            console.log('Processed first account (after sort):', accounts[0]);
         }
         
         // Compute percentages based on this slice's total
