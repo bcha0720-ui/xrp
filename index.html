@@ -1293,19 +1293,57 @@
             overflow-x: auto;
             max-height: 600px;
             overflow-y: auto;
+            position: relative;
         }
 
         .holdings-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             min-width: 1200px;
         }
 
-        .holdings-table th {
+        /* Sticky header rows */
+        .holdings-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .holdings-table thead tr:first-child th {
             position: sticky;
             top: 0;
             background: var(--bg-secondary);
-            z-index: 10;
+            z-index: 20;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--accent-xrp);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .holdings-table thead tr:nth-child(2) th {
+            position: sticky;
+            top: 38px;
+            background: var(--bg-secondary);
+            z-index: 20;
+            padding: 0.5rem 1rem;
+            text-align: right;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--accent-xrp);
+            white-space: nowrap;
+        }
+
+        .holdings-table th {
+            background: var(--bg-secondary);
             padding: 1rem;
             text-align: right;
             font-size: 0.75rem;
@@ -1317,13 +1355,24 @@
             white-space: nowrap;
         }
 
+        /* Sticky first column (date) */
+        .holdings-table td:first-child,
         .holdings-table th:first-child {
+            position: sticky;
+            left: 0;
+            background: var(--bg-card);
+            z-index: 10;
             text-align: left;
+        }
+
+        .holdings-table thead th:first-child {
+            background: var(--bg-secondary);
+            z-index: 25;
         }
 
         .holdings-table th.etf-header {
             text-align: center;
-            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            background: var(--bg-secondary);
         }
 
         .holdings-table th.sub-header {
@@ -1337,6 +1386,7 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
             text-align: right;
+            background: var(--bg-card);
         }
 
         .holdings-table td:first-child {
@@ -1345,7 +1395,7 @@
             color: var(--accent-xrp);
         }
 
-        .holdings-table tr:hover {
+        .holdings-table tr:hover td {
             background: var(--bg-card-hover);
         }
 
@@ -3668,12 +3718,7 @@
                         <span>📋</span>
                         Daily Holdings Data
                     </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">Data updated manually</span>
-                        <button class="btn btn-refresh" onclick="refreshHoldingsDisplay()">
-                            ↻ Recalculate Values
-                        </button>
-                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Data updated manually</span>
                 </div>
                 <div class="holdings-table-wrapper">
                     <table class="holdings-table" id="holdingsTable">
@@ -5895,8 +5940,8 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	       {       
-			    date: "1/22/2026",
+	    {       
+         date: "1/22/2026",
                 canary: { xrp: 181885628.7, value: 356203723.94 },
                 bitwise: { xrp: null, value: null },
                 franklin: { xrp: null, value: null },
@@ -5920,8 +5965,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },
-			{       
+            },     
+      	    {      
 			    date: "1/20/2026",
                 canary: { xrp: null, value: null },
                 bitwise: { xrp: null, value: null },
@@ -11583,103 +11628,10 @@
         }
         
         async function fetchRichListFallback() {
-            // Fallback: Generate realistic rich list data
-            // Target from user's script: 51,809,629,093 XRP total
-            // Mean: 5,180,962.91 XRP, Median: 403,841.13 XRP
-            
-            const results = [];
-            
-            // Known large wallets - scaled up to reach 51.8B target
-            const knownWallets = [
-                { address: "rHWcuuZoFvDS6gNbmHSdpb7u1hZzxvCoMt", balance: 9500000000, name: "Ripple Escrow" },
-                { address: "rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9", balance: 7200000000, name: "Ripple" },
-                { address: "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf", balance: 3661827727, name: "Binance" },
-                { address: "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS", balance: 2818277941, name: "Bitso" },
-                { address: "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV", balance: 2490523350, name: "Uphold" },
-                { address: "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF", balance: 2165582363, name: "Uphold" },
-                { address: "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN", balance: 1847378587, name: "Kraken" },
-                { address: "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G", balance: 1516576792, name: "Bitstamp" },
-                { address: "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A", balance: 1409917943, name: "Binance" },
-                { address: "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe", balance: 1157941994, name: "Coinbase" },
-                { address: "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh", balance: 925860812, name: "Uphold" },
-                { address: "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6", balance: 789000000, name: "Robinhood" },
-                { address: "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP", balance: 675000000, name: "Robinhood" },
-                { address: "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm", balance: 545000000, name: "Bitfinex" },
-                { address: "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq", balance: 438000000, name: "Bitrue" },
-                { address: "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5", balance: 432000000, name: "Bithumb" },
-                { address: "rGDreBvnHrX1get7na3J4oowN19ny4GzFn", balance: 328000000, name: "Bitget" },
-                { address: "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq", balance: 322000000, name: "GateHub" },
-                { address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv", balance: 279000000, name: "Bitstamp" },
-                { address: "rEy8TFcrAPvhpKrwyrscNYyqBGUkE9hKaJ", balance: 265000000, name: "Unknown Whale" },
-            ];
-            
-            results.push(...knownWallets);
-            
-            // Target: 51,809,629,093 XRP
-            const targetTotal = 51809629093;
-            const knownTotal = knownWallets.reduce((sum, w) => sum + w.balance, 0);
-            const remainingTotal = targetTotal - knownTotal;
-            
-            // Generate remaining 9,980 accounts
-            const targetCount = 10000;
-            const remainingCount = targetCount - results.length;
-            
-            // Average remaining balance needed per account
-            const avgRemaining = remainingTotal / remainingCount;
-            
-            // Generate with power law - starting high and decaying
-            let runningTotal = 0;
-            let currentBalance = 250000000; // Start at 250M for rank 21
-            
-            for (let i = 0; i < remainingCount; i++) {
-                const rank = results.length + i + 1;
-                
-                // Decay rate that produces median ~400K around rank 5000
-                currentBalance = currentBalance * 0.99915;
-                
-                // Add variance
-                const variance = 0.8 + Math.random() * 0.4;
-                let balance = Math.floor(currentBalance * variance);
-                
-                // Ensure we don't go below minimum
-                balance = Math.max(50000, balance);
-                
-                results.push({
-                    address: 'r' + generateRandomAddress(),
-                    balance: balance,
-                    name: balance >= 1000000 ? 'Unknown Whale' : 'Unknown'
-                });
-                
-                runningTotal += balance;
-            }
-            
-            // Adjust to hit exact target by scaling
-            const actualTotal = results.reduce((sum, w) => sum + w.balance, 0);
-            const scaleFactor = targetTotal / actualTotal;
-            
-            results.forEach(w => {
-                w.balance = Math.floor(w.balance * scaleFactor);
-            });
-            
-            // Sort by balance descending
-            results.sort((a, b) => b.balance - a.balance);
-            
-            // Add ranks
-            results.forEach((item, index) => {
-                item.rank = index + 1;
-            });
-            
-            // Log totals for verification
-            const finalTotal = results.reduce((sum, w) => sum + w.balance, 0);
-            console.log('Rich list fallback generated:', {
-                accounts: results.length,
-                totalXRP: finalTotal.toLocaleString(),
-                targetXRP: targetTotal.toLocaleString(),
-                mean: Math.round(finalTotal / results.length).toLocaleString(),
-                median: results[Math.floor(results.length / 2)].balance.toLocaleString()
-            });
-            
-            return results.slice(0, 10000);
+            // No fake data - return empty with error message
+            console.error('Rich list API failed - no fallback data available');
+            showToast('Unable to load Top Holders data. Please try again later.', 'error');
+            return [];
         }
         
         function generateRandomAddress() {
