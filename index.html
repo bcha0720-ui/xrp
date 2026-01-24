@@ -15,8 +15,10 @@
     <link rel="manifest" href="manifest.json">
     
     <!-- Icons for iOS and Android -->
-    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
-    <link rel="apple-touch-icon" href="icon-192.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JFYKZKVTMZ"></script>
@@ -3794,6 +3796,182 @@
         .btn-generate-report:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(35, 247, 221, 0.4); }
         .btn-generate-report:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .report-status { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Install App Banner */
+        .install-banner {
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(35, 247, 221, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .install-banner:hover {
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.15), rgba(168, 85, 247, 0.15));
+            transform: translateY(-2px);
+        }
+        
+        .install-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .install-banner-icon {
+            font-size: 1.5rem;
+        }
+        
+        .install-banner-text h4 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 0.1rem;
+        }
+        
+        .install-banner-text p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .install-banner-btn {
+            background: var(--accent-xrp);
+            color: var(--bg-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .install-banner.hidden {
+            display: none;
+        }
+        
+        /* Install Modal */
+        .install-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .install-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .install-modal {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-xrp);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .install-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .install-modal-header h3 {
+            font-size: 1.2rem;
+            color: var(--accent-xrp);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .install-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .install-platform {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .install-platform h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .install-platform h4.ios { color: #007AFF; }
+        .install-platform h4.android { color: #34A853; }
+        
+        .install-steps {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .install-steps li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .install-steps li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            background: var(--accent-xrp);
+            color: var(--bg-primary);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .install-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+            }
+            
+            .install-banner-content {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3806,6 +3984,54 @@
     <div class="bg-glow"></div>
 
     <div class="container">
+        <!-- Install App Banner -->
+        <div class="install-banner" id="installBanner" onclick="showInstallModal()">
+            <div class="install-banner-content">
+                <span class="install-banner-icon">📲</span>
+                <div class="install-banner-text">
+                    <h4>Install XRP ETF Tracker</h4>
+                    <p>Add to your home screen for quick access</p>
+                </div>
+            </div>
+            <button class="install-banner-btn">Install</button>
+        </div>
+        
+        <!-- Install Modal -->
+        <div class="install-modal-overlay" id="installModal">
+            <div class="install-modal">
+                <div class="install-modal-header">
+                    <h3>📲 Install App</h3>
+                    <button class="install-modal-close" onclick="hideInstallModal()">×</button>
+                </div>
+                
+                <div class="install-platform">
+                    <h4 class="ios">🍎 iPhone / iPad (Safari)</h4>
+                    <ol class="install-steps">
+                        <li><span class="step-number">1</span> Tap the <strong>Share</strong> button <span style="background:#007AFF;color:white;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.7rem;">□↑</span></li>
+                        <li><span class="step-number">2</span> Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                        <li><span class="step-number">3</span> Tap <strong>"Add"</strong> in the top right</li>
+                    </ol>
+                </div>
+                
+                <div class="install-platform">
+                    <h4 class="android">🤖 Android (Chrome)</h4>
+                    <ol class="install-steps">
+                        <li><span class="step-number">1</span> Tap the <strong>⋮ menu</strong> (3 dots top right)</li>
+                        <li><span class="step-number">2</span> Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+                        <li><span class="step-number">3</span> Tap <strong>"Install"</strong></li>
+                    </ol>
+                </div>
+                
+                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:1rem;">
+                    ✨ The app will appear on your home screen like a native app!
+                </p>
+                
+                <button style="width:100%;margin-top:1rem;padding:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.8rem;cursor:pointer;" onclick="dismissInstallBanner()">
+                    Don't show again
+                </button>
+            </div>
+        </div>
+        
         <header>
             <div class="logo">
                 <div class="logo-icon">
@@ -6336,25 +6562,11 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	          {       
-                date: "1/23/2026",
-                canary: { xrp: 182620618.48, value: 349956439.05 },
-                bitwise: { xrp: null, value: null },
-                franklin: { xrp: null, value: null },
-                grayscale: { xrp: null, value: null },
-                shares21: { xrp: null, value: null },
-                rex: { xrp: null, value: null },
-                nciq: { xrp: null, value: null },
-                bitw: { xrp: null, value: null },
-                gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null },
-                btgo: { xrp: null, value: null}
-            },
-		     {       
-                date: "1/23/2026",
+	{       
+         date: "1/23/2026",
                 canary: { xrp: 181883137.7, value: 349951340.56 },
                 bitwise: { xrp: null, value: null },
-                franklin: { xrp: 157403633.99, value: 301621565.57 },
+                franklin: { xrp: null, value: null },
                 grayscale: { xrp: null, value: null },
                 shares21: { xrp: null, value: null },
                 rex: { xrp: null, value: null },
@@ -6365,7 +6577,7 @@
                 btgo: { xrp: 29068538, value: 82755000}
             },
 			{       
-                date: "1/22/2026",
+         date: "1/22/2026",
                 canary: { xrp: 181885628.7, value: 356203723.94 },
                 bitwise: { xrp: null, value: null },
                 franklin: { xrp: 142281809.13, value: 273754469.22 },
@@ -13368,6 +13580,41 @@
                     .catch(err => console.log('SW registration failed:', err));
             });
         }
+        
+        // Install Banner Functions
+        function showInstallModal() {
+            document.getElementById('installModal').classList.add('active');
+        }
+        
+        function hideInstallModal() {
+            document.getElementById('installModal').classList.remove('active');
+        }
+        
+        function dismissInstallBanner() {
+            localStorage.setItem('installBannerDismissed', 'true');
+            document.getElementById('installBanner').classList.add('hidden');
+            hideInstallModal();
+        }
+        
+        // Check if banner should be shown
+        function checkInstallBanner() {
+            const dismissed = localStorage.getItem('installBannerDismissed');
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            
+            if (dismissed || isStandalone) {
+                document.getElementById('installBanner').classList.add('hidden');
+            }
+        }
+        
+        // Check on load
+        checkInstallBanner();
+        
+        // Close modal on overlay click
+        document.getElementById('installModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideInstallModal();
+            }
+        });
     </script>
 </body>
 </html>
