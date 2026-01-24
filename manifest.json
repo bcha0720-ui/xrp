@@ -1,6 +1,6 @@
 {
-  "name": "XRP ETF Tracker",
-  "short_name": "XRP Tracker",
+  "name": "XRP Insights",
+  "short_name": "XRP Insights",
   "description": "Track XRP ETF holdings, exchange balances, and market data in real-time",
   "start_url": "/",
   "display": "standalone",
