@@ -869,23 +869,35 @@
                 font-size: 1.3rem;
             }
 
+            /* Horizontal scrollable tabs on mobile */
             .main-tabs {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.4rem;
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 0.5rem;
                 padding: 0.5rem;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .main-tabs::-webkit-scrollbar {
+                display: none;
             }
 
             .main-tab {
-                padding: 0.6rem 0.3rem;
-                font-size: 0.65rem;
+                flex: 0 0 auto;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.7rem;
                 flex-direction: column;
-                gap: 0.2rem;
-                min-height: 50px;
+                gap: 0.3rem;
+                min-width: 70px;
+                min-height: 60px;
+                white-space: nowrap;
             }
 
             .main-tab-icon {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
 
             .holdings-summary {
@@ -917,6 +929,12 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 0.5rem;
+            }
+            
+            /* Fix body scroll */
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
             }
             
             .dashboard-grid {

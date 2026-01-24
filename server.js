@@ -5,6 +5,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const app = express();
@@ -13,6 +14,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files (for PWA: manifest.json, sw.js, icons, index.html)
+app.use(express.static(path.join(__dirname, '.')));
 
 // Initialize Anthropic client (only if API key exists)
 let anthropic = null;
@@ -143,11 +147,18 @@ async function fetchYahooFinanceData(symbol) {
     try {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
         
+        // Add timeout using AbortController
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
+            },
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
@@ -179,21 +190,34 @@ async function fetchYahooFinanceData(symbol) {
             yearly: { shares: yearlyShares, dollars: yearlyShares * price }
         };
     } catch (error) {
-        console.error(`Error fetching ${symbol}:`, error.message);
+        if (error.name === 'AbortError') {
+            console.error(`Timeout fetching ${symbol}`);
+        } else {
+            console.error(`Error fetching ${symbol}:`, error.message);
+        }
         return null;
     }
 }
 
 async function fetchAllETFData() {
+    console.log('Fetching all ETF data...');
     const results = {};
+    
     for (const [groupName, symbols] of Object.entries(ETF_SYMBOLS)) {
-        const groupData = [];
-        for (const symbol of symbols) {
-            const data = await fetchYahooFinanceData(symbol);
-            if (data) groupData.push(data);
+        // Fetch all symbols in this group in parallel
+        const promises = symbols.map(symbol => fetchYahooFinanceData(symbol));
+        const groupResults = await Promise.all(promises);
+        
+        // Filter out null results
+        const groupData = groupResults.filter(data => data !== null);
+        
+        if (groupData.length > 0) {
+            results[groupName] = groupData;
+            console.log(`${groupName}: ${groupData.length}/${symbols.length} loaded`);
         }
-        if (groupData.length > 0) results[groupName] = groupData;
     }
+    
+    console.log('ETF data fetch complete');
     return results;
 }
 
@@ -925,19 +949,6 @@ app.get('/api/onchain/network', async (req, res) => {
     }
 });
 
-// ODL corridors
-app.get('/api/onchain/odl', async (req, res) => {
-    const corridors = [
-        { name: 'Mexico (Bitso)', pair: 'USD/MXN', exchange: 'Bitso', status: 'active' },
-        { name: 'Philippines (Coins.ph)', pair: 'USD/PHP', exchange: 'Coins.ph', status: 'active' },
-        { name: 'Australia (BTC Markets)', pair: 'USD/AUD', exchange: 'BTC Markets', status: 'active' },
-        { name: 'Japan (SBI VC)', pair: 'USD/JPY', exchange: 'SBI VC Trade', status: 'active' },
-        { name: 'Brazil', pair: 'USD/BRL', exchange: 'Mercado Bitcoin', status: 'active' },
-        { name: 'Europe (Bitstamp)', pair: 'USD/EUR', exchange: 'Bitstamp', status: 'active' }
-    ];
-    res.json({ success: true, data: { corridors } });
-});
-
 // DEX stats
 app.get('/api/onchain/dex', async (req, res) => {
     try {
@@ -1395,6 +1406,11 @@ app.get('/api/richlist', async (req, res) => {
 // START SERVER
 // =====================================================
 
+// Catch-all route to serve index.html for SPA/PWA
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
     console.log('=========================================');
     console.log(`🚀 XRP ETF Tracker API running on port ${PORT}`);
@@ -1407,7 +1423,6 @@ app.listen(PORT, () => {
     console.log('  GET  /api/sentiment         (live sentiment meter)');
     console.log('  GET  /api/onchain/escrow');
     console.log('  GET  /api/onchain/network');
-    console.log('  GET  /api/onchain/odl');
     console.log('  GET  /api/onchain/dex');
     console.log('  GET  /api/x-post          (preview X post)');
     console.log('  POST /api/send-email      (manual trigger)');
