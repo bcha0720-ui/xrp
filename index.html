@@ -876,8 +876,8 @@
                 flex-wrap: nowrap !important;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                gap: 0.5rem;
-                padding: 0.5rem;
+                gap: 0.3rem;
+                padding: 0.4rem;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
             }
@@ -889,18 +889,21 @@
             .main-tab {
                 flex: 0 0 auto !important;
                 padding: 0.5rem 0.6rem;
-                font-size: 0.65rem;
                 flex-direction: column;
-                gap: 0.2rem;
-                min-width: 65px;
-                max-width: 75px;
-                min-height: 55px;
+                gap: 0.15rem;
+                min-width: 50px;
+                min-height: 50px;
                 white-space: nowrap;
                 text-align: center;
             }
 
             .main-tab-icon {
-                font-size: 1.1rem;
+                font-size: 1.3rem;
+            }
+            
+            .main-tab-text {
+                font-size: 0.5rem;
+                line-height: 1;
             }
 
             .holdings-summary {
@@ -1033,19 +1036,21 @@
             }
             
             .main-tabs {
-                gap: 0.25rem;
-                padding: 0.4rem;
+                gap: 0.2rem;
+                padding: 0.3rem;
             }
             
             .main-tab {
-                padding: 0.4rem 0.5rem;
-                font-size: 0.55rem;
-                min-width: 55px;
-                max-width: 65px;
+                padding: 0.4rem 0.4rem;
+                min-width: 42px;
             }
             
             .main-tab-icon {
-                font-size: 0.9rem;
+                font-size: 1.1rem;
+            }
+            
+            .main-tab-text {
+                display: none;
             }
             
             .daily-summary-banner {
@@ -3985,31 +3990,31 @@
         <div class="main-tabs" style="flex-wrap: wrap;">
             <button class="main-tab active" onclick="switchMainTab('trading')">
                 <span class="main-tab-icon">📈</span>
-                ETF Trading
+                <span class="main-tab-text">Trading</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('holdings')">
                 <span class="main-tab-icon">💎</span>
-                XRP Holdings
+                <span class="main-tab-text">Holdings</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('exchange')">
                 <span class="main-tab-icon">🏦</span>
-                Exchange
+                <span class="main-tab-text">Exchange</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('analytics')">
                 <span class="main-tab-icon">📊</span>
-                Exchange Analytics
+                <span class="main-tab-text">Analytics</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('whales')">
                 <span class="main-tab-icon">🏆</span>
-                Top 10K
+                <span class="main-tab-text">Top 10K</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('news')">
                 <span class="main-tab-icon">📰</span>
-                News
+                <span class="main-tab-text">News</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('insights')">
                 <span class="main-tab-icon">🤖</span>
-                AI Insights
+                <span class="main-tab-text">AI</span>
             </button>
         </div>
 
