@@ -1,0 +1,39 @@
+{
+  "name": "XRP ETF Tracker",
+  "short_name": "XRP Tracker",
+  "description": "Track XRP ETF holdings, exchange balances, and market data in real-time",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#23f7dd",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "ETF Holdings",
+      "url": "/?tab=holdings",
+      "description": "View ETF holdings data"
+    },
+    {
+      "name": "Top 10K Holders",
+      "url": "/?tab=whales",
+      "description": "View top XRP holders"
+    }
+  ]
+}

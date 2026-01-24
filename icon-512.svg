@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="100" fill="#0f172a"/>
+  <circle cx="256" cy="240" r="160" fill="#1e293b"/>
+  <g transform="translate(136, 120) scale(3.75)">
+    <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20z" fill="#23f7dd"/>
+    <path d="M19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
+  </g>
+  <text x="256" y="460" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="#23f7dd" text-anchor="middle">XRP ETF</text>
+</svg>

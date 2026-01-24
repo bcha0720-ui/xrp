@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="40" fill="#0f172a"/>
+  <circle cx="96" cy="96" r="70" fill="#1e293b"/>
+  <g transform="translate(46, 46) scale(1.56)">
+    <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20z" fill="#23f7dd"/>
+    <path d="M19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
+  </g>
+  <text x="96" y="170" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#23f7dd" text-anchor="middle">ETF</text>
+</svg>
