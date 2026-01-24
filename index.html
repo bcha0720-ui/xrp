@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
     <title>XRP Insights</title>
     
     <!-- Google Analytics -->
@@ -57,7 +61,18 @@
             --glass-blur: 12px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        /* Smooth scrolling and touch improvements */
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            touch-action: manipulation;
+            overscroll-behavior-y: contain;
+        }
         
         /* Glassmorphism Base Styles */
         .glass {
@@ -803,13 +818,14 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 1rem;
+                padding: 0.75rem;
             }
 
             header {
                 flex-direction: column;
-                gap: 1.5rem;
+                gap: 1rem;
                 text-align: center;
+                padding: 0.75rem;
             }
 
             .header-meta {
@@ -818,6 +834,8 @@
 
             .controls {
                 justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
 
             .btn-refresh {
@@ -826,8 +844,8 @@
             }
 
             th, td {
-                padding: 0.75rem;
-                font-size: 0.8rem;
+                padding: 0.5rem 0.4rem;
+                font-size: 0.75rem;
             }
 
             .api-input-group {
@@ -839,23 +857,238 @@
             }
 
             .dashboard-metric-value {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
 
             .main-tabs {
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.4rem;
+                padding: 0.5rem;
             }
 
             .main-tab {
-                padding: 0.8rem;
+                padding: 0.6rem 0.3rem;
+                font-size: 0.65rem;
+                flex-direction: column;
+                gap: 0.2rem;
+                min-height: 50px;
+            }
+
+            .main-tab-icon {
+                font-size: 1.1rem;
             }
 
             .holdings-summary {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
             }
 
             .exchange-charts-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            /* Dashboard overview mobile */
+            .dashboard-overview {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .dashboard-overview-header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .dashboard-overview-title {
+                font-size: 1rem;
+            }
+            
+            .header-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-pie-container {
+                order: -1;
+                margin-bottom: 1rem;
+            }
+            
+            /* Summary banner mobile */
+            .daily-summary-banner {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+            
+            .summary-item {
+                padding: 0.5rem;
+            }
+            
+            .summary-item-header {
+                font-size: 0.6rem;
+            }
+            
+            .summary-item-value {
+                font-size: 0.9rem;
+            }
+            
+            .summary-item-subtitle {
+                font-size: 0.55rem;
+            }
+            
+            .summary-item-link {
+                font-size: 0.5rem;
+            }
+            
+            /* Tables mobile */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Bottom stats row mobile */
+            .dashboard-bottom-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .bottom-stat {
+                padding: 0.75rem;
+            }
+            
+            .bottom-stat-value {
+                font-size: 1rem;
+            }
+            
+            /* News section mobile */
+            .news-filters {
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+            
+            .news-filters .btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            /* Charts mobile */
+            .chart-container {
+                height: 250px;
+            }
+            
+            /* ETF groups mobile */
+            .etf-group {
+                margin-bottom: 1rem;
+            }
+            
+            .group-header {
+                padding: 0.75rem;
+            }
+            
+            .group-title {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Extra small screens (iPhone SE, etc) */
+        @media (max-width: 380px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .main-tabs {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.25rem;
+            }
+            
+            .main-tab {
+                padding: 0.5rem 0.2rem;
+                font-size: 0.55rem;
+            }
+            
+            .main-tab-icon {
+                font-size: 0.9rem;
+            }
+            
+            .daily-summary-banner {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-metric-value {
+                font-size: 1.1rem;
+            }
+            
+            .summary-item-value {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 0.4rem 0.3rem;
+                font-size: 0.7rem;
+            }
+        }
+        
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* Prevent iOS zoom on input focus */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+            
+            /* Fix iOS momentum scrolling */
+            .table-wrapper,
+            .news-feed,
+            .whale-table-container {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Safe area padding for notched iPhones */
+            .container {
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+                padding-right: max(0.75rem, env(safe-area-inset-right));
+                padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            }
+        }
+        
+        /* Touch-friendly button sizes */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .main-tab {
+                min-height: 48px;
+            }
+            
+            .summary-item {
+                min-height: 80px;
+            }
+            
+            .news-item,
+            .calendar-event {
+                padding: 1rem;
+            }
+            
+            /* Larger tap targets */
+            .lang-btn {
+                min-width: 50px;
+                min-height: 36px;
+            }
+            
+            .help-button,
+            .header-theme-toggle {
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
         }
 
