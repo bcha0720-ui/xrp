@@ -1667,11 +1667,93 @@
             pointer-events: none;
         }
 
+        /* Daily Summary Banner */
+        .daily-summary-banner {
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(35, 247, 221, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .summary-item:hover {
+            background: rgba(35, 247, 221, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .summary-item-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-item-icon {
+            font-size: 1rem;
+        }
+
+        .summary-item-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .summary-item-value.positive {
+            color: var(--accent-green);
+        }
+
+        .summary-item-value.negative {
+            color: var(--accent-red);
+        }
+
+        .summary-item-subtitle {
+            font-size: 0.65rem;
+            color: var(--accent-xrp);
+        }
+
+        .summary-item-link {
+            font-size: 0.6rem;
+            color: var(--accent-xrp);
+            opacity: 0.7;
+        }
+
+        @media (max-width: 1000px) {
+            .daily-summary-banner {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .daily-summary-banner {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .dashboard-overview-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .dashboard-overview-title {
@@ -3512,6 +3594,50 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- Daily Summary Banner -->
+            <div class="daily-summary-banner">
+                <div class="summary-item" onclick="switchMainTab('holdings')">
+                    <div class="summary-item-header">
+                        <span class="summary-item-icon">💎</span>
+                        <span>Today's ETF Change</span>
+                    </div>
+                    <div class="summary-item-value positive" id="summaryETFChange">+0 XRP</div>
+                    <div class="summary-item-subtitle" id="summaryETFDetail">Loading...</div>
+                    <div class="summary-item-link">↓ ETF Holdings</div>
+                </div>
+                
+                <div class="summary-item" onclick="switchMainTab('trading')">
+                    <div class="summary-item-header">
+                        <span class="summary-item-icon">📊</span>
+                        <span>ETF Trading Volume</span>
+                    </div>
+                    <div class="summary-item-value" id="summaryVolume">$0</div>
+                    <div class="summary-item-subtitle" id="summaryVolumeDetail">Today's volume</div>
+                    <div class="summary-item-link">↓ Trading Data</div>
+                </div>
+                
+                <div class="summary-item" onclick="switchMainTab('whales')">
+                    <div class="summary-item-header">
+                        <span class="summary-item-icon">🐋</span>
+                        <span>Top Holders</span>
+                    </div>
+                    <div class="summary-item-value" id="summaryWhales">--</div>
+                    <div class="summary-item-subtitle" id="summaryWhalesDetail">Whale accounts</div>
+                    <div class="summary-item-link">↓ Top 10K</div>
+                </div>
+                
+                <div class="summary-item" onclick="switchMainTab('news')">
+                    <div class="summary-item-header">
+                        <span class="summary-item-icon">📰</span>
+                        <span>Latest News</span>
+                    </div>
+                    <div class="summary-item-value" id="summaryNews">--</div>
+                    <div class="summary-item-subtitle" id="summaryNewsDetail">Recent headlines</div>
+                    <div class="summary-item-link">↓ All News</div>
+                </div>
+            </div>
+            
             <div class="dashboard-grid">
                 <div class="dashboard-metrics">
                     <div class="dashboard-metric">
@@ -3598,7 +3724,7 @@
             </button>
             <button class="main-tab" onclick="switchMainTab('holdings')">
                 <span class="main-tab-icon">💎</span>
-                ETF Holdings
+                XRP Holdings
             </button>
             <button class="main-tab" onclick="switchMainTab('exchange')">
                 <span class="main-tab-icon">🏦</span>
@@ -3695,7 +3821,7 @@
                     <div class="holdings-chart-header">
                         <div class="holdings-table-title">
                             <span>📊</span>
-                            ETF Holdings Distribution
+                            XRP Holdings Distribution
                         </div>
                         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                             <div class="holdings-chart-controls">
@@ -4862,7 +4988,7 @@
                 loading: "Loading...",
                 cached: "Cached",
                 clickToLoad: "Click to load",
-                activeETFs: "Active ETFs",
+                activeETFs: "Active ETFs and Exchange",
                 accounts: "accounts",
                 
                 // Tab Names
@@ -5940,7 +6066,7 @@
         // UPDATE THIS ARRAY DAILY - Add new entries at the TOP
         // =====================================================
         const holdingsData = [
-	    {       
+	{       
          date: "1/23/2026",
                 canary: { xrp: 181883137.7, value: 349951340.56 },
                 bitwise: { xrp: null, value: null },
@@ -5951,7 +6077,8 @@
                 nciq: { xrp: null, value: null },
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
-                ezpz: { xrp: null, value: null }
+                ezpz: { xrp: null, value: null },
+                btgo: { xrp: 29068538, value: 82755000}
             },
 			{       
          date: "1/22/2026",
@@ -5978,8 +6105,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null }
-            },     		
-           {       
+            },     			
+            {       
 			    date: "1/20/2026",
                 canary: { xrp: null, value: null },
                 bitwise: { xrp: null, value: null },
@@ -6564,7 +6691,9 @@
             { key: 'nciq', name: 'NCIQ', ticker: 'NCIQ' },
             { key: 'bitw', name: 'BITW', ticker: 'BITW' },
             { key: 'gdlc', name: 'Grayscale GDLC', ticker: 'GDLC' },
-            { key: 'ezpz', name: 'Franklin EZPZ', ticker: 'EZPZ' }
+            { key: 'ezpz', name: 'Franklin EZPZ', ticker: 'EZPZ' },
+            { key: 'btgo', name: 'Bitgo Exchange', ticker: 'BTGO' }
+        
         ];
 
         // Tab switching function
@@ -6573,7 +6702,12 @@
             document.querySelectorAll('.main-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.closest('.main-tab').classList.add('active');
+            
+            // Find and activate the correct tab button
+            const tabButton = document.querySelector(`.main-tab[onclick*="${tabName}"]`);
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
 
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -6959,6 +7093,146 @@
 
             // Render pie chart
             renderDashboardPie(etfTotalXRP, exchangeTotalXRP);
+            
+            // Update Daily Summary Banner
+            updateSummaryBanner(etfTotalXRP, exchangeTotalXRP);
+        }
+        
+        function updateSummaryBanner(etfTotalXRP, exchangeTotalXRP) {
+            // Calculate daily change - for ETFs that have data on the LATEST date
+            // If ETF has no previous value, it's a NEW addition (count full amount)
+            let totalDailyChange = 0;
+            let changedETFs = [];
+            let latestDate = holdingsData.length > 0 ? holdingsData[0].date : '';
+            
+            if (holdingsData.length >= 1) {
+                const latestRow = holdingsData[0];
+                
+                etfColumns.forEach(col => {
+                    const latestVal = latestRow[col.key]?.xrp;
+                    
+                    // Only process if this ETF has data on the latest date
+                    if (latestVal && latestVal > 0) {
+                        // Find the previous value (next row with data for this ETF)
+                        let prevVal = 0;
+                        for (let i = 1; i < holdingsData.length; i++) {
+                            const val = holdingsData[i][col.key]?.xrp;
+                            if (val && val > 0) {
+                                prevVal = val;
+                                break;
+                            }
+                        }
+                        
+                        let change;
+                        if (prevVal > 0) {
+                            // Existing ETF - calculate difference
+                            change = latestVal - prevVal;
+                        } else {
+                            // NEW ETF - no previous data, count full amount as added
+                            change = latestVal;
+                        }
+                        
+                        totalDailyChange += change;
+                        changedETFs.push({
+                            name: col.name,
+                            change: change,
+                            isNew: prevVal === 0
+                        });
+                    }
+                });
+            }
+            
+            // Update ETF Change display
+            const changeEl = document.getElementById('summaryETFChange');
+            const detailEl = document.getElementById('summaryETFDetail');
+            if (changeEl) {
+                if (changedETFs.length > 0) {
+                    const sign = totalDailyChange >= 0 ? '+' : '';
+                    changeEl.textContent = sign + formatHoldingsNumber(totalDailyChange) + ' XRP';
+                    changeEl.className = 'summary-item-value ' + (totalDailyChange >= 0 ? 'positive' : 'negative');
+                } else {
+                    changeEl.textContent = 'No updates';
+                    changeEl.className = 'summary-item-value';
+                }
+            }
+            if (detailEl) {
+                if (changedETFs.length > 0) {
+                    const names = changedETFs.map(e => e.isNew ? e.name + ' (NEW)' : e.name).join(', ');
+                    detailEl.textContent = names + ' (' + latestDate + ')';
+                } else if (latestDate) {
+                    detailEl.textContent = 'Latest: ' + latestDate;
+                } else {
+                    detailEl.textContent = 'Click to view details';
+                }
+            }
+            
+            // Update Trading Volume from cachedData
+            const volumeEl = document.getElementById('summaryVolume');
+            const volumeDetailEl = document.getElementById('summaryVolumeDetail');
+            if (cachedData && cachedData.data) {
+                let totalVolume = 0;
+                let etfCount = 0;
+                for (const group of Object.values(cachedData.data)) {
+                    if (Array.isArray(group)) {
+                        group.forEach(etf => {
+                            totalVolume += etf.daily?.dollars || 0;
+                            etfCount++;
+                        });
+                    }
+                }
+                if (volumeEl) volumeEl.textContent = '$' + formatHoldingsNumber(totalVolume);
+                if (volumeDetailEl) volumeDetailEl.textContent = etfCount + ' ETFs tracked';
+            } else {
+                if (volumeEl) volumeEl.textContent = 'Loading...';
+                if (volumeDetailEl) volumeDetailEl.textContent = 'Fetching data';
+            }
+            
+            // Update Whale count
+            const whaleEl = document.getElementById('summaryWhales');
+            const whaleDetailEl = document.getElementById('summaryWhalesDetail');
+            if (whaleDataFull.length > 0) {
+                const whaleCount = whaleDataFull.filter(w => w.balance >= 1000000).length;
+                if (whaleEl) whaleEl.textContent = whaleCount.toLocaleString();
+                if (whaleDetailEl) whaleDetailEl.textContent = whaleDataFull.length.toLocaleString() + ' accounts loaded';
+            } else if (isWhaleFetching) {
+                if (whaleEl) whaleEl.textContent = 'Loading...';
+                if (whaleDetailEl) whaleDetailEl.textContent = 'Fetching data';
+            } else {
+                if (whaleEl) whaleEl.textContent = 'View';
+                if (whaleDetailEl) whaleDetailEl.textContent = 'Click to load';
+            }
+            
+            // Update News - show latest headline
+            const newsEl = document.getElementById('summaryNews');
+            const newsDetailEl = document.getElementById('summaryNewsDetail');
+            if (cachedNews && cachedNews.length > 0) {
+                const latestNews = cachedNews[0];
+                const title = latestNews.title || 'Latest Update';
+                // Truncate title if too long
+                const shortTitle = title.length > 35 ? title.substring(0, 35) + '...' : title;
+                if (newsEl) newsEl.textContent = shortTitle;
+                if (newsDetailEl) {
+                    const source = latestNews.source || 'News';
+                    const timeAgo = getTimeAgo(latestNews.published_on * 1000);
+                    newsDetailEl.textContent = source + ' • ' + timeAgo;
+                }
+            } else {
+                if (newsEl) newsEl.textContent = 'Loading...';
+                if (newsDetailEl) newsDetailEl.textContent = 'Fetching headlines';
+            }
+        }
+        
+        // Helper function for time ago
+        function getTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) return minutes + 'm ago';
+            if (hours < 24) return hours + 'h ago';
+            return days + 'd ago';
         }
 
         function animateValue(elementId, value, isCurrency = false) {
@@ -8455,6 +8729,8 @@
         async function fetchData(silent = false) {
             const refreshBtn = document.getElementById('refreshBtn');
             
+            console.log('fetchData called, silent:', silent);
+            
             refreshBtn.disabled = true;
             refreshBtn.textContent = '⟳ Loading...';
             updateStatus('loading', 'Loading ETF data...');
@@ -8469,17 +8745,34 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/etf-data`);
+                console.log('Fetching from:', `${API_URL}/api/etf-data`);
+                
+                // Add timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
+                const response = await fetch(`${API_URL}/api/etf-data`, {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
+                console.log('Data received:', data ? 'yes' : 'no');
+                
                 cachedData = data;
                 
                 const now = new Date().toLocaleTimeString();
                 document.getElementById('lastUpdated').textContent = `Last updated: ${data.timestamp} (fetched ${now})`;
                 updateStatus('success', data.cached ? 'Cached' : 'Live');
                 
+                console.log('Calling renderData...');
                 renderData(data);
+                console.log('renderData complete');
             } catch (error) {
                 console.error('Fetch error:', error);
                 if (!silent) {
@@ -9024,6 +9317,8 @@
                     renderNews(data.Data.slice(0, 10));
                     // Also update AI Analysis section
                     renderAIAnalysis(data.Data.slice(0, 4));
+                    // Update summary banner with latest news
+                    updateSummaryBanner(0, 0);
                 } else {
                     throw new Error('No news data');
                 }
@@ -10855,7 +11150,7 @@
                     • <strong>XRPZ</strong> - Franklin<br>
                     • <strong>TOXR</strong> - 21Shares<br>
                     • <strong>XRPR</strong> - REX-Osprey<br><br>
-                    Check the <strong>ETF Holdings</strong> tab for details.`;
+                    Check the <strong>XRP Holdings</strong> tab for details.`;
             }
             
             // Technical analysis
@@ -11483,11 +11778,20 @@
                     const richListData = await richListResponse.json();
                     
                     if (richListData.accounts && richListData.accounts.length > 0) {
-                        whaleDataFull = richListData.accounts.map(acc => ({
-                            rank: acc.rank,
+                        // First map the data
+                        let accounts = richListData.accounts.map(acc => ({
                             address: acc.address,
                             balance: acc.balance,
                             name: KNOWN_ADDRESSES[acc.address] || acc.name || 'Unknown'
+                        }));
+                        
+                        // Sort by balance descending (highest first)
+                        accounts.sort((a, b) => b.balance - a.balance);
+                        
+                        // Assign ranks based on sorted order
+                        whaleDataFull = accounts.map((acc, index) => ({
+                            ...acc,
+                            rank: index + 1
                         }));
                         
                         // Store stats
@@ -11498,7 +11802,8 @@
                         console.log('Rich list loaded from API:', {
                             accounts: whaleDataFull.length,
                             total: richListData.stats?.total_xrp?.toLocaleString(),
-                            cached: richListData.cached
+                            cached: richListData.cached,
+                            topHolder: whaleDataFull[0]
                         });
                     }
                 } else {
@@ -11667,11 +11972,20 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (Array.isArray(data) && data.length > 0) {
-                        return data.map((acc, index) => ({
-                            rank: index + 1,
+                        // Map data
+                        let accounts = data.map((acc) => ({
                             address: acc.account,
                             balance: Number(acc.balance) / 1_000_000,
                             name: acc.name?.name || 'Unknown'
+                        }));
+                        
+                        // Sort by balance descending
+                        accounts.sort((a, b) => b.balance - a.balance);
+                        
+                        // Assign ranks
+                        return accounts.map((acc, index) => ({
+                            ...acc,
+                            rank: index + 1
                         }));
                     }
                 }
@@ -11776,25 +12090,14 @@
         
         function updateWhaleStats() {
             // Use FULL dataset for stats, not just displayed subset
-            if (whaleDataFull.length === 0) return;
+            if (!whaleDataFull || whaleDataFull.length === 0) return;
             
-            // Use API stats if available, otherwise calculate
-            let total, whaleAccounts, mean, median;
-            
-            if (whaleStats && whaleStats.total_xrp) {
-                // Use stats from API
-                total = whaleStats.total_xrp;
-                whaleAccounts = whaleStats.whale_count;
-                mean = whaleStats.mean_balance;
-                median = whaleStats.median_balance;
-            } else {
-                // Calculate from data
-                total = whaleDataFull.reduce((sum, w) => sum + w.balance, 0);
-                whaleAccounts = whaleDataFull.filter(w => w.balance >= 1000000).length;
-                const balances = whaleDataFull.map(w => w.balance).sort((a, b) => a - b);
-                mean = total / whaleDataFull.length;
-                median = balances[Math.floor(balances.length / 2)];
-            }
+            // Calculate from data (more reliable than API stats)
+            const total = whaleDataFull.reduce((sum, w) => sum + (w.balance || 0), 0);
+            const whaleAccounts = whaleDataFull.filter(w => w.balance >= 1000000).length;
+            const balances = whaleDataFull.map(w => w.balance || 0).sort((a, b) => a - b);
+            const mean = whaleDataFull.length > 0 ? total / whaleDataFull.length : 0;
+            const median = balances.length > 0 ? balances[Math.floor(balances.length / 2)] : 0;
             
             document.getElementById('whaleTotalXRP').textContent = formatHoldingsNumber(total);
             document.getElementById('whaleAccountCount').textContent = whaleDataFull.length.toLocaleString();
@@ -11803,7 +12106,7 @@
             document.getElementById('whaleMedianBalance').textContent = formatHoldingsNumber(median);
             
             // Top 10 dominance (from full dataset)
-            const top10Total = whaleDataFull.slice(0, 10).reduce((sum, w) => sum + w.balance, 0);
+            const top10Total = whaleDataFull.slice(0, 10).reduce((sum, w) => sum + (w.balance || 0), 0);
             const top10Pct = total > 0 ? (top10Total / total * 100) : 0;
             document.getElementById('whaleTop10Pct').textContent = top10Pct.toFixed(1) + '%';
             
@@ -11821,32 +12124,52 @@
         }
         
         function updateConcentrationBar(id, value, total) {
+            const bar = document.getElementById(id);
+            const valueEl = document.getElementById(id + 'Value');
+            if (!bar || !valueEl) return;
+            
             const pct = total > 0 ? (value / total * 100) : 0;
-            document.getElementById(id).style.width = Math.min(pct, 100) + '%';
-            document.getElementById(id + 'Value').textContent = pct.toFixed(1) + '%';
+            bar.style.width = Math.min(pct, 100) + '%';
+            valueEl.textContent = pct.toFixed(1) + '%';
         }
         
         function updateWhaleActivity() {
             const container = document.getElementById('whaleActivity');
+            if (!container) return;
+            
             const now = new Date();
+            
+            if (!whaleDataFull || whaleDataFull.length === 0) {
+                container.innerHTML = `
+                    <div class="activity-item">
+                        <span class="activity-icon">⏳</span>
+                        <span class="activity-text">Waiting for data...</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            const bigWhales = whaleDataFull.filter(w => w.balance >= 100000000).length;
+            const millionaires = whaleDataFull.filter(w => w.balance >= 1000000).length;
+            const knownWallets = whaleDataFull.filter(w => KNOWN_ADDRESSES[w.address]).length;
             
             container.innerHTML = `
                 <div class="activity-item">
                     <span class="activity-icon">📊</span>
-                    <span class="activity-text">10K rich list loaded</span>
+                    <span class="activity-text">Rich list loaded</span>
                     <span class="activity-time">${now.toLocaleTimeString()}</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">🐋</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => w.balance >= 100000000).length} accounts with 100M+ XRP</span>
+                    <span class="activity-text">${bigWhales} accounts with 100M+ XRP</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">💰</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => w.balance >= 1000000).length.toLocaleString()} accounts with 1M+ XRP</span>
+                    <span class="activity-text">${millionaires.toLocaleString()} accounts with 1M+ XRP</span>
                 </div>
                 <div class="activity-item">
                     <span class="activity-icon">🏦</span>
-                    <span class="activity-text">${whaleDataFull.filter(w => KNOWN_ADDRESSES[w.address]).length} known exchange wallets</span>
+                    <span class="activity-text">${knownWallets} known exchange wallets</span>
                 </div>
             `;
         }
@@ -12110,64 +12433,67 @@
         }
 
         // Auto-connect on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Initialize language support
-            initLanguage();
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded, starting initialization...');
             
-            fetchXRPPrice();
-            fetchData();
-            startAutoRefresh();
-            
-            // Load saved portfolio
-            loadPortfolio();
-            
-            // Update report date range
-            const today = new Date();
-            const weekAgo = new Date(today);
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            const reportDateEl = document.getElementById('reportDateRange');
-            if (reportDateEl) {
-                reportDateEl.textContent = `${weekAgo.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+            try {
+                // Initialize language support
+                console.log('1. Initializing language...');
+                initLanguage();
+                
+                // Fetch XRP price first
+                console.log('2. Fetching XRP price...');
+                fetchXRPPrice(); // Don't await - let it run in background
+                
+                // Fetch ETF data
+                console.log('3. Fetching ETF data...');
+                await fetchData();
+                console.log('4. ETF data loaded successfully');
+                
+                // Start auto refresh
+                startAutoRefresh();
+                
+                // Load saved portfolio
+                loadPortfolio();
+                
+                // Update report date range
+                const today = new Date();
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const reportDateEl = document.getElementById('reportDateRange');
+                if (reportDateEl) {
+                    reportDateEl.textContent = `${weekAgo.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${today.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+                }
+                
+                console.log('5. Initialization complete');
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
             }
             
-            // Initialize dashboard overview after a delay
-            setTimeout(() => {
-                updateDashboardOverview();
-            }, 1000);
-            
-            // Auto pre-fetch exchange data in background after 3 seconds
+            // These run regardless of try/catch
+            setTimeout(() => updateDashboardOverview(), 1000);
             setTimeout(() => {
                 if (Object.keys(exchangeData).length === 0 && !isExchangeFetching) {
-                    console.log('Pre-fetching exchange data in background...');
                     fetchExchangeData();
                 }
             }, 3000);
-            
-            // Auto pre-fetch Top 10K data in background after 5 seconds
             setTimeout(() => {
                 if (whaleDataFull.length === 0 && !isWhaleFetching) {
-                    console.log('Pre-fetching Top 10K data in background...');
                     fetchWhaleData();
                 }
             }, 5000);
             
-            // Update XRP price every 10 seconds
             setInterval(() => {
                 fetchXRPPrice();
                 updateDashboardOverview();
             }, 10000);
             
-            // Schedule daily auto-refresh at 3 PM PST (23:00 UTC)
             scheduleDaily3PMRefresh();
-            
-            // Also check every minute if it's time to refresh
             setInterval(checkScheduledRefresh, 60000);
 
-            // Show popup after 5 seconds if not recently closed
             if (shouldShowPopup()) {
-                setTimeout(() => {
-                    showPopup();
-                }, 5000);
+                setTimeout(() => showPopup(), 5000);
             }
         });
         
