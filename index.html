@@ -6565,16 +6565,18 @@
         // CONFIGURATION: Your Google Sheets Published CSV URL
         const SHEET_CSV_URL_RAW = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS8ITdmh4kpKrfc714wtsXfzPhw9m5NC4gfD-vaVuBeA5dDeANcJwQJ-TK-eUJqlTRD1gsxP9rkiTod/pub?gid=1565352037&single=true&output=csv";
         
-        // Use CORS proxy to bypass cross-origin restrictions
-        // Options: 'https://corsproxy.io/?' or 'https://api.allorigins.win/raw?url='
-        const CORS_PROXY = "https://corsproxy.io/?";
-        const SHEET_CSV_URL = CORS_PROXY + encodeURIComponent(SHEET_CSV_URL_RAW);
+        // Multiple CORS proxies for fallback reliability
+        const CORS_PROXIES = [
+            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            (url) => `https://proxy.cors.sh/${url}`,
+            (url) => url // Try direct as last resort (works if same-origin or CORS enabled)
+        ];
         
         // Holdings data will be populated from the sheet
         let holdingsData = [];
         
-        // Column mapping: Maps CSV columns to ETF keys
-        // Expected CSV format: Date, Canary XRP, Canary Value, Bitwise XRP, Bitwise Value, etc.
+        // Column mapping (kept for reference but not used directly)
         const csvColumnMap = {
             0: 'date',
             1: { key: 'canary', field: 'xrp' },
@@ -6601,6 +6603,35 @@
             22: { key: 'btgo', field: 'value' }
         };
         
+        // Function to try fetching with multiple CORS proxies
+        async function fetchWithFallback(url) {
+            for (let i = 0; i < CORS_PROXIES.length; i++) {
+                const proxyUrl = CORS_PROXIES[i](url);
+                console.log(`🔄 Trying proxy ${i + 1}/${CORS_PROXIES.length}: ${proxyUrl.substring(0, 60)}...`);
+                
+                try {
+                    const response = await fetch(proxyUrl, {
+                        headers: {
+                            'Accept': 'text/csv,text/plain,*/*'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        // Verify it looks like CSV data (has commas and newlines)
+                        if (text.includes(',') && text.includes('\n')) {
+                            console.log(`✅ Proxy ${i + 1} succeeded!`);
+                            return text;
+                        }
+                    }
+                    console.log(`❌ Proxy ${i + 1} failed: ${response.status}`);
+                } catch (err) {
+                    console.log(`❌ Proxy ${i + 1} error: ${err.message}`);
+                }
+            }
+            throw new Error('All CORS proxies failed');
+        }
+        
         // Function to fetch and parse CSV from Google Sheets
         async function fetchHoldingsFromSheet() {
             const statusDot = document.getElementById('statusDot');
@@ -6610,17 +6641,11 @@
             if (statusText) statusText.textContent = "Syncing...";
             
             console.log("🔄 Fetching data from Google Sheets...");
-            console.log("📍 URL:", SHEET_CSV_URL);
             
             try {
-                const response = await fetch(SHEET_CSV_URL);
-                console.log("📡 Response status:", response.status);
-                
-                if (!response.ok) throw new Error(`Failed to fetch sheet: ${response.status} ${response.statusText}`);
-                
-                const csvText = await response.text();
+                const csvText = await fetchWithFallback(SHEET_CSV_URL_RAW);
                 console.log("📄 CSV received, length:", csvText.length);
-                console.log("📄 First 500 chars:", csvText.substring(0, 500));
+                console.log("📄 First 300 chars:", csvText.substring(0, 300));
                 
                 const lines = csvText.split('\n').filter(line => line.trim());
                 
