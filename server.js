@@ -69,7 +69,7 @@ const knowledgeBase = [
 function findRelevantDocs(query, topK = 3) {
     const queryLower = query.toLowerCase();
     const words = queryLower.split(/\s+/).filter(w => w.length > 3);
-    
+
     return knowledgeBase.map(doc => {
         const content = (doc.title + ' ' + doc.content).toLowerCase();
         let score = words.filter(w => content.includes(w)).length;
@@ -87,7 +87,7 @@ function findRelevantDocs(query, topK = 3) {
 
 const ETF_SYMBOLS = {
     'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP'],
+    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'XXX'],
     'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
     'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
@@ -108,7 +108,8 @@ const DESCRIPTIONS = {
     'XRPR': 'REX-Osprey XRP',
     'XRPK': 'T-REX 2X Long XRP',
     'XRPT': 'Volatility Shares 2x XRP',
-    'XXRP': 'Teucrium 2x Long XRP'
+    'XXRP': 'Teucrium 2x Long XRP',
+    'XXX': 'Cyber Hornet S&P 500/XRP 75/25'
 };
 
 // =====================================================
@@ -146,40 +147,40 @@ function isRateLimited(ip) {
 async function fetchYahooFinanceData(symbol) {
     try {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
-        
+
         // Add timeout using AbortController
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
+
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             },
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         const data = await response.json();
         const result = data.chart?.result?.[0];
         if (!result) return null;
-        
+
         const meta = result.meta;
         const quotes = result.indicators?.quote?.[0];
         const timestamps = result.timestamp || [];
-        
+
         if (!quotes || !timestamps.length) return null;
-        
+
         const price = meta.regularMarketPrice || quotes.close?.[quotes.close.length - 1] || 0;
         const volumes = quotes.volume || [];
-        
+
         const dailyShares = volumes[volumes.length - 1] || 0;
         const weeklyShares = volumes.slice(-5).reduce((a, b) => a + (b || 0), 0);
         const monthlyShares = volumes.slice(-21).reduce((a, b) => a + (b || 0), 0);
         const yearlyShares = volumes.slice(-252).reduce((a, b) => a + (b || 0), 0);
-        
+
         return {
             symbol,
             description: DESCRIPTIONS[symbol] || symbol,
@@ -202,21 +203,21 @@ async function fetchYahooFinanceData(symbol) {
 async function fetchAllETFData() {
     console.log('Fetching all ETF data...');
     const results = {};
-    
+
     for (const [groupName, symbols] of Object.entries(ETF_SYMBOLS)) {
         // Fetch all symbols in this group in parallel
         const promises = symbols.map(symbol => fetchYahooFinanceData(symbol));
         const groupResults = await Promise.all(promises);
-        
+
         // Filter out null results
         const groupData = groupResults.filter(data => data !== null);
-        
+
         if (groupData.length > 0) {
             results[groupName] = groupData;
             console.log(`${groupName}: ${groupData.length}/${symbols.length} loaded`);
         }
     }
-    
+
     console.log('ETF data fetch complete');
     return results;
 }
@@ -261,7 +262,7 @@ async function generateWeeklyEmailSummary() {
         const { accounts, stats } = richData;
 
         // Summarize key holders (top 10 as example)
-        const topHoldersSummary = accounts.slice(0, 10).map(a => 
+        const topHoldersSummary = accounts.slice(0, 10).map(a =>
             `- ${a.name} (${a.status}): ${a.balance.toLocaleString()} XRP (${a.percentage}%)`
         ).join('\n');
 
@@ -324,7 +325,7 @@ async function fetchExchangeHoldings() {
     console.log('Fetching exchange holdings from XRPL...');
     const holdings = {};
     let total = 0;
-    
+
     for (const [exchange, addresses] of Object.entries(EXCHANGE_WALLETS)) {
         let exchangeTotal = 0;
         for (const addr of addresses) {
@@ -335,7 +336,7 @@ async function fetchExchangeHoldings() {
         total += exchangeTotal;
         console.log(`  ${exchange}: ${formatLargeNumber(exchangeTotal)} XRP`);
     }
-    
+
     console.log(`Total exchange holdings: ${formatLargeNumber(total)} XRP`);
     return { holdings, total };
 }
@@ -343,20 +344,20 @@ async function fetchExchangeHoldings() {
 async function generateXPostSummary() {
     try {
         console.log('Generating X post with real data...');
-        
+
         // Fetch real XRP price from CoinGecko
         const xrpData = await fetchXRPPrice();
         console.log(`XRP Price: $${xrpData.price}, Change: ${xrpData.change24h}%`);
-        
+
         // Fetch real exchange holdings from XRPL
         const exchangeData = await fetchExchangeHoldings();
-        
+
         // Sort exchanges by holdings
         const sortedExchanges = Object.entries(exchangeData.holdings)
             .filter(([_, bal]) => bal > 0)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
-        
+
         // Also get XRP Spot ETF data
         const etfData = await fetchAllETFData();
         const xrpETFs = etfData['Spot ETFs'] || [];
@@ -364,19 +365,19 @@ async function generateXPostSummary() {
         xrpETFs.forEach(etf => {
             etfTotalVolume += etf.daily?.dollars || 0;
         });
-        
+
         // Format the X post
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
         const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' });
-        
+
         const priceChange = xrpData.change24h >= 0 ? `+${xrpData.change24h.toFixed(2)}%` : `${xrpData.change24h.toFixed(2)}%`;
-        
+
         // Build exchange holdings text
-        let exchangeText = sortedExchanges.map(([name, bal]) => 
+        let exchangeText = sortedExchanges.map(([name, bal]) =>
             `• ${name}: ${formatLargeNumber(bal)}`
         ).join('\n');
-        
+
         // Build the X post
         let xPost = `📊 XRP Update - ${dateStr} ${timeStr} PST
 
@@ -393,7 +394,7 @@ ${exchangeText}
         }
 
         xPost += `\n\n#XRP #Crypto #Ripple`;
-        
+
         // If too long, shorten
         if (xPost.length > 280) {
             xPost = `📊 XRP - ${dateStr}
@@ -405,9 +406,9 @@ Top: ${sortedExchanges.slice(0, 3).map(e => e[0]).join(', ')}
 
 #XRP #Crypto`;
         }
-        
+
         const charCount = xPost.length;
-        
+
         return {
             post: xPost,
             charCount,
@@ -435,7 +436,7 @@ async function sendEmail(to, subject, htmlContent, textContent) {
         console.log('⚠️ Email not sent - No API key');
         return false;
     }
-    
+
     try {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -451,9 +452,9 @@ async function sendEmail(to, subject, htmlContent, textContent) {
                 text: textContent
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
             console.log(`✅ Email sent to ${to}: ${subject}`);
             return true;
@@ -473,23 +474,23 @@ async function sendXPostEmail() {
         console.error('Failed to generate summary');
         return false;
     }
-    
+
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true, 
-        timeZone: 'America/Los_Angeles' 
+    const timeStr = now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'America/Los_Angeles'
     });
-    const dateStr = now.toLocaleDateString('en-US', { 
+    const dateStr = now.toLocaleDateString('en-US', {
         weekday: 'short',
-        month: 'short', 
+        month: 'short',
         day: 'numeric',
         timeZone: 'America/Los_Angeles'
     });
-    
+
     const subject = `📊 XRP Update - Ready to Post (${dateStr} ${timeStr} PST)`;
-    
+
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -563,22 +564,22 @@ function scheduleEmails() {
         console.log('⚠️ Email scheduling skipped - not enabled');
         return;
     }
-    
+
     // Check every minute if it's time to send
     setInterval(async () => {
         const now = new Date();
         const utcHour = now.getUTCHours();
         const utcMinute = now.getUTCMinutes();
-        
+
         // Only send at the start of the hour (minute 0-1)
         if (utcMinute > 1) return;
-        
+
         if (SCHEDULE_HOURS_UTC.includes(utcHour)) {
             console.log(`⏰ Scheduled email time: ${utcHour}:00 UTC`);
             await sendXPostEmail();
         }
     }, 60000); // Check every minute
-    
+
     console.log('📅 Email scheduler started');
     console.log(`   Schedule (UTC): ${SCHEDULE_HOURS_UTC.map(h => h + ':00').join(', ')}`);
     console.log(`   Schedule (PST): 8:00 AM, 1:00 PM, 4:00 PM`);
@@ -618,7 +619,7 @@ app.get('/api/etf-data', async (req, res) => {
 app.get('/api/historical', async (req, res) => {
     const period = req.query.period || '1mo';
     console.log(`[Historical] Fetching data for period: ${period}`);
-    
+
     // Map period to Yahoo Finance parameters
     const periodMap = {
         '1mo': { range: '1mo', interval: '1d' },
@@ -626,15 +627,15 @@ app.get('/api/historical', async (req, res) => {
         '6mo': { range: '6mo', interval: '1d' },
         '1y': { range: '1y', interval: '1wk' }
     };
-    
+
     const { range, interval } = periodMap[period] || periodMap['1mo'];
-    
+
     // XRP ETFs only
     const symbols = ['GXRP', 'XRP', 'XRPC', 'XXRP'];
-    
+
     try {
         const historicalData = {};
-        
+
         for (const symbol of symbols) {
             try {
                 console.log(`[Historical] Fetching ${symbol}...`);
@@ -644,36 +645,36 @@ app.get('/api/historical', async (req, res) => {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                     }
                 });
-                
+
                 console.log(`[Historical] ${symbol} response status: ${response.status}`);
-                
+
                 if (!response.ok) {
                     console.log(`[Historical] ${symbol} failed with status ${response.status}`);
                     continue;
                 }
-                
+
                 const data = await response.json();
                 const result = data.chart?.result?.[0];
-                
+
                 if (!result || !result.timestamp) {
                     console.log(`[Historical] ${symbol} no timestamp data`);
                     continue;
                 }
-                
+
                 const timestamps = result.timestamp;
                 const quotes = result.indicators?.quote?.[0];
-                
+
                 if (!quotes) {
                     console.log(`[Historical] ${symbol} no quotes data`);
                     continue;
                 }
-                
+
                 const chartData = [];
                 for (let i = 0; i < timestamps.length; i++) {
                     const date = new Date(timestamps[i] * 1000).toISOString().split('T')[0];
                     const close = quotes.close?.[i];
                     const volume = quotes.volume?.[i];
-                    
+
                     if (close != null) {
                         chartData.push({
                             date,
@@ -682,7 +683,7 @@ app.get('/api/historical', async (req, res) => {
                         });
                     }
                 }
-                
+
                 if (chartData.length > 0) {
                     historicalData[symbol] = chartData;
                     console.log(`[Historical] ${symbol} got ${chartData.length} data points`);
@@ -691,18 +692,18 @@ app.get('/api/historical', async (req, res) => {
                 console.log(`[Historical] Failed to fetch ${symbol}:`, err.message);
             }
         }
-        
+
         // If no data fetched, return generated sample data so chart works
         if (Object.keys(historicalData).length === 0) {
             console.log('[Historical] No data from Yahoo, generating sample data');
             const today = new Date();
             const sampleSymbols = ['GXRP', 'XRP', 'XXRP'];
             const basePrices = { 'GXRP': 40, 'XRP': 23, 'XXRP': 12 };
-            
+
             for (const symbol of sampleSymbols) {
                 const chartData = [];
                 const basePrice = basePrices[symbol];
-                
+
                 for (let i = 30; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(date.getDate() - i);
@@ -718,11 +719,11 @@ app.get('/api/historical', async (req, res) => {
                 historicalData[symbol] = chartData;
             }
         }
-        
+
         console.log(`[Historical] Returning data for symbols: ${Object.keys(historicalData).join(', ')}`);
-        
-        res.json({ 
-            period, 
+
+        res.json({
+            period,
             data: historicalData,
             symbols: Object.keys(historicalData)
         });
@@ -746,7 +747,7 @@ app.post('/api/ai-insights', async (req, res) => {
     try {
         const now = Date.now();
         const forceRefresh = req.body.forceRefresh === true;
-        
+
         // Check cache (skip if force refresh)
         if (!forceRefresh && insightCache.data && now - insightCache.timestamp < AI_CACHE_DURATION) {
             return res.json({ ...insightCache.data, cached: true, success: true });
@@ -844,12 +845,12 @@ app.get('/api/x-post', async (req, res) => {
 // Manually trigger email (for testing)
 app.post('/api/send-email', async (req, res) => {
     const { secret } = req.body;
-    
+
     // Simple protection - require a secret to send manually
     if (secret !== process.env.EMAIL_SECRET) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-    
+
     try {
         const success = await sendXPostEmail();
         res.json({ success, message: success ? 'Email sent!' : 'Failed to send email' });
@@ -967,7 +968,7 @@ app.get('/api/onchain/dex', async (req, res) => {
 
         const data = await response.json();
         let totalLiquidity = 0, orderCount = 0;
-        
+
         if (data.result?.offers) {
             orderCount = data.result.offers.length;
             data.result.offers.forEach(offer => {
@@ -1054,16 +1055,16 @@ async function fetchSentimentExchangeBalance(address) {
 async function calculateSentiment() {
     try {
         console.log('Calculating sentiment...');
-        
+
         // Fetch market data
         const marketData = await fetchXRPMarketData();
         if (!marketData) {
             return { score: 50, label: 'Neutral', signals: ['Unable to fetch market data'] };
         }
-        
+
         // Fetch ETF data
         const etfData = await fetchAllETFData();
-        
+
         // Fetch exchange balances
         let totalExchangeBalance = 0;
         const exchangeBalances = {};
@@ -1072,11 +1073,11 @@ async function calculateSentiment() {
             exchangeBalances[name] = balance;
             totalExchangeBalance += balance;
         }
-        
+
         // Calculate sentiment signals
         const signals = [];
         let score = 50; // Start neutral
-        
+
         // 1. Price Momentum (24h) - Weight: 20 points
         if (marketData.change24h > 5) {
             score += 15;
@@ -1097,7 +1098,7 @@ async function calculateSentiment() {
             score -= 15;
             signals.push({ factor: '24h Price', impact: 'bearish', detail: `${marketData.change24h.toFixed(2)}% (Strong decline)` });
         }
-        
+
         // 2. Weekly Trend (7d) - Weight: 15 points
         if (marketData.change7d > 10) {
             score += 12;
@@ -1112,7 +1113,7 @@ async function calculateSentiment() {
             score -= 12;
             signals.push({ factor: '7d Trend', impact: 'bearish', detail: `${marketData.change7d.toFixed(2)}% (Downtrend)` });
         }
-        
+
         // 3. Monthly Trend (30d) - Weight: 10 points
         if (marketData.change30d > 20) {
             score += 8;
@@ -1124,14 +1125,14 @@ async function calculateSentiment() {
             score -= 4;
             signals.push({ factor: '30d Trend', impact: 'slightly_bearish', detail: `${marketData.change30d.toFixed(2)}%` });
         }
-        
+
         // 4. ETF Volume Analysis - Weight: 15 points
         let totalETFVolume = 0;
         const spotETFs = etfData['Spot ETFs'] || [];
         spotETFs.forEach(etf => {
             totalETFVolume += etf.daily?.dollars || 0;
         });
-        
+
         if (totalETFVolume > 50000000) { // > $50M
             score += 12;
             signals.push({ factor: 'ETF Volume', impact: 'bullish', detail: `$${formatLargeNumber(totalETFVolume)} (High institutional interest)` });
@@ -1145,7 +1146,7 @@ async function calculateSentiment() {
             score -= 3;
             signals.push({ factor: 'ETF Volume', impact: 'slightly_bearish', detail: `$${formatLargeNumber(totalETFVolume)} (Low activity)` });
         }
-        
+
         // 5. Exchange Holdings Analysis - Weight: 10 points
         // Lower exchange holdings = bullish (coins moving to cold storage)
         // This is a simplified heuristic - in production you'd compare to historical data
@@ -1160,10 +1161,10 @@ async function calculateSentiment() {
             score -= 3;
             signals.push({ factor: 'Exchange Holdings', impact: 'slightly_bearish', detail: `${exchangeHoldingsBillions.toFixed(2)}B XRP (High - potential sell pressure)` });
         }
-        
+
         // Clamp score between 0 and 100
         score = Math.max(0, Math.min(100, score));
-        
+
         // Determine label
         let label, color;
         if (score >= 70) {
@@ -1182,7 +1183,7 @@ async function calculateSentiment() {
             label = 'Bearish';
             color = '#ef4444'; // red
         }
-        
+
         return {
             score: Math.round(score),
             label,
@@ -1209,19 +1210,19 @@ async function calculateSentiment() {
 app.get('/api/sentiment', async (req, res) => {
     try {
         const forceRefresh = req.query.refresh === 'true';
-        
+
         // Check cache
-        if (!forceRefresh && sentimentCache.data && 
+        if (!forceRefresh && sentimentCache.data &&
             Date.now() - sentimentCache.timestamp < SENTIMENT_CACHE_DURATION) {
             return res.json({ ...sentimentCache.data, cached: true });
         }
-        
+
         // Calculate fresh sentiment
         const sentiment = await calculateSentiment();
-        
+
         // Update cache
         sentimentCache = { data: sentiment, timestamp: Date.now() };
-        
+
         res.json({ ...sentiment, cached: false });
     } catch (error) {
         console.error('Sentiment API error:', error);
@@ -1284,45 +1285,45 @@ const RICHLIST_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes - adjust as needed
 
 app.get('/api/richlist', async (req, res) => {
     const forceRefresh = req.query.refresh === 'true';
-    
+
     if (!forceRefresh && richListCache.data && (Date.now() - richListCache.timestamp < RICHLIST_CACHE_DURATION)) {
         return res.json({ ...richListCache.data, cached: true });
     }
-    
+
     try {
         console.log('Fetching rich list from XRPSCAN...');
-        
+
         const response = await fetch('https://api.xrpscan.com/api/v1/balances', {
-            headers: { 
+            headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Accept': 'application/json'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`XRPSCAN returned ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Log raw first entry for debugging
         if (data.length > 0) {
             console.log('Raw first entry from XRPSCAN:', JSON.stringify(data[0]));
         }
-        
+
         if (!Array.isArray(data)) {
             throw new Error('Invalid response: not an array');
         }
-        
+
         // Process the returned data
         let accounts = data.map((acc) => {
             // XRPScan returns balance in DROPS (1 XRP = 1,000,000 drops)
             const rawBalance = Number(acc.balance);
             const balanceXRP = rawBalance / 1_000_000;
-            
+
             let displayName = 'Unknown';
             let status = 'Whale';
-            
+
             if (acc.name && acc.name.name) {
                 displayName = acc.name.name;
                 if (['Binance', 'Uphold', 'Bitso', 'Kraken', 'Bitstamp', 'Coinbase', 'Robinhood', 'Bithumb', 'Upbit', 'bitbank', 'Bitfinex', 'OKX', 'Huobi', 'KuCoin', 'Crypto.com', 'Gemini', 'Gate.io'].some(e => displayName.includes(e))) {
@@ -1331,7 +1332,7 @@ app.get('/api/richlist', async (req, res) => {
                     status = 'Ripple';
                 }
             }
-            
+
             return {
                 address: acc.account,
                 balance: balanceXRP,
@@ -1340,27 +1341,27 @@ app.get('/api/richlist', async (req, res) => {
                 status
             };
         });
-        
+
         // Sort by balance descending (highest first)
         accounts.sort((a, b) => b.balance - a.balance);
-        
+
         // Assign ranks after sorting
         accounts = accounts.map((acc, index) => ({
             ...acc,
             rank: index + 1
         }));
-        
+
         // Log first processed account
         if (accounts.length > 0) {
             console.log('Processed first account (after sort):', accounts[0]);
         }
-        
+
         // Compute percentages based on this slice's total
         const totalInSlice = accounts.reduce((sum, a) => sum + a.balance, 0);
         accounts.forEach(a => {
             a.percentage = ((a.balance / totalInSlice) * 100).toFixed(4);
         });
-        
+
         // Stats
         const stats = {
             total_xrp: totalInSlice,
@@ -1372,24 +1373,24 @@ app.get('/api/richlist', async (req, res) => {
             fetched_at: new Date().toISOString(),
             source: 'xrpscan'
         };
-        
+
         const result = { accounts, stats, source: 'xrpscan' };
-        
+
         richListCache = { data: result, timestamp: Date.now() };
         res.json(result);
-        
+
     } catch (error) {
         console.error('Rich list fetch failed:', error.message);
-        
+
         // Return cached data if available (even if stale)
         if (richListCache.data) {
             console.log('Returning stale cached data');
             return res.json({ ...richListCache.data, cached: true, stale: true });
         }
-        
+
         // Return error with empty structure so frontend doesn't break
-        res.status(503).json({ 
-            error: 'Rich list temporarily unavailable', 
+        res.status(503).json({
+            error: 'Rich list temporarily unavailable',
             accounts: [],
             stats: {
                 total_xrp: 0,
@@ -1431,7 +1432,7 @@ app.listen(PORT, () => {
     console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
     console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
     console.log('=========================================');
-    
+
     // Start email scheduler
     scheduleEmails();
 });

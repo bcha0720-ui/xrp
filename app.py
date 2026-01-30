@@ -52,7 +52,7 @@ RIPPLED_URLS = [
 
 groups = {
     "Spot ETFs": ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    "Futures ETFs": ['UXRP', 'XRPI', 'XRPM', 'XRPT', 'XXRP', 'XRPK'],
+    "Futures ETFs": ['UXRP', 'XRPI', 'XRPM', 'XRPT', 'XXRP', 'XRPK', 'XXX'],
     "Index ETFs": ['EZPZ', 'GDLC', 'NCIQ', 'BITW'],
     "Canada ETFs": ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE']
 }
@@ -67,6 +67,7 @@ descriptions = {
     'XRPZ': 'Franklin XRP', 'TOXR': '21Shares', 'UXRP': 'ProShares Ultra',
     'XRPI': 'Volatility Shares Trust', 'XRPM': 'Amplify', 'XRPR': 'REX-Osprey',
     'XRPK': 'T-REX 2X Long', 'XRPT': 'Volatility Shares 2x', 'XXRP': 'Teucrium 2x Long',
+    'XXX': 'Cyber Hornet S&P 500/XRP 75/25',
     'XRP.TO': 'Purpose', 'XRPP-B.TO': 'Purpose', 'XRPP-U.TO': 'Purpose USD Non-Hedged',
     'XRPP.TO': 'Purpose CAD Hedged', 'XRPQ-U.TO': '3iQ USD', 'XRPQ.TO': '3iQ',
     'XRP.NE': 'Canada ETF', 'XRPP.NE': 'Purpose NEO'
