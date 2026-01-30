@@ -3,3 +3,4 @@ flask-cors
 yfinance
 gunicorn
 anthropic
+requests==2.31.0
