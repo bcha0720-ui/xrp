@@ -272,6 +272,41 @@
         .header-meta {
             text-align: right;
         }
+        
+        /* Mini Install Button in Header */
+        .install-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.2), rgba(35, 247, 221, 0.05));
+            border: 1px solid var(--accent-xrp);
+            border-radius: 8px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .install-mini:hover {
+            background: linear-gradient(135deg, rgba(35, 247, 221, 0.3), rgba(35, 247, 221, 0.1));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(35, 247, 221, 0.3);
+        }
+        
+        .install-mini-icon {
+            font-size: 0.9rem;
+        }
+        
+        .install-mini-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-xrp);
+            white-space: nowrap;
+        }
+        
+        .install-mini.hidden {
+            display: none;
+        }
 
         .xrp-price {
             display: flex;
@@ -4412,8 +4447,8 @@
     <div class="bg-glow"></div>
 
     <div class="container">
-        <!-- Install App Banner -->
-        <div class="install-banner" id="installBanner" onclick="showInstallModal()">
+        <!-- Install App Banner - Hidden by default, mini version shown in header -->
+        <div class="install-banner hidden" id="installBanner" onclick="showInstallModal()">
             <div class="install-banner-content">
                 <span class="install-banner-icon">📲</span>
                 <div class="install-banner-text">
@@ -4485,6 +4520,10 @@
                 <span class="site-link-desc">Holdings Tracker</span>
             </a>
             <div class="header-meta">
+                <div class="install-mini" id="installMini" onclick="showInstallModal()">
+                    <span class="install-mini-icon">📲</span>
+                    <span class="install-mini-text">Install XRP Insights</span>
+                </div>
                 <div class="last-updated" id="lastUpdated">Not yet loaded</div>
                 <div class="status">
                     <span class="status-dot"></span>
@@ -9400,6 +9439,7 @@
             'XRPK': 'T-REX 2X Long',
             'XRPT': 'Volatility Shares 2x',
             'XXRP': 'Teucrium 2x Long',
+            'SXRP': 'Cyber Hornet S&P 500/XRP 75/25',
             'XRP.TO': 'Purpose',
             'XRPP-B.TO': 'Purpose',
             'XRPP-U.TO': 'Purpose USD Non-Hedged',
@@ -9554,6 +9594,7 @@
                     <div class="loading-container">
                         <div class="spinner"></div>
                         <p class="loading-text">Fetching ETF data...</p>
+                        <p class="loading-hint" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">First load may take 30-60s if server is waking up</p>
                     </div>
                 `;
             }
@@ -9561,9 +9602,9 @@
             try {
                 console.log('Fetching from:', `${API_URL}/api/etf-data`);
                 
-                // Add timeout
+                // Add timeout - 60 seconds for Render cold start
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
                 
                 const response = await fetch(`${API_URL}/api/etf-data`, {
                     signal: controller.signal
@@ -9600,11 +9641,16 @@
         }
 
         function showError(message) {
+            const isTimeout = message.includes('abort') || message.includes('timeout');
+            const hint = isTimeout 
+                ? 'The server may be waking up (Render free tier). Please wait 30-60 seconds and try again.'
+                : 'Make sure your API URL is correct and the server is running.';
+            
             document.getElementById('mainContent').innerHTML = `
                 <div class="error-container">
-                    <div class="error-icon">⚠️</div>
-                    <p class="error-message">${message}</p>
-                    <p class="error-hint">Make sure your API URL is correct and the server is running.</p>
+                    <div class="error-icon">${isTimeout ? '⏳' : '⚠️'}</div>
+                    <p class="error-message">${isTimeout ? 'Server is starting up...' : message}</p>
+                    <p class="error-hint">${hint}</p>
                     <button class="btn btn-refresh" onclick="fetchData()">Try Again</button>
                 </div>
             `;
@@ -13928,6 +13974,8 @@
         function dismissInstallBanner() {
             localStorage.setItem('installBannerDismissed', 'true');
             document.getElementById('installBanner').classList.add('hidden');
+            const miniBtn = document.getElementById('installMini');
+            if (miniBtn) miniBtn.classList.add('hidden');
             hideInstallModal();
         }
         
@@ -13938,6 +13986,8 @@
             
             if (dismissed || isStandalone) {
                 document.getElementById('installBanner').classList.add('hidden');
+                const miniBtn = document.getElementById('installMini');
+                if (miniBtn) miniBtn.classList.add('hidden');
             }
         }
         
@@ -13957,7 +14007,7 @@
 
         // LunarCrush via existing Render backend
         // Your Render backend already handles ETF data - now also handles LunarCrush
-        const RENDER_BACKEND_URL = 'https://xrp-etf-tracker.onrender.com'; // Your existing Render URL
+        const RENDER_BACKEND_URL = 'https://xrp-gtve.onrender.com'; // Your existing Render URL
         const LUNARCRUSH_API_KEY = '00kyv32gahqdkkkxcieql160hz89ml0c542vj4hkro6'; // Fallback for direct API
         const LUNARCRUSH_BASE_URL = 'https://lunarcrush.com/api4/public';
         
