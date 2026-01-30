@@ -25,12 +25,22 @@ try:
 except ImportError:
     logging.warning("anthropic package not installed")
 
+# =====================================================
+# LUNARCRUSH API CONFIGURATION
+# =====================================================
+LUNARCRUSH_API_KEY = os.environ.get('LUNARCRUSH_API_KEY', '00kyv32gahqdkkkxcieql160hz89ml0c542vj4hkro6')
+LUNARCRUSH_BASE_URL = 'https://lunarcrush.com/api4/public'
+
 # Caches
 ai_cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
 cache = {'data': None, 'timestamp': None, 'cache_duration': 300}
 historical_cache = {'data': None, 'timestamp': None, 'cache_duration': 600}  # 10 min cache for historical
 richlist_cache = {'data': None, 'timestamp': None, 'cache_duration': 86400}  # 24 hour cache for rich list
 burn_cache = {'data': None, 'timestamp': None, 'cache_duration': 3600}  # 1 hour cache for burn data
+
+# LunarCrush caches (5 minute cache)
+lunarcrush_cache = {}
+LUNARCRUSH_CACHE_DURATION = 300
 
 # XRPL API endpoints
 XRPSCAN_BASE = "https://api.xrpscan.com/api/v1"
@@ -61,6 +71,189 @@ descriptions = {
     'XRPP.TO': 'Purpose CAD Hedged', 'XRPQ-U.TO': '3iQ USD', 'XRPQ.TO': '3iQ',
     'XRP.NE': 'Canada ETF', 'XRPP.NE': 'Purpose NEO'
 }
+
+# =====================================================
+# LUNARCRUSH HELPER FUNCTIONS
+# =====================================================
+
+def get_lunarcrush_cached(key):
+    """Get cached LunarCrush data if not expired"""
+    if key in lunarcrush_cache:
+        data, timestamp = lunarcrush_cache[key]
+        if time.time() - timestamp < LUNARCRUSH_CACHE_DURATION:
+            return data
+    return None
+
+def set_lunarcrush_cache(key, data):
+    """Set LunarCrush cache with timestamp"""
+    lunarcrush_cache[key] = (data, time.time())
+
+def lunarcrush_request(endpoint, params=None):
+    """Make authenticated request to LunarCrush API"""
+    url = f"{LUNARCRUSH_BASE_URL}{endpoint}"
+    headers = {
+        'Authorization': f'Bearer {LUNARCRUSH_API_KEY}'
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logging.error(f"LunarCrush API error: {e}")
+        return None
+
+# =====================================================
+# LUNARCRUSH API ENDPOINTS
+# =====================================================
+
+@app.route('/api/xrp/topic')
+def get_xrp_topic():
+    """Get XRP social topic data"""
+    cache_key = 'xrp_topic'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/topic/xrp/v1')
+    if result:
+        data = result.get('data', result)
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch topic data'}), 500
+
+@app.route('/api/xrp/posts')
+def get_xrp_posts():
+    """Get top XRP social posts"""
+    cache_key = 'xrp_posts'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/topic/xrp/posts/v1')
+    if result:
+        data = result.get('data', [])
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch posts'}), 500
+
+@app.route('/api/xrp/timeseries')
+def get_xrp_timeseries():
+    """Get XRP social time series data"""
+    bucket = request.args.get('bucket', 'day')
+    interval = request.args.get('interval', '1w')
+    
+    cache_key = f'xrp_timeseries_{bucket}_{interval}'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request(f'/topic/xrp/time-series/v1', {
+        'bucket': bucket,
+        'interval': interval
+    })
+    if result:
+        data = result.get('data', [])
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch timeseries'}), 500
+
+@app.route('/api/xrp/creators')
+def get_xrp_creators():
+    """Get top XRP content creators"""
+    cache_key = 'xrp_creators'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/topic/xrp/creators/v1')
+    if result:
+        data = result.get('data', [])
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch creators'}), 500
+
+@app.route('/api/xrp/news')
+def get_xrp_news():
+    """Get XRP news articles"""
+    cache_key = 'xrp_news'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/topic/xrp/news/v1')
+    if result:
+        data = result.get('data', [])
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch news'}), 500
+
+@app.route('/api/xrp/coin')
+def get_xrp_coin():
+    """Get XRP coin market data"""
+    cache_key = 'xrp_coin'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/coins/xrp/v1')
+    if result:
+        data = result.get('data', result)
+        set_lunarcrush_cache(cache_key, data)
+        return jsonify({'data': data, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch coin data'}), 500
+
+@app.route('/api/xrp/all')
+def get_xrp_all():
+    """Get all XRP data in one request (topic, posts, timeseries, coin, news)"""
+    cache_key = 'xrp_all'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    # Fetch all data
+    topic = lunarcrush_request('/topic/xrp/v1')
+    posts = lunarcrush_request('/topic/xrp/posts/v1')
+    timeseries = lunarcrush_request('/topic/xrp/time-series/v1', {'bucket': 'day', 'interval': '1w'})
+    coin = lunarcrush_request('/coins/xrp/v1')
+    news = lunarcrush_request('/topic/xrp/news/v1')
+    
+    data = {
+        'topic': topic.get('data', topic) if topic else None,
+        'posts': posts.get('data', []) if posts else [],
+        'timeseries': timeseries.get('data', []) if timeseries else [],
+        'coin': coin.get('data', coin) if coin else None,
+        'news': news.get('data', [])[:5] if news else [],
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    
+    set_lunarcrush_cache(cache_key, data)
+    return jsonify({'data': data, 'cached': False})
+
+@app.route('/api/xrp/whatsup')
+def get_xrp_whatsup():
+    """Get AI-generated summary of XRP news and social activity"""
+    cache_key = 'xrp_whatsup'
+    cached = get_lunarcrush_cached(cache_key)
+    if cached:
+        return jsonify({'data': cached, 'cached': True})
+    
+    result = lunarcrush_request('/topic/xrp/whatsup/v1')
+    if result:
+        set_lunarcrush_cache(cache_key, result)
+        return jsonify({'data': result, 'cached': False})
+    
+    return jsonify({'error': 'Failed to fetch whatsup'}), 500
+
+# =====================================================
+# EXISTING ETF DATA FUNCTIONS
+# =====================================================
 
 def fetch_etf_data_batch():
     data = {}
@@ -195,263 +388,117 @@ def fetch_historical_data(period='1mo'):
             try:
                 symbol_data = []
                 
-                # Check if symbol exists in data
                 if symbol in hist.columns.get_level_values(0):
-                    sym_hist = hist[symbol]
+                    sym_hist = hist[symbol].dropna()
                     
-                    if sym_hist.empty:
-                        continue
-                    
-                    # Iterate through each day
-                    for date, row in sym_hist.iterrows():
-                        try:
-                            close_price = row.get('Close')
-                            volume = row.get('Volume')
-                            
-                            # Skip if no valid data
-                            if close_price is None or (hasattr(close_price, '__iter__') and len(close_price) == 0):
-                                continue
-                            
-                            # Handle potential series/array values
-                            if hasattr(close_price, 'item'):
-                                close_price = close_price.item()
-                            if hasattr(volume, 'item'):
-                                volume = volume.item()
-                            
-                            # Skip NaN values
-                            if close_price != close_price:  # NaN check
-                                continue
-                            
-                            symbol_data.append({
-                                'date': date.strftime('%Y-%m-%d'),
-                                'price': round(float(close_price), 2),
-                                'volume': int(volume) if volume == volume else 0  # NaN check for volume
-                            })
-                        except Exception as e:
-                            logging.warning(f"Error processing row for {symbol}: {e}")
-                            continue
-                    
-                    if symbol_data:
-                        data[symbol] = symbol_data
-                        logging.info(f"Got {len(symbol_data)} data points for {symbol}")
+                    if not sym_hist.empty:
+                        for date, row in sym_hist.iterrows():
+                            try:
+                                close_price = float(row['Close']) if 'Close' in row else None
+                                volume = int(row['Volume']) if 'Volume' in row and not pd.isna(row['Volume']) else 0
+                                
+                                if close_price and close_price > 0:
+                                    symbol_data.append({
+                                        'date': date.strftime('%Y-%m-%d'),
+                                        'price': round(close_price, 2),
+                                        'volume': volume,
+                                        'dollar_volume': int(close_price * volume)
+                                    })
+                            except Exception as e:
+                                logging.warning(f"Error processing row for {symbol}: {e}")
                         
+                        if symbol_data:
+                            data[symbol] = {
+                                'description': descriptions.get(symbol, ''),
+                                'history': symbol_data
+                            }
+                            logging.info(f"Got {len(symbol_data)} days of history for {symbol}")
+                
             except Exception as e:
                 errors.append(f"{symbol}: {str(e)}")
-                logging.warning(f"Error fetching {symbol}: {e}")
-                
+                logging.warning(f"Error processing {symbol}: {e}")
+    
     except Exception as e:
         errors.append(f"Batch error: {str(e)}")
         logging.error(f"Historical fetch error: {e}")
     
     return {
-        'data': data,
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         'period': period,
-        'symbols': list(data.keys()),
+        'data': data,
         'errors': errors if errors else None
     }
 
 @app.route('/api/historical', methods=['GET'])
 def get_historical():
-    """
-    Get historical price/volume data for XRP Spot ETFs
-    Query params:
-        - period: 1mo, 3mo, 6mo, 1y (default: 1mo)
-    """
+    """Get historical ETF data for charts"""
     try:
         period = request.args.get('period', '1mo')
         
-        # Validate period
-        valid_periods = ['1mo', '3mo', '6mo', '1y']
-        if period not in valid_periods:
-            period = '1mo'
-        
         # Check cache
-        cache_key = f"historical_{period}"
         now = datetime.now()
+        cache_key = f'historical_{period}'
         
-        if (historical_cache.get('key') == cache_key and 
-            historical_cache['data'] and 
-            historical_cache['timestamp']):
-            age = (now - historical_cache['timestamp']).total_seconds()
+        if historical_cache.get(cache_key) and historical_cache.get(f'{cache_key}_timestamp'):
+            age = (now - historical_cache[f'{cache_key}_timestamp']).total_seconds()
             if age < historical_cache['cache_duration']:
-                result = historical_cache['data'].copy()
+                result = historical_cache[cache_key].copy()
                 result['cached'] = True
                 result['cache_age'] = int(age)
-                logging.info(f"Returning cached historical data (age: {int(age)}s)")
                 return jsonify(result)
         
         # Fetch fresh data
         result = fetch_historical_data(period)
         
         # Cache if we got data
-        if result['data']:
-            historical_cache['data'] = result
-            historical_cache['timestamp'] = now
-            historical_cache['key'] = cache_key
+        if result.get('data'):
+            historical_cache[cache_key] = result
+            historical_cache[f'{cache_key}_timestamp'] = now
         
         result['cached'] = False
         return jsonify(result)
         
     except Exception as e:
         logging.error(f"Historical endpoint error: {e}")
-        return jsonify({'error': str(e), 'data': {}}), 500
+        return jsonify({'error': str(e)}), 500
 
 # =====================================================
-# RICH LIST (TOP 10K) ENDPOINT
+# RICHLIST ENDPOINT
 # =====================================================
-
-# Known wallet labels
-KNOWN_ADDRESSES = {
-    "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh": "Binance",
-    "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Binance",
-    "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Binance",
-    "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Uphold",
-    "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Uphold",
-    "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Uphold",
-    "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "Bitso",
-    "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Kraken",
-    "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "Bitstamp",
-    "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe": "Coinbase",
-    "rEAKseZ7yNgaDuxH74PkqB12cVWohpi7R6": "Robinhood",
-    "r4ZuQtPNXGRMKfPjAsn2J7gRqoQuWnTPFP": "Robinhood",
-    "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv": "Bitstamp",
-    "rLW9gnQo7BQhU6igk5keqYnH3TVrCxGRzm": "Bitfinex",
-    "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq": "GateHub",
-    "rHWcuuZoFvDS6gNbmHSdpb7u1hZzxvCoMt": "GateHub",
-    "rKq7xLeTaDFCg9cdy9MmgxpPWS8EZf2fNq": "Bitrue",
-    "rPMM1dRp7taeRkbT74Smx2a25kTAHdr4N5": "Bithumb",
-    "rGDreBvnHrX1get7na3J4oowN19ny4GzFn": "Bitget",
-    "rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9": "Ripple",
-    "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh": "Genesis",
-}
-
-def fetch_account_balance(address):
-    """Fetch balance for a single account from XRPL"""
-    for url in RIPPLED_URLS:
-        try:
-            response = requests.post(url, json={
-                "method": "account_info",
-                "params": [{
-                    "account": address,
-                    "ledger_index": "validated",
-                    "strict": True
-                }]
-            }, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if 'result' in data and 'account_data' in data['result']:
-                    balance_drops = int(data['result']['account_data']['Balance'])
-                    return balance_drops / 1000000  # Convert drops to XRP
-        except Exception as e:
-            logging.warning(f"Error fetching {address} from {url}: {e}")
-            continue
-    return None
-
-def fetch_richlist_from_xrpscan():
-    """Fetch rich list from XRPScan API"""
-    try:
-        response = requests.get(f"{XRPSCAN_BASE}/richlist", timeout=30)
-        if response.status_code == 200:
-            data = response.json()
-            if isinstance(data, list) and len(data) > 0:
-                return data
-        return None
-    except Exception as e:
-        logging.error(f"XRPScan richlist error: {e}")
-        return None
-
-def calculate_richlist_stats(accounts):
-    """Calculate statistics for the rich list"""
-    if not accounts:
-        return {}
-    
-    balances = [a['balance'] for a in accounts]
-    total = sum(balances)
-    count = len(balances)
-    
-    sorted_balances = sorted(balances)
-    median = sorted_balances[count // 2] if count > 0 else 0
-    mean = total / count if count > 0 else 0
-    
-    # Count whales (>=1M XRP)
-    whale_count = sum(1 for b in balances if b >= 1000000)
-    
-    # Gini coefficient
-    gini = 0
-    if count > 0 and total > 0:
-        cumulative = 0
-        for i, b in enumerate(sorted_balances):
-            cumulative += b
-            gini += (2 * (i + 1) - count - 1) * b
-        gini = gini / (count * total)
-    
-    return {
-        'total_xrp': total,
-        'account_count': count,
-        'whale_count': whale_count,
-        'mean_balance': mean,
-        'median_balance': median,
-        'gini_coefficient': round(gini, 4)
-    }
-
 @app.route('/api/richlist', methods=['GET'])
 def get_richlist():
-    """
-    Get top 10K XRP rich list
-    Query params:
-        - refresh: true to force refresh (bypasses cache)
-        - limit: number of accounts to return (default 10000, max 10000)
-    """
+    """Get XRP rich list from XRPScan API"""
     try:
-        force_refresh = request.args.get('refresh', 'false').lower() == 'true'
-        limit = min(int(request.args.get('limit', 10000)), 10000)
+        refresh = request.args.get('refresh', 'false').lower() == 'true'
+        limit = int(request.args.get('limit', 10000))
         
         now = datetime.now()
         
-        # Check cache unless force refresh
-        if not force_refresh and richlist_cache['data'] and richlist_cache['timestamp']:
+        # Check cache unless refresh requested
+        if not refresh and richlist_cache['data'] and richlist_cache['timestamp']:
             age = (now - richlist_cache['timestamp']).total_seconds()
             if age < richlist_cache['cache_duration']:
                 result = richlist_cache['data'].copy()
                 result['cached'] = True
                 result['cache_age'] = int(age)
-                result['accounts'] = result['accounts'][:limit]
-                logging.info(f"Returning cached richlist (age: {int(age)}s)")
                 return jsonify(result)
         
-        logging.info("Fetching fresh rich list data...")
+        # Fetch from XRPScan API
+        logging.info(f"Fetching rich list from XRPScan (limit: {limit})")
         
-        # Try XRPScan first
-        xrpscan_data = fetch_richlist_from_xrpscan()
+        response = requests.get(
+            f"{XRPSCAN_BASE}/balances/top",
+            params={'limit': min(limit, 10000)},  # XRPScan max is 10000
+            timeout=30
+        )
+        response.raise_for_status()
         
-        accounts = []
-        if xrpscan_data:
-            for i, item in enumerate(xrpscan_data[:10000]):
-                address = item.get('account') or item.get('address', '')
-                balance = float(item.get('balance', 0))
-                accounts.append({
-                    'rank': i + 1,
-                    'address': address,
-                    'balance': balance,
-                    'name': KNOWN_ADDRESSES.get(address, item.get('name', 'Unknown'))
-                })
-        
-        if not accounts:
-            # Fallback: Return error
-            return jsonify({
-                'error': 'Unable to fetch rich list data',
-                'accounts': [],
-                'stats': {}
-            }), 503
-        
-        # Calculate stats
-        stats = calculate_richlist_stats(accounts)
+        data = response.json()
         
         result = {
             'timestamp': now.strftime("%Y-%m-%d %H:%M:%S"),
-            'accounts': accounts,
-            'stats': stats,
+            'count': len(data) if isinstance(data, list) else 0,
+            'accounts': data,
             'cached': False
         }
         
@@ -459,87 +506,55 @@ def get_richlist():
         richlist_cache['data'] = result
         richlist_cache['timestamp'] = now
         
-        # Return with limit applied
-        result['accounts'] = accounts[:limit]
-        
         return jsonify(result)
         
+    except requests.exceptions.RequestException as e:
+        logging.error(f"XRPScan API error: {e}")
+        
+        # Return cached data if available
+        if richlist_cache['data']:
+            result = richlist_cache['data'].copy()
+            result['cached'] = True
+            result['stale'] = True
+            return jsonify(result)
+        
+        return jsonify({'error': f'XRPScan API error: {str(e)}'}), 500
     except Exception as e:
         logging.error(f"Richlist endpoint error: {e}")
-        return jsonify({'error': str(e), 'accounts': [], 'stats': {}}), 500
+        return jsonify({'error': str(e)}), 500
 
 # =====================================================
-# BURN TRACKER ENDPOINT
+# BURN DATA ENDPOINT
 # =====================================================
-
-def get_ledger_data(ledger_index):
-    """Fetch ledger data from XRPScan"""
-    try:
-        response = requests.get(f"{XRPSCAN_BASE}/ledger/{ledger_index}", timeout=10)
-        if response.status_code == 200:
-            return response.json()
-    except Exception as e:
-        logging.warning(f"Error fetching ledger {ledger_index}: {e}")
+def make_rippled_request(method, params=None):
+    """Make request to rippled server with fallback"""
+    payload = {
+        "method": method,
+        "params": [params] if params else [{}]
+    }
+    
+    for url in RIPPLED_URLS:
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            if response.status_code == 200:
+                result = response.json()
+                if 'result' in result:
+                    return result['result']
+        except Exception as e:
+            logging.warning(f"Rippled request to {url} failed: {e}")
+            continue
+    
     return None
-
-def get_current_ledger():
-    """Get current ledger info"""
-    try:
-        response = requests.get(f"{XRPSCAN_BASE}/ledgers", timeout=10)
-        if response.status_code == 200:
-            return response.json()
-    except Exception as e:
-        logging.warning(f"Error fetching current ledger: {e}")
-    return None
-
-def find_ledger_at_time(target_timestamp, current_ledger_index):
-    """Binary search to find ledger at specific timestamp"""
-    low = 32570  # Approximate starting ledger
-    high = current_ledger_index
-    
-    while low < high:
-        mid = (low + high) // 2
-        ledger = get_ledger_data(mid)
-        if not ledger:
-            break
-        
-        close_time = ledger.get('close_time', 0)
-        if close_time < target_timestamp:
-            low = mid + 1
-        else:
-            high = mid
-    
-    return low
-
-def calculate_burn_for_period(start_ledger_index, end_ledger_index):
-    """Calculate XRP burned between two ledgers"""
-    start_ledger = get_ledger_data(start_ledger_index)
-    end_ledger = get_ledger_data(end_ledger_index)
-    
-    if not start_ledger or not end_ledger:
-        return None
-    
-    start_total = int(start_ledger.get('total_coins', 0))
-    end_total = int(end_ledger.get('total_coins', 0))
-    
-    burned_drops = start_total - end_total
-    burned_xrp = burned_drops / 1000000
-    
-    return burned_xrp
 
 @app.route('/api/burn', methods=['GET'])
 def get_burn_data():
-    """
-    Get XRP burn statistics
-    Query params:
-        - refresh: true to force refresh
-    """
+    """Get XRP burn statistics from XRPL"""
     try:
-        force_refresh = request.args.get('refresh', 'false').lower() == 'true'
+        refresh = request.args.get('refresh', 'false').lower() == 'true'
         now = datetime.now()
         
-        # Check cache
-        if not force_refresh and burn_cache['data'] and burn_cache['timestamp']:
+        # Check cache unless refresh requested
+        if not refresh and burn_cache['data'] and burn_cache['timestamp']:
             age = (now - burn_cache['timestamp']).total_seconds()
             if age < burn_cache['cache_duration']:
                 result = burn_cache['data'].copy()
@@ -547,34 +562,57 @@ def get_burn_data():
                 result['cache_age'] = int(age)
                 return jsonify(result)
         
-        logging.info("Fetching fresh burn data...")
+        logging.info("Fetching burn data from XRPL")
         
         # Get current ledger info
-        current_ledger_info = get_current_ledger()
-        if not current_ledger_info:
-            return jsonify({'error': 'Unable to fetch ledger data'}), 503
+        server_info = make_rippled_request("server_info")
+        if not server_info:
+            return jsonify({'error': 'Could not connect to XRPL'}), 500
         
-        current_ledger_index = current_ledger_info.get('current_ledger', 0)
-        current_total_drops = int(current_ledger_info.get('total_coins', 0))
+        ledger_info = server_info.get('info', {}).get('validated_ledger', {})
+        current_ledger_index = ledger_info.get('seq', 0)
         
-        # Initial supply: 100 billion XRP in drops
-        initial_drops = 100000000000000000
+        # Get current total coins (drops)
+        ledger_data = make_rippled_request("ledger", {"ledger_index": "validated"})
+        if not ledger_data or 'ledger' not in ledger_data:
+            return jsonify({'error': 'Could not fetch ledger data'}), 500
         
-        # Calculate total burned
-        total_burned_drops = initial_drops - current_total_drops
-        total_burned_xrp = total_burned_drops / 1000000
-        current_supply_xrp = current_total_drops / 1000000
+        total_coins = int(ledger_data['ledger'].get('total_coins', 0))
+        current_supply_xrp = total_coins / 1_000_000  # Convert drops to XRP
         
-        # Calculate periodic burns
-        now_ts = time.time()
+        # Original supply was 100 billion XRP
+        original_supply = 100_000_000_000
+        total_burned_xrp = original_supply - current_supply_xrp
         
-        burn_data = {
-            'daily': None,
-            'weekly': None,
-            'monthly': None,
-            'yearly': None
-        }
+        # Calculate burns for different periods
+        burn_data = {}
+        now_ts = int(time.time())
         
+        def find_ledger_at_time(target_time, current_ledger):
+            """Estimate ledger index at a given time"""
+            # Average ~4 seconds per ledger
+            seconds_ago = now_ts - target_time
+            ledgers_ago = int(seconds_ago / 4)
+            return max(1, current_ledger - ledgers_ago)
+        
+        def get_ledger_total_coins(ledger_index):
+            """Get total coins at a specific ledger"""
+            result = make_rippled_request("ledger", {"ledger_index": ledger_index})
+            if result and 'ledger' in result:
+                return int(result['ledger'].get('total_coins', 0))
+            return None
+        
+        def calculate_burn_for_period(start_ledger, end_ledger):
+            """Calculate XRP burned between two ledgers"""
+            start_coins = get_ledger_total_coins(start_ledger)
+            end_coins = get_ledger_total_coins(end_ledger)
+            
+            if start_coins and end_coins:
+                burned_drops = start_coins - end_coins
+                return burned_drops / 1_000_000  # Convert to XRP
+            return None
+        
+        # Calculate burns for different periods
         periods = {
             'daily': 1,
             'weekly': 7,
@@ -610,6 +648,10 @@ def get_burn_data():
     except Exception as e:
         logging.error(f"Burn endpoint error: {e}")
         return jsonify({'error': str(e)}), 500
+
+# =====================================================
+# EXISTING API ENDPOINTS
+# =====================================================
 
 @app.route('/api/etf-data', methods=['GET'])
 def get_etf_data():
@@ -753,13 +795,18 @@ def ai_health():
 
 @app.route('/api/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'healthy', 'ai_enabled': anthropic_client is not None})
+    return jsonify({
+        'status': 'healthy', 
+        'ai_enabled': anthropic_client is not None,
+        'lunarcrush_enabled': LUNARCRUSH_API_KEY is not None
+    })
 
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({
         'message': 'XRP ETF API',
         'ai_enabled': anthropic_client is not None,
+        'lunarcrush_enabled': LUNARCRUSH_API_KEY is not None,
         'endpoints': [
             '/api/etf-data',
             '/api/historical?period=1mo|3mo|6mo|1y',
@@ -767,7 +814,16 @@ def home():
             '/api/burn?refresh=false',
             '/api/ai-insights',
             '/api/chat',
-            '/api/health'
+            '/api/health',
+            '--- LunarCrush Social ---',
+            '/api/xrp/all (all data combined)',
+            '/api/xrp/topic',
+            '/api/xrp/posts',
+            '/api/xrp/timeseries',
+            '/api/xrp/creators',
+            '/api/xrp/news',
+            '/api/xrp/coin',
+            '/api/xrp/whatsup'
         ]
     })
 

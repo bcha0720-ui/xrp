@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lunarcrush-xrp-proxy
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: LUNARCRUSH_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
