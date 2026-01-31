@@ -87,7 +87,7 @@ function findRelevantDocs(query, topK = 3) {
 
 const ETF_SYMBOLS = {
     'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'XXX'],
+    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'SXRP'],
     'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
     'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
@@ -109,7 +109,7 @@ const DESCRIPTIONS = {
     'XRPK': 'T-REX 2X Long XRP',
     'XRPT': 'Volatility Shares 2x XRP',
     'XXRP': 'Teucrium 2x Long XRP',
-    'XXX': 'Cyber Hornet S&P 500/XRP 75/25'
+    'SXRP': 'Cyber Hornet S&P 500/XRP 75/25'
 };
 
 // =====================================================
@@ -124,6 +124,309 @@ const AI_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 let onChainCache = { escrow: null, network: null, lastUpdate: null };
 const ONCHAIN_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Daily Holdings Trend Cache
+let dailyHoldingsTrend = [];
+let exchangeHoldingsCache = { data: null, timestamp: null };
+const EXCHANGE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+
+// =====================================================
+// EXCHANGE WALLETS CONFIGURATION
+// =====================================================
+
+const EXCHANGE_WALLETS = {
+    "binance": {
+        "rEy8TFcrAPvhpKrwyrscNYyqBGUkE9hKaJ": "Binance 1",
+        "rNU4eAowPuixS5ZCWaRL72UUeKgxLyFjEA": "Binance 2",
+        "rs8ZPbYqgecRcDzQpJYAMhSxSi5htsjnza": "Binance 3",
+        "rsG1xG58dqEz8VVPL67gMwBdNb9jCuxuhv": "Binance 4",
+        "rDvMQ76vWpuAPmf5Gk9MrPfaoW7113ibAw": "Binance 5",
+        "rpQGn6Qra6xrViLueYN1R9v4sHSLPqw3PQ": "Binance 6",
+        "r4G689g4KePYLKkyyumM1iUppTP4nhZwVC": "Binance 7",
+        "rJo4m69u9Wd1F8fN2RbgAsJEF6a4hW1nSi": "Binance 8",
+        "r9NpT9EBCjPMYfKXHMTqMLYmh8BeQREehY": "Binance 9",
+        "r38a3PtqW3M7LRESgaR4dyHjg3AxAmiZCt": "Binance 10",
+        "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb": "Binance 11",
+        "rJWbw1u3oDDRcYLFqiWFjhGWRKVcBAWdgp": "Binance 12"
+    },
+    "uphold": {
+        "rPz2qA93PeRCyHyFCqyNggnyycJR1N4iNf": "Uphold 1",
+        "rU8xhU7n8wHfagwqaapVQtLQPmB7Gr4ivT": "Uphold 2",
+        "rBc2pcENcLhYGdFKF3pqU2eowV9QsGQXe": "Uphold 3"
+    },
+    "bitso": {
+        "rG6FZ31hDHN1K5Dkbma3PSB5uVCuVVRzfn": "Bitso 1",
+        "rLSn6Z3T8uCxbcd1oxwfGQN1Fdn5CyGujK": "Bitso 2"
+    },
+    "kraken": {
+        "rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh": "Kraken 1",
+        "rUeDDFNp2q7Ymvyv75hFGC8DAcygVyJbNF": "Kraken 2"
+    },
+    "bitstamp": {
+        "rp7TCczQuQo61dUo1oAgwdpRxLrA8vDaNV": "Bitstamp 1",
+        "rrpNnNLKrartuEqfJGpqyDwPj1AFPg9vn1": "Bitstamp 2",
+        "rGFuMiw48HdbnrUbkRYuitXTmfrDBNTCnX": "Bitstamp 3"
+    },
+    "coinbase": {
+        "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg": "Coinbase 1"
+    },
+    "bithumb": {
+        "rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV": "Bithumb 1",
+        "rPJ5GFpyDLv7gqeB1uZVUBwDwi41kaXN5A": "Bithumb 2"
+    },
+    "bitbank": {
+        "rMvCasZ9cohYrSZRNYPTZfoaaSUQMfgQ8G": "bitbank 1"
+    },
+    "huobi": {
+        "rJn2zAPdFA193sixJwuFixRkYDUtx3apQh": "Huobi 1",
+        "raQxZLtqurEXvH5sgijrif7yXMNwvFRkJN": "Huobi 2"
+    },
+    "okx": {
+        "rwBHqnCgNRnk3Kyoc6zon6Wt4Wujj3HNGe": "OKX 1"
+    },
+    "upbit": {
+        "rhWj9gaovwu2hZxYW7p388P8GRbuXFLQkK": "Upbit 1"
+    },
+    "sbi": {
+        "rNRc2S2GSefSkTkAiyjE6LDzMonpeHp6jS": "SBI VC Trade 1",
+        "rDDyH5nfvozKZQCwiBrWfcE528sWsBPWET": "SBI VC Trade 2"
+    },
+    "crypto_com": {
+        "rUzpn3UpWvJT7gJp6UD3TkQSQSbHwNMtTL": "Crypto.com 1"
+    },
+    "kucoin": {
+        "rBKz5MC2iXdoS3XgnNSYmF69K1Wo4NXGa": "KuCoin 1"
+    },
+    "gate_io": {
+        "rHsZHqa5oMQNL5hFm4kfLd47aEMYjPstpg": "Gate.io 1"
+    }
+};
+
+// =====================================================
+// XRPL BALANCE FETCHING
+// =====================================================
+
+const XRPL_NODES = [
+    'https://xrplcluster.com',
+    'https://s1.ripple.com:51234',
+    'https://s2.ripple.com:51234'
+];
+
+async function fetchXRPLBalance(address) {
+    for (const node of XRPL_NODES) {
+        try {
+            const response = await fetch(node, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    method: 'account_info',
+                    params: [{
+                        account: address,
+                        ledger_index: 'validated'
+                    }]
+                })
+            });
+            
+            if (!response.ok) continue;
+            
+            const data = await response.json();
+            if (data.result && data.result.account_data) {
+                // Balance is in drops (1 XRP = 1,000,000 drops)
+                return parseInt(data.result.account_data.Balance) / 1000000;
+            }
+        } catch (error) {
+            console.log(`XRPL node ${node} failed for ${address}`);
+        }
+    }
+    return null;
+}
+
+// =====================================================
+// DAILY EXCHANGE HOLDINGS SNAPSHOT
+// Runs at 3:59 PM PST (23:59 UTC) daily
+// =====================================================
+
+async function fetchAllExchangeHoldings() {
+    console.log('📊 Fetching all exchange holdings...');
+    
+    const exchangeData = {};
+    let grandTotal = 0;
+    
+    for (const [exchangeName, wallets] of Object.entries(EXCHANGE_WALLETS)) {
+        let exchangeTotal = 0;
+        let successCount = 0;
+        
+        for (const [address, walletName] of Object.entries(wallets)) {
+            try {
+                const balance = await fetchXRPLBalance(address);
+                if (balance !== null) {
+                    exchangeTotal += balance;
+                    successCount++;
+                }
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+                console.log(`Failed to fetch ${walletName}: ${error.message}`);
+            }
+        }
+        
+        exchangeData[exchangeName] = {
+            total: exchangeTotal,
+            walletCount: Object.keys(wallets).length,
+            successCount: successCount
+        };
+        grandTotal += exchangeTotal;
+        
+        console.log(`  ${exchangeName}: ${(exchangeTotal / 1e9).toFixed(2)}B XRP`);
+    }
+    
+    return { exchanges: exchangeData, total: grandTotal, timestamp: Date.now() };
+}
+
+function formatDateKey(date = new Date()) {
+    // Format as YYYY-MM-DD in PST
+    const pst = new Date(date.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    return pst.toISOString().split('T')[0];
+}
+
+async function takeDailySnapshot() {
+    console.log('📸 Taking daily exchange holdings snapshot...');
+    
+    try {
+        const holdings = await fetchAllExchangeHoldings();
+        const today = formatDateKey();
+        
+        // Check if we already have today's snapshot
+        const existingIndex = dailyHoldingsTrend.findIndex(d => d.date === today);
+        
+        const entry = {
+            date: today,
+            total: holdings.total,
+            exchanges: {},
+            timestamp: Date.now(),
+            isPastCutoff: true
+        };
+        
+        // Store exchange totals
+        for (const [name, data] of Object.entries(holdings.exchanges)) {
+            entry.exchanges[name] = data.total;
+        }
+        
+        if (existingIndex >= 0) {
+            dailyHoldingsTrend[existingIndex] = entry;
+            console.log(`✅ Updated snapshot for ${today}`);
+        } else {
+            dailyHoldingsTrend.push(entry);
+            dailyHoldingsTrend.sort((a, b) => a.date.localeCompare(b.date));
+            console.log(`✅ Added new snapshot for ${today}`);
+        }
+        
+        // Keep only last 90 days
+        if (dailyHoldingsTrend.length > 90) {
+            dailyHoldingsTrend = dailyHoldingsTrend.slice(-90);
+        }
+        
+        // Update cache
+        exchangeHoldingsCache = { data: holdings, timestamp: Date.now() };
+        
+        console.log(`📊 Total exchange holdings: ${(holdings.total / 1e9).toFixed(2)}B XRP`);
+        console.log(`📅 Trend data now has ${dailyHoldingsTrend.length} days`);
+        
+        return entry;
+        
+    } catch (error) {
+        console.error('❌ Daily snapshot failed:', error.message);
+        return null;
+    }
+}
+
+// Schedule daily snapshot at 3:59 PM PST (23:59 UTC)
+function scheduleDailySnapshot() {
+    const now = new Date();
+    
+    // Target: 23:59 UTC (3:59 PM PST)
+    const targetHour = 23;
+    const targetMinute = 59;
+    
+    let target = new Date(now);
+    target.setUTCHours(targetHour, targetMinute, 0, 0);
+    
+    // If we've passed today's target, schedule for tomorrow
+    if (now >= target) {
+        target.setUTCDate(target.getUTCDate() + 1);
+    }
+    
+    const msUntilTarget = target.getTime() - now.getTime();
+    const hoursUntil = (msUntilTarget / (1000 * 60 * 60)).toFixed(1);
+    
+    console.log(`⏰ Daily snapshot scheduled in ${hoursUntil} hours (3:59 PM PST / 23:59 UTC)`);
+    
+    setTimeout(async () => {
+        await takeDailySnapshot();
+        // Schedule next day
+        scheduleDailySnapshot();
+    }, msUntilTarget);
+}
+
+// API endpoint to get daily holdings trend
+app.get('/api/exchange/holdings', async (req, res) => {
+    const forceRefresh = req.query.refresh === 'true';
+    
+    // Return cached data if fresh
+    if (!forceRefresh && exchangeHoldingsCache.data && 
+        Date.now() - exchangeHoldingsCache.timestamp < EXCHANGE_CACHE_DURATION) {
+        return res.json({
+            ...exchangeHoldingsCache.data,
+            cached: true,
+            cacheAge: Date.now() - exchangeHoldingsCache.timestamp
+        });
+    }
+    
+    try {
+        const holdings = await fetchAllExchangeHoldings();
+        exchangeHoldingsCache = { data: holdings, timestamp: Date.now() };
+        res.json({ ...holdings, cached: false });
+    } catch (error) {
+        console.error('Exchange holdings error:', error);
+        if (exchangeHoldingsCache.data) {
+            return res.json({ ...exchangeHoldingsCache.data, cached: true, stale: true });
+        }
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API endpoint to get daily trend data
+app.get('/api/exchange/trend', (req, res) => {
+    const days = parseInt(req.query.days) || 30;
+    const trendData = dailyHoldingsTrend.slice(-days);
+    
+    // Calculate changes
+    const dataWithChanges = trendData.map((entry, index) => {
+        const prev = index > 0 ? trendData[index - 1] : null;
+        return {
+            ...entry,
+            change: prev ? entry.total - prev.total : 0,
+            changePercent: prev ? ((entry.total - prev.total) / prev.total * 100).toFixed(2) : 0
+        };
+    });
+    
+    res.json({
+        trend: dataWithChanges,
+        count: dailyHoldingsTrend.length,
+        latest: dailyHoldingsTrend[dailyHoldingsTrend.length - 1] || null
+    });
+});
+
+// API endpoint to manually trigger snapshot (for testing)
+app.post('/api/exchange/snapshot', async (req, res) => {
+    console.log('📸 Manual snapshot triggered via API');
+    const result = await takeDailySnapshot();
+    if (result) {
+        res.json({ success: true, snapshot: result });
+    } else {
+        res.status(500).json({ success: false, error: 'Snapshot failed' });
+    }
+});
 
 // Rate limiting
 const rateLimitMap = new Map();
@@ -1428,6 +1731,10 @@ app.listen(PORT, () => {
     console.log('  GET  /api/x-post          (preview X post)');
     console.log('  POST /api/send-email      (manual trigger)');
     console.log('  GET  /api/email-status    (check schedule)');
+    console.log('  --- Exchange Holdings Trend ---');
+    console.log('  GET  /api/exchange/holdings (current holdings)');
+    console.log('  GET  /api/exchange/trend    (daily trend data)');
+    console.log('  POST /api/exchange/snapshot (manual snapshot)');
     console.log('=========================================');
     console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
     console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
@@ -1435,4 +1742,15 @@ app.listen(PORT, () => {
 
     // Start email scheduler
     scheduleEmails();
+    
+    // Start daily holdings snapshot scheduler (3:59 PM PST)
+    scheduleDailySnapshot();
+    
+    // Take initial snapshot on startup if we don't have today's data
+    const today = formatDateKey();
+    const hasToday = dailyHoldingsTrend.some(d => d.date === today);
+    if (!hasToday) {
+        console.log('📸 No snapshot for today, taking initial snapshot...');
+        setTimeout(() => takeDailySnapshot(), 5000); // Wait 5s for server to stabilize
+    }
 });

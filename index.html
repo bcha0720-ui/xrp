@@ -2356,6 +2356,71 @@
             height: 280px;
         }
 
+        /* Trend Stat Cards */
+        .trend-stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            min-width: 120px;
+            flex: 1;
+        }
+        
+        .trend-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        
+        .trend-stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+        
+        .trend-stat-value.positive {
+            color: var(--accent-green);
+        }
+        
+        .trend-stat-value.negative {
+            color: var(--accent-red);
+        }
+        
+        .trend-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        
+        .trend-table th,
+        .trend-table td {
+            padding: 0.5rem 0.75rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .trend-table th {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            position: sticky;
+            top: 0;
+        }
+        
+        .trend-table th:first-child,
+        .trend-table td:first-child {
+            text-align: left;
+        }
+        
+        .trend-table tr:hover {
+            background: var(--bg-card-hover);
+        }
+
         /* Treemap styles */
         .treemap-container {
             padding: 1rem;
@@ -4891,6 +4956,48 @@
                     📊 Full Dashboard
                 </a>
                 <input type="text" id="exchangeFilter" class="exchange-filter-input" placeholder="🔍 Filter exchanges..." onkeyup="filterExchangeTable()">
+            </div>
+
+            <!-- Daily Holdings Trend Chart -->
+            <div class="exchange-chart-card" style="margin-bottom: 1.5rem;">
+                <div class="exchange-chart-header">
+                    <div class="holdings-table-title">
+                        <span>📈</span>
+                        Daily Holdings Trend
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span id="nextSnapshotTime" style="color: var(--text-muted); font-size: 0.7rem;">Next: --</span>
+                        <span style="color: var(--border);">|</span>
+                        <span style="color: var(--text-muted); font-size: 0.7rem;">Cut-off: 3:59 PM PST</span>
+                        <button class="chart-export-btn" onclick="exportDailyTrendData()">📥 Export</button>
+                    </div>
+                </div>
+                <div style="padding: 1rem;">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="trend-stat-card">
+                            <div class="trend-stat-label">Today's Total</div>
+                            <div class="trend-stat-value" id="trendTodayTotal">--</div>
+                        </div>
+                        <div class="trend-stat-card">
+                            <div class="trend-stat-label">Yesterday</div>
+                            <div class="trend-stat-value" id="trendYesterdayTotal">--</div>
+                        </div>
+                        <div class="trend-stat-card">
+                            <div class="trend-stat-label">24h Change</div>
+                            <div class="trend-stat-value" id="trendDailyChange">--</div>
+                        </div>
+                        <div class="trend-stat-card">
+                            <div class="trend-stat-label">7-Day Change</div>
+                            <div class="trend-stat-value" id="trend7DayChange">--</div>
+                        </div>
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="dailyHoldingsTrendChart"></canvas>
+                    </div>
+                    <div id="dailyTrendTable" style="margin-top: 1rem; max-height: 200px; overflow-y: auto;">
+                        <!-- Daily data table will be rendered here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Exchange Charts Grid -->
@@ -9015,6 +9122,12 @@
         const EXCHANGE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
         const MANUAL_REFRESH_COOLDOWN = 15 * 60 * 1000; // 15 min cooldown for manual refresh
         
+        // Daily Holdings Trend Tracking
+        let dailyHoldingsTrend = []; // Array of { date, total, exchanges: {name: total}, timestamp }
+        let dailyTrendChart = null;
+        const DAILY_CUTOFF_HOUR = 15; // 3 PM PST
+        const DAILY_CUTOFF_MINUTE = 59; // 3:59 PM PST
+        
         // Analytics data
         let analyticsData = {};
         let analyticsChart = null;
@@ -9045,7 +9158,8 @@
             whaleData: 'xrp_etf_whale_data',
             whaleTimestamp: 'xrp_etf_whale_timestamp',
             whaleLastRefresh: 'xrp_etf_whale_last_refresh',
-            burnData: 'xrp_etf_burn_data'
+            burnData: 'xrp_etf_burn_data',
+            dailyHoldingsTrend: 'xrp_etf_daily_holdings_trend'
         };
         
         // localStorage helper functions
@@ -9159,6 +9273,10 @@
                 if (cacheAge < EXCHANGE_CACHE_DURATION) {
                     // Use cached data
                     renderExchangeTable();
+                    // Also render trend charts with cached data
+                    renderDailyTrendChart();
+                    renderDailyTrendStats();
+                    renderDailyTrendTable();
                     const remainingMs = EXCHANGE_CACHE_DURATION - cacheAge;
                     const remainingMins = Math.ceil(remainingMs / 60000);
                     const displayTime = remainingMins > 60 
@@ -9264,6 +9382,9 @@
             saveToCache(CACHE_KEYS.exchangeLastRefresh, lastManualRefresh);
             console.log('Exchange data saved to localStorage');
             
+            // Update daily holdings trend
+            updateDailyHoldingsTrend();
+            
             // Calculate next refresh time
             const nextRefreshMins = Math.ceil(MANUAL_REFRESH_COOLDOWN / 60000);
             
@@ -9307,6 +9428,580 @@
             
             updateCountdown();
         }
+        
+        // =====================================================
+        // DAILY HOLDINGS TREND TRACKING
+        // Tracks total exchange holdings daily at 3:59 PM PST
+        // =====================================================
+        
+        function getPSTDate(date = new Date()) {
+            // Convert to PST (UTC-8)
+            const pstOffset = -8 * 60; // minutes
+            const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+            const pst = new Date(utc + (pstOffset * 60000));
+            return pst;
+        }
+        
+        function formatDateKey(date) {
+            // Format as YYYY-MM-DD for consistent keys
+            const d = getPSTDate(date);
+            return d.toISOString().split('T')[0];
+        }
+        
+        function isPastCutoffTime() {
+            const pst = getPSTDate();
+            const hour = pst.getHours();
+            const minute = pst.getMinutes();
+            return (hour > DAILY_CUTOFF_HOUR) || (hour === DAILY_CUTOFF_HOUR && minute >= DAILY_CUTOFF_MINUTE);
+        }
+        
+        function loadDailyHoldingsTrend() {
+            const cached = loadFromCache(CACHE_KEYS.dailyHoldingsTrend);
+            if (cached && Array.isArray(cached)) {
+                dailyHoldingsTrend = cached;
+                console.log(`Loaded ${dailyHoldingsTrend.length} days of holdings trend data`);
+            }
+        }
+        
+        function saveDailyHoldingsTrend() {
+            // Keep only last 90 days of data
+            if (dailyHoldingsTrend.length > 90) {
+                dailyHoldingsTrend = dailyHoldingsTrend.slice(-90);
+            }
+            saveToCache(CACHE_KEYS.dailyHoldingsTrend, dailyHoldingsTrend);
+            console.log('Daily holdings trend saved');
+        }
+        
+        function updateDailyHoldingsTrend() {
+            if (Object.keys(exchangeData).length === 0) return;
+            
+            const today = formatDateKey(new Date());
+            const total = Object.values(exchangeData).reduce((sum, d) => sum + d.total, 0);
+            
+            // Build exchange breakdown
+            const exchanges = {};
+            for (const [name, data] of Object.entries(exchangeData)) {
+                exchanges[name] = data.total;
+            }
+            
+            // Check if we already have an entry for today
+            const existingIndex = dailyHoldingsTrend.findIndex(d => d.date === today);
+            
+            const entry = {
+                date: today,
+                total: total,
+                exchanges: exchanges,
+                timestamp: Date.now(),
+                isPastCutoff: isPastCutoffTime()
+            };
+            
+            if (existingIndex >= 0) {
+                // Update existing entry only if past cutoff or if current is more recent
+                if (isPastCutoffTime() || !dailyHoldingsTrend[existingIndex].isPastCutoff) {
+                    dailyHoldingsTrend[existingIndex] = entry;
+                    console.log(`Updated trend data for ${today}`);
+                }
+            } else {
+                // Add new entry
+                dailyHoldingsTrend.push(entry);
+                dailyHoldingsTrend.sort((a, b) => a.date.localeCompare(b.date));
+                console.log(`Added new trend data for ${today}`);
+            }
+            
+            saveDailyHoldingsTrend();
+            renderDailyTrendChart();
+            renderDailyTrendStats();
+            renderDailyTrendTable();
+        }
+        
+        function renderDailyTrendChart() {
+            const ctx = document.getElementById('dailyHoldingsTrendChart');
+            if (!ctx) return;
+            
+            if (dailyTrendChart) {
+                dailyTrendChart.destroy();
+            }
+            
+            if (dailyHoldingsTrend.length === 0) {
+                ctx.parentElement.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 2rem;">No historical data yet. Data is recorded daily at 3:59 PM PST.</div>';
+                return;
+            }
+            
+            // Get last 30 days of data
+            const chartData = dailyHoldingsTrend.slice(-30);
+            
+            const labels = chartData.map(d => {
+                const date = new Date(d.date + 'T00:00:00');
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const totals = chartData.map(d => d.total);
+            
+            // Calculate daily changes
+            const changes = chartData.map((d, i) => {
+                if (i === 0) return 0;
+                return d.total - chartData[i - 1].total;
+            });
+            
+            dailyTrendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Holdings',
+                            data: totals,
+                            type: 'line',
+                            borderColor: '#23f7dd',
+                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y',
+                            order: 1
+                        },
+                        {
+                            label: 'Daily Change',
+                            data: changes,
+                            type: 'bar',
+                            backgroundColor: changes.map(c => c >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                            borderColor: changes.map(c => c >= 0 ? '#22c55e' : '#ef4444'),
+                            borderWidth: 1,
+                            yAxisID: 'y1',
+                            order: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#94a3b8', font: { size: 11 } }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    if (context.dataset.label === 'Total Holdings') {
+                                        return `Total: ${(value / 1e9).toFixed(2)}B XRP`;
+                                    } else {
+                                        const sign = value >= 0 ? '+' : '';
+                                        return `Change: ${sign}${(value / 1e6).toFixed(1)}M XRP`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#23f7dd',
+                                font: { size: 10 },
+                                callback: v => (v / 1e9).toFixed(1) + 'B'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Total Holdings',
+                                color: '#23f7dd',
+                                font: { size: 11 }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 10 },
+                                callback: v => (v / 1e6).toFixed(0) + 'M'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Daily Change',
+                                color: '#94a3b8',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderDailyTrendStats() {
+            const todayTotalEl = document.getElementById('trendTodayTotal');
+            const yesterdayTotalEl = document.getElementById('trendYesterdayTotal');
+            const dailyChangeEl = document.getElementById('trendDailyChange');
+            const weekChangeEl = document.getElementById('trend7DayChange');
+            
+            if (!todayTotalEl) return;
+            
+            if (dailyHoldingsTrend.length === 0) {
+                todayTotalEl.textContent = '--';
+                yesterdayTotalEl.textContent = '--';
+                dailyChangeEl.textContent = '--';
+                weekChangeEl.textContent = '--';
+                return;
+            }
+            
+            const today = dailyHoldingsTrend[dailyHoldingsTrend.length - 1];
+            const yesterday = dailyHoldingsTrend.length > 1 ? dailyHoldingsTrend[dailyHoldingsTrend.length - 2] : null;
+            const weekAgo = dailyHoldingsTrend.length > 7 ? dailyHoldingsTrend[dailyHoldingsTrend.length - 8] : null;
+            
+            // Today's total
+            todayTotalEl.textContent = formatLargeNumber(today.total) + ' XRP';
+            
+            // Yesterday's total
+            if (yesterday) {
+                yesterdayTotalEl.textContent = formatLargeNumber(yesterday.total) + ' XRP';
+            } else {
+                yesterdayTotalEl.textContent = '--';
+            }
+            
+            // Daily change
+            if (yesterday) {
+                const change = today.total - yesterday.total;
+                const changePercent = ((change / yesterday.total) * 100).toFixed(2);
+                const sign = change >= 0 ? '+' : '';
+                dailyChangeEl.textContent = `${sign}${formatLargeNumber(Math.abs(change))}`;
+                dailyChangeEl.className = `trend-stat-value ${change >= 0 ? 'positive' : 'negative'}`;
+            } else {
+                dailyChangeEl.textContent = '--';
+                dailyChangeEl.className = 'trend-stat-value';
+            }
+            
+            // 7-day change
+            if (weekAgo) {
+                const change = today.total - weekAgo.total;
+                const changePercent = ((change / weekAgo.total) * 100).toFixed(2);
+                const sign = change >= 0 ? '+' : '';
+                weekChangeEl.textContent = `${sign}${formatLargeNumber(Math.abs(change))} (${sign}${changePercent}%)`;
+                weekChangeEl.className = `trend-stat-value ${change >= 0 ? 'positive' : 'negative'}`;
+            } else {
+                weekChangeEl.textContent = '--';
+                weekChangeEl.className = 'trend-stat-value';
+            }
+        }
+        
+        function formatLargeNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+        
+        function renderDailyTrendTable() {
+            const container = document.getElementById('dailyTrendTable');
+            if (!container) return;
+            
+            if (dailyHoldingsTrend.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No historical data available yet.</p>';
+                return;
+            }
+            
+            // Show last 14 days in reverse order (newest first)
+            const recentData = dailyHoldingsTrend.slice(-14).reverse();
+            
+            let html = `
+                <table class="trend-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Total Holdings</th>
+                            <th>Daily Change</th>
+                            <th>% Change</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for (let i = 0; i < recentData.length; i++) {
+                const current = recentData[i];
+                const previous = i < recentData.length - 1 ? recentData[i + 1] : null;
+                
+                const date = new Date(current.date + 'T00:00:00');
+                const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                let changeStr = '--';
+                let percentStr = '--';
+                let changeClass = '';
+                
+                if (previous) {
+                    const change = current.total - previous.total;
+                    const percent = ((change / previous.total) * 100).toFixed(2);
+                    const sign = change >= 0 ? '+' : '';
+                    changeStr = `${sign}${formatLargeNumber(Math.abs(change))}`;
+                    percentStr = `${sign}${percent}%`;
+                    changeClass = change >= 0 ? 'positive' : 'negative';
+                }
+                
+                const status = current.isPastCutoff 
+                    ? '<span style="color: var(--accent-green);">✓ Final</span>'
+                    : '<span style="color: var(--accent-orange);">⏳ Pending</span>';
+                
+                html += `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace;">${formatLargeNumber(current.total)}</td>
+                        <td class="${changeClass}" style="font-family: 'JetBrains Mono', monospace;">${changeStr}</td>
+                        <td class="${changeClass}">${percentStr}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        function exportDailyTrendData() {
+            if (dailyHoldingsTrend.length === 0) {
+                showToast('No trend data available to export', 'warning');
+                return;
+            }
+            
+            let csv = 'Date,Total Holdings (XRP),Daily Change,Percent Change,Status\n';
+            
+            for (let i = 0; i < dailyHoldingsTrend.length; i++) {
+                const current = dailyHoldingsTrend[i];
+                const previous = i > 0 ? dailyHoldingsTrend[i - 1] : null;
+                
+                let change = '';
+                let percent = '';
+                
+                if (previous) {
+                    change = current.total - previous.total;
+                    percent = ((change / previous.total) * 100).toFixed(4);
+                }
+                
+                const status = current.isPastCutoff ? 'Final' : 'Pending';
+                
+                csv += `${current.date},${current.total},${change},${percent},${status}\n`;
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `exchange_holdings_trend_${formatDateKey(new Date())}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Trend data exported!', 'info');
+        }
+        
+        // Load trend data on page load - from backend API
+        loadDailyHoldingsTrend();
+        
+        // =====================================================
+        // BACKEND API INTEGRATION FOR TREND DATA
+        // =====================================================
+        
+        async function loadDailyHoldingsTrendFromAPI() {
+            try {
+                const response = await fetch(`${API_URL}/api/exchange/trend?days=90`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.trend && data.trend.length > 0) {
+                        dailyHoldingsTrend = data.trend;
+                        console.log(`Loaded ${dailyHoldingsTrend.length} days from backend API`);
+                        renderDailyTrendChart();
+                        renderDailyTrendStats();
+                        renderDailyTrendTable();
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.log('Backend trend API not available, using localStorage');
+            }
+            return false;
+        }
+        
+        // Try to load from backend first, fallback to localStorage
+        async function loadDailyHoldingsTrendHybrid() {
+            // First load from localStorage for immediate display
+            const cached = loadFromCache(CACHE_KEYS.dailyHoldingsTrend);
+            if (cached && Array.isArray(cached)) {
+                dailyHoldingsTrend = cached;
+                renderDailyTrendChart();
+                renderDailyTrendStats();
+                renderDailyTrendTable();
+            }
+            
+            // Then try to get latest from backend (may have more data)
+            await loadDailyHoldingsTrendFromAPI();
+        }
+        
+        // Call hybrid loader
+        loadDailyHoldingsTrendHybrid();
+        
+        // =====================================================
+        // AUTO-SNAPSHOT SCHEDULER - 3:59 PM PST Daily
+        // Frontend backup - triggers if page is open
+        // Backend handles the guaranteed daily snapshot
+        // =====================================================
+        
+        let dailySnapshotScheduled = false;
+        let dailySnapshotTimer = null;
+        
+        function getMillisecondsUntilCutoff() {
+            const now = new Date();
+            const pst = getPSTDate(now);
+            
+            // Target: 3:59 PM PST today
+            const targetHour = DAILY_CUTOFF_HOUR;
+            const targetMinute = DAILY_CUTOFF_MINUTE;
+            
+            // Create target time in PST
+            let targetPST = new Date(pst);
+            targetPST.setHours(targetHour, targetMinute, 0, 0);
+            
+            // If we've already passed the cutoff time today, schedule for tomorrow
+            if (pst >= targetPST) {
+                targetPST.setDate(targetPST.getDate() + 1);
+            }
+            
+            // Convert back to local time for setTimeout
+            const pstOffset = -8 * 60; // PST offset in minutes
+            const localOffset = now.getTimezoneOffset();
+            const diffMinutes = pstOffset - (-localOffset);
+            
+            const targetLocal = new Date(targetPST.getTime() - (diffMinutes * 60000));
+            const msUntil = targetLocal.getTime() - now.getTime();
+            
+            return Math.max(0, msUntil);
+        }
+        
+        function scheduleDailySnapshot() {
+            if (dailySnapshotTimer) {
+                clearTimeout(dailySnapshotTimer);
+            }
+            
+            const msUntilCutoff = getMillisecondsUntilCutoff();
+            const hoursUntil = (msUntilCutoff / (1000 * 60 * 60)).toFixed(1);
+            
+            console.log(`📅 Daily snapshot scheduled in ${hoursUntil} hours (3:59 PM PST)`);
+            
+            dailySnapshotTimer = setTimeout(async () => {
+                console.log('⏰ 3:59 PM PST - Triggering daily exchange snapshot...');
+                
+                // Check if we already have today's final snapshot
+                const today = formatDateKey(new Date());
+                const existingToday = dailyHoldingsTrend.find(d => d.date === today && d.isPastCutoff);
+                
+                if (existingToday) {
+                    console.log('Already have final snapshot for today, skipping');
+                } else {
+                    // Fetch fresh exchange data
+                    showToast('📸 Taking daily snapshot at 3:59 PM PST...', 'info');
+                    
+                    try {
+                        // Force a fresh fetch for the snapshot
+                        await fetchExchangeDataForSnapshot();
+                        showToast('✅ Daily snapshot recorded!', 'info');
+                    } catch (error) {
+                        console.error('Snapshot failed:', error);
+                        showToast('⚠️ Snapshot failed - will retry', 'warning');
+                    }
+                }
+                
+                // Schedule next day's snapshot
+                scheduleDailySnapshot();
+                
+            }, msUntilCutoff);
+            
+            dailySnapshotScheduled = true;
+        }
+        
+        // Lightweight fetch just for snapshot (doesn't update UI aggressively)
+        async function fetchExchangeDataForSnapshot() {
+            console.log('Fetching exchange data for daily snapshot...');
+            
+            const tempExchangeData = {};
+            
+            for (const [exchangeName, wallets] of Object.entries(EXCHANGES)) {
+                let exchangeTotal = 0;
+                
+                for (const [address, walletName] of Object.entries(wallets)) {
+                    const balance = await fetchSingleBalance(address);
+                    if (balance !== null) {
+                        exchangeTotal += balance;
+                    }
+                }
+                
+                tempExchangeData[exchangeName] = {
+                    total: exchangeTotal,
+                    walletCount: Object.keys(wallets).length
+                };
+            }
+            
+            // Update the main exchange data
+            exchangeData = tempExchangeData;
+            exchangeDataTimestamp = Date.now();
+            
+            // Save to cache
+            saveToCache(CACHE_KEYS.exchangeData, exchangeData);
+            saveToCache(CACHE_KEYS.exchangeTimestamp, exchangeDataTimestamp);
+            
+            // Record the daily trend
+            updateDailyHoldingsTrend();
+            
+            console.log('Daily snapshot complete!');
+        }
+        
+        // Start the scheduler when page loads
+        scheduleDailySnapshot();
+        updateNextSnapshotDisplay();
+        
+        // Update the next snapshot display every minute
+        setInterval(updateNextSnapshotDisplay, 60000);
+        
+        function updateNextSnapshotDisplay() {
+            const el = document.getElementById('nextSnapshotTime');
+            if (!el) return;
+            
+            const msUntil = getMillisecondsUntilCutoff();
+            const hoursUntil = Math.floor(msUntil / (1000 * 60 * 60));
+            const minsUntil = Math.floor((msUntil % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (hoursUntil > 0) {
+                el.textContent = `Next: ${hoursUntil}h ${minsUntil}m`;
+            } else if (minsUntil > 0) {
+                el.textContent = `Next: ${minsUntil}m`;
+                el.style.color = 'var(--accent-orange)'; // Highlight when close
+            } else {
+                el.textContent = 'Next: Soon!';
+                el.style.color = 'var(--accent-green)';
+            }
+        }
+        
+        // Also check on visibility change (when user returns to tab)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && !dailySnapshotScheduled) {
+                scheduleDailySnapshot();
+            }
+        });
         
         function showToast(message, type = 'info') {
             // Remove existing toast
