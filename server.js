@@ -53,7 +53,7 @@ if (RESEND_API_KEY) {
 // LUNARCRUSH API CONFIGURATION
 // =====================================================
 
-const LUNARCRUSH_API_KEY = process.env.LUNARCRUSH_API_KEY || '00kyv32gahqdkkkxcieql160hz89ml0c542vj4hkro6';
+const LUNARCRUSH_API_KEY = process.env.LUNARCRUSH_API_KEY || 'jgxx7wiopp9jvz426oiokjagtsml40immg52j6ovb';
 const LUNARCRUSH_BASE_URL = 'https://lunarcrush.com/api4/public';
 
 // LunarCrush cache (5 minute cache)
@@ -78,6 +78,8 @@ async function lunarcrushRequest(endpoint, params = {}) {
     const url = new URL(`${LUNARCRUSH_BASE_URL}${endpoint}`);
     Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
     
+    console.log(`LunarCrush request: ${url.toString()}`);
+    
     try {
         const response = await fetch(url.toString(), {
             headers: {
@@ -85,12 +87,17 @@ async function lunarcrushRequest(endpoint, params = {}) {
             }
         });
         
+        console.log(`LunarCrush response status: ${response.status}`);
+        
         if (!response.ok) {
-            console.log(`LunarCrush API error: ${response.status}`);
+            const errorText = await response.text();
+            console.log(`LunarCrush API error: ${response.status} - ${errorText}`);
             return null;
         }
         
-        return await response.json();
+        const data = await response.json();
+        console.log(`LunarCrush data received:`, data ? 'yes' : 'no');
+        return data;
     } catch (error) {
         console.error('LunarCrush request failed:', error.message);
         return null;
