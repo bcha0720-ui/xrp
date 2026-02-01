@@ -50,6 +50,56 @@ if (RESEND_API_KEY) {
 }
 
 // =====================================================
+// LUNARCRUSH API CONFIGURATION
+// =====================================================
+
+const LUNARCRUSH_API_KEY = process.env.LUNARCRUSH_API_KEY || '00kyv32gahqdkkkxcieql160hz89ml0c542vj4hkro6';
+const LUNARCRUSH_BASE_URL = 'https://lunarcrush.com/api4/public';
+
+// LunarCrush cache (5 minute cache)
+let lunarcrushCache = {};
+const LUNARCRUSH_CACHE_DURATION = 5 * 60 * 1000;
+
+function getLunarCrushCached(key) {
+    if (lunarcrushCache[key]) {
+        const { data, timestamp } = lunarcrushCache[key];
+        if (Date.now() - timestamp < LUNARCRUSH_CACHE_DURATION) {
+            return data;
+        }
+    }
+    return null;
+}
+
+function setLunarCrushCache(key, data) {
+    lunarcrushCache[key] = { data, timestamp: Date.now() };
+}
+
+async function lunarcrushRequest(endpoint, params = {}) {
+    const url = new URL(`${LUNARCRUSH_BASE_URL}${endpoint}`);
+    Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+    
+    try {
+        const response = await fetch(url.toString(), {
+            headers: {
+                'Authorization': `Bearer ${LUNARCRUSH_API_KEY}`
+            }
+        });
+        
+        if (!response.ok) {
+            console.log(`LunarCrush API error: ${response.status}`);
+            return null;
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('LunarCrush request failed:', error.message);
+        return null;
+    }
+}
+
+console.log('✅ LunarCrush API configured');
+
+// =====================================================
 // KNOWLEDGE BASE FOR RAG (Chat Enhancement)
 // =====================================================
 
@@ -891,6 +941,168 @@ function scheduleEmails() {
 // =====================================================
 // API ENDPOINTS
 // =====================================================
+
+// =====================================================
+// LUNARCRUSH SOCIAL SENTIMENT ENDPOINTS
+// =====================================================
+
+// Get XRP topic data (social metrics)
+app.get('/api/xrp/topic', async (req, res) => {
+    const cacheKey = 'xrp_topic';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/v1');
+    if (result) {
+        const data = result.data || result;
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch topic data' });
+});
+
+// Get XRP social posts
+app.get('/api/xrp/posts', async (req, res) => {
+    const cacheKey = 'xrp_posts';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/posts/v1');
+    if (result) {
+        const data = result.data || [];
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch posts' });
+});
+
+// Get XRP time series data
+app.get('/api/xrp/timeseries', async (req, res) => {
+    const bucket = req.query.bucket || 'day';
+    const interval = req.query.interval || '1w';
+    const cacheKey = `xrp_timeseries_${bucket}_${interval}`;
+    
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/time-series/v1', { bucket, interval });
+    if (result) {
+        const data = result.data || [];
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch timeseries' });
+});
+
+// Get XRP creators
+app.get('/api/xrp/creators', async (req, res) => {
+    const cacheKey = 'xrp_creators';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/creators/v1');
+    if (result) {
+        const data = result.data || [];
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch creators' });
+});
+
+// Get XRP news
+app.get('/api/xrp/news', async (req, res) => {
+    const cacheKey = 'xrp_news';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/news/v1');
+    if (result) {
+        const data = result.data || [];
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch news' });
+});
+
+// Get XRP coin market data
+app.get('/api/xrp/coin', async (req, res) => {
+    const cacheKey = 'xrp_coin';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/coins/xrp/v1');
+    if (result) {
+        const data = result.data || result;
+        setLunarCrushCache(cacheKey, data);
+        return res.json({ data, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch coin data' });
+});
+
+// Get ALL XRP data in one request (combined endpoint)
+app.get('/api/xrp/all', async (req, res) => {
+    const cacheKey = 'xrp_all';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    // Fetch all data in parallel
+    const [topic, posts, timeseries, coin, news] = await Promise.all([
+        lunarcrushRequest('/topic/xrp/v1'),
+        lunarcrushRequest('/topic/xrp/posts/v1'),
+        lunarcrushRequest('/topic/xrp/time-series/v1', { bucket: 'day', interval: '1w' }),
+        lunarcrushRequest('/coins/xrp/v1'),
+        lunarcrushRequest('/topic/xrp/news/v1')
+    ]);
+    
+    const data = {
+        topic: topic?.data || topic || null,
+        posts: posts?.data || [],
+        timeseries: timeseries?.data || [],
+        coin: coin?.data || coin || null,
+        news: (news?.data || []).slice(0, 5),
+        timestamp: new Date().toISOString()
+    };
+    
+    setLunarCrushCache(cacheKey, data);
+    res.json({ data, cached: false });
+});
+
+// Get AI-generated summary
+app.get('/api/xrp/whatsup', async (req, res) => {
+    const cacheKey = 'xrp_whatsup';
+    const cached = getLunarCrushCached(cacheKey);
+    if (cached) {
+        return res.json({ data: cached, cached: true });
+    }
+    
+    const result = await lunarcrushRequest('/topic/xrp/whatsup/v1');
+    if (result) {
+        setLunarCrushCache(cacheKey, result);
+        return res.json({ data: result, cached: false });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch whatsup' });
+});
 
 // ETF Data endpoint
 app.get('/api/etf-data', async (req, res) => {
@@ -1735,9 +1947,17 @@ app.listen(PORT, () => {
     console.log('  GET  /api/exchange/holdings (current holdings)');
     console.log('  GET  /api/exchange/trend    (daily trend data)');
     console.log('  POST /api/exchange/snapshot (manual snapshot)');
+    console.log('  --- LunarCrush Social Sentiment ---');
+    console.log('  GET  /api/xrp/all          (all social data)');
+    console.log('  GET  /api/xrp/topic        (social metrics)');
+    console.log('  GET  /api/xrp/posts        (top posts)');
+    console.log('  GET  /api/xrp/timeseries   (historical)');
+    console.log('  GET  /api/xrp/news         (news articles)');
+    console.log('  GET  /api/xrp/coin         (market data)');
     console.log('=========================================');
     console.log(`AI: ${anthropic ? '✅ Enabled' : '❌ Disabled'}`);
     console.log(`Email: ${emailEnabled ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`LunarCrush: ✅ Enabled`);
     console.log('=========================================');
 
     // Start email scheduler
