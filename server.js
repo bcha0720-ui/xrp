@@ -87,7 +87,7 @@ function findRelevantDocs(query, topK = 3) {
 
 const ETF_SYMBOLS = {
     'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
-    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'SXRP'],
+    'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'XXX'],
     'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
     'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
 };
@@ -109,7 +109,7 @@ const DESCRIPTIONS = {
     'XRPK': 'T-REX 2X Long XRP',
     'XRPT': 'Volatility Shares 2x XRP',
     'XXRP': 'Teucrium 2x Long XRP',
-    'SXRP': 'Cyber Hornet S&P 500/XRP 75/25'
+    'XXX': 'Cyber Hornet S&P 500/XRP 75/25'
 };
 
 // =====================================================
@@ -226,9 +226,9 @@ async function fetchXRPLBalance(address) {
                     }]
                 })
             });
-            
+
             if (!response.ok) continue;
-            
+
             const data = await response.json();
             if (data.result && data.result.account_data) {
                 // Balance is in drops (1 XRP = 1,000,000 drops)
@@ -248,14 +248,14 @@ async function fetchXRPLBalance(address) {
 
 async function fetchAllExchangeHoldings() {
     console.log('📊 Fetching all exchange holdings...');
-    
+
     const exchangeData = {};
     let grandTotal = 0;
-    
+
     for (const [exchangeName, wallets] of Object.entries(EXCHANGE_WALLETS)) {
         let exchangeTotal = 0;
         let successCount = 0;
-        
+
         for (const [address, walletName] of Object.entries(wallets)) {
             try {
                 const balance = await fetchXRPLBalance(address);
@@ -269,17 +269,17 @@ async function fetchAllExchangeHoldings() {
                 console.log(`Failed to fetch ${walletName}: ${error.message}`);
             }
         }
-        
+
         exchangeData[exchangeName] = {
             total: exchangeTotal,
             walletCount: Object.keys(wallets).length,
             successCount: successCount
         };
         grandTotal += exchangeTotal;
-        
+
         console.log(`  ${exchangeName}: ${(exchangeTotal / 1e9).toFixed(2)}B XRP`);
     }
-    
+
     return { exchanges: exchangeData, total: grandTotal, timestamp: Date.now() };
 }
 
@@ -291,14 +291,14 @@ function formatDateKey(date = new Date()) {
 
 async function takeDailySnapshot() {
     console.log('📸 Taking daily exchange holdings snapshot...');
-    
+
     try {
         const holdings = await fetchAllExchangeHoldings();
         const today = formatDateKey();
-        
+
         // Check if we already have today's snapshot
         const existingIndex = dailyHoldingsTrend.findIndex(d => d.date === today);
-        
+
         const entry = {
             date: today,
             total: holdings.total,
@@ -306,12 +306,12 @@ async function takeDailySnapshot() {
             timestamp: Date.now(),
             isPastCutoff: true
         };
-        
+
         // Store exchange totals
         for (const [name, data] of Object.entries(holdings.exchanges)) {
             entry.exchanges[name] = data.total;
         }
-        
+
         if (existingIndex >= 0) {
             dailyHoldingsTrend[existingIndex] = entry;
             console.log(`✅ Updated snapshot for ${today}`);
@@ -320,20 +320,20 @@ async function takeDailySnapshot() {
             dailyHoldingsTrend.sort((a, b) => a.date.localeCompare(b.date));
             console.log(`✅ Added new snapshot for ${today}`);
         }
-        
+
         // Keep only last 90 days
         if (dailyHoldingsTrend.length > 90) {
             dailyHoldingsTrend = dailyHoldingsTrend.slice(-90);
         }
-        
+
         // Update cache
         exchangeHoldingsCache = { data: holdings, timestamp: Date.now() };
-        
+
         console.log(`📊 Total exchange holdings: ${(holdings.total / 1e9).toFixed(2)}B XRP`);
         console.log(`📅 Trend data now has ${dailyHoldingsTrend.length} days`);
-        
+
         return entry;
-        
+
     } catch (error) {
         console.error('❌ Daily snapshot failed:', error.message);
         return null;
@@ -343,24 +343,24 @@ async function takeDailySnapshot() {
 // Schedule daily snapshot at 3:59 PM PST (23:59 UTC)
 function scheduleDailySnapshot() {
     const now = new Date();
-    
+
     // Target: 23:59 UTC (3:59 PM PST)
     const targetHour = 23;
     const targetMinute = 59;
-    
+
     let target = new Date(now);
     target.setUTCHours(targetHour, targetMinute, 0, 0);
-    
+
     // If we've passed today's target, schedule for tomorrow
     if (now >= target) {
         target.setUTCDate(target.getUTCDate() + 1);
     }
-    
+
     const msUntilTarget = target.getTime() - now.getTime();
     const hoursUntil = (msUntilTarget / (1000 * 60 * 60)).toFixed(1);
-    
+
     console.log(`⏰ Daily snapshot scheduled in ${hoursUntil} hours (3:59 PM PST / 23:59 UTC)`);
-    
+
     setTimeout(async () => {
         await takeDailySnapshot();
         // Schedule next day
@@ -371,9 +371,9 @@ function scheduleDailySnapshot() {
 // API endpoint to get daily holdings trend
 app.get('/api/exchange/holdings', async (req, res) => {
     const forceRefresh = req.query.refresh === 'true';
-    
+
     // Return cached data if fresh
-    if (!forceRefresh && exchangeHoldingsCache.data && 
+    if (!forceRefresh && exchangeHoldingsCache.data &&
         Date.now() - exchangeHoldingsCache.timestamp < EXCHANGE_CACHE_DURATION) {
         return res.json({
             ...exchangeHoldingsCache.data,
@@ -381,7 +381,7 @@ app.get('/api/exchange/holdings', async (req, res) => {
             cacheAge: Date.now() - exchangeHoldingsCache.timestamp
         });
     }
-    
+
     try {
         const holdings = await fetchAllExchangeHoldings();
         exchangeHoldingsCache = { data: holdings, timestamp: Date.now() };
@@ -399,7 +399,7 @@ app.get('/api/exchange/holdings', async (req, res) => {
 app.get('/api/exchange/trend', (req, res) => {
     const days = parseInt(req.query.days) || 30;
     const trendData = dailyHoldingsTrend.slice(-days);
-    
+
     // Calculate changes
     const dataWithChanges = trendData.map((entry, index) => {
         const prev = index > 0 ? trendData[index - 1] : null;
@@ -409,7 +409,7 @@ app.get('/api/exchange/trend', (req, res) => {
             changePercent: prev ? ((entry.total - prev.total) / prev.total * 100).toFixed(2) : 0
         };
     });
-    
+
     res.json({
         trend: dataWithChanges,
         count: dailyHoldingsTrend.length,
@@ -1742,10 +1742,10 @@ app.listen(PORT, () => {
 
     // Start email scheduler
     scheduleEmails();
-    
+
     // Start daily holdings snapshot scheduler (3:59 PM PST)
     scheduleDailySnapshot();
-    
+
     // Take initial snapshot on startup if we don't have today's data
     const today = formatDateKey();
     const hasToday = dailyHoldingsTrend.some(d => d.date === today);
