@@ -55,9 +55,13 @@ if (RESEND_API_KEY) {
 
 const COINGECKO_BASE_URL = 'https://api.coingecko.com/api/v3';
 
-// CoinGecko cache (5 minute cache)
+// CoinGecko cache (10 minute cache to avoid rate limits)
 let coingeckoCache = {};
-const COINGECKO_CACHE_DURATION = 5 * 60 * 1000;
+const COINGECKO_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+// Rate limiting - CoinGecko free tier allows 30 calls/minute
+let lastCoinGeckoCall = 0;
+const COINGECKO_MIN_INTERVAL = 2500; // 2.5 seconds between calls (24 calls/min max)
 
 function getCoinGeckoCached(key, forceRefresh = false) {
     if (forceRefresh) {
@@ -83,6 +87,16 @@ function clearCoinGeckoCache() {
 }
 
 async function coingeckoRequest(endpoint) {
+    // Rate limiting
+    const now = Date.now();
+    const timeSinceLastCall = now - lastCoinGeckoCall;
+    if (timeSinceLastCall < COINGECKO_MIN_INTERVAL) {
+        const waitTime = COINGECKO_MIN_INTERVAL - timeSinceLastCall;
+        console.log(`CoinGecko rate limit: waiting ${waitTime}ms`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    lastCoinGeckoCall = Date.now();
+    
     const url = `${COINGECKO_BASE_URL}${endpoint}`;
     
     console.log(`CoinGecko request: ${url}`);
@@ -95,6 +109,11 @@ async function coingeckoRequest(endpoint) {
         });
         
         console.log(`CoinGecko response status: ${response.status}`);
+        
+        if (response.status === 429) {
+            console.log('CoinGecko rate limit hit - using cached data');
+            return null;
+        }
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -1077,18 +1096,19 @@ app.get('/api/xrp/all', async (req, res) => {
     
     console.log('Fetching fresh data from CoinGecko (FREE)...');
     
-    // Fetch all data in parallel
-    const [coinData, chartData, trendingData] = await Promise.all([
-        coingeckoRequest('/coins/ripple?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true'),
-        coingeckoRequest('/coins/ripple/market_chart?vs_currency=usd&days=7'),
-        coingeckoRequest('/search/trending')
-    ]);
+    // Use SINGLE API call to get all data (to avoid rate limits)
+    const coinData = await coingeckoRequest('/coins/ripple?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=true');
     
-    console.log('CoinGecko results:', {
-        coinData: coinData ? 'received' : 'null',
-        chartData: chartData ? 'received' : 'null',
-        trendingData: trendingData ? 'received' : 'null'
-    });
+    if (!coinData) {
+        console.log('CoinGecko request failed - returning error');
+        return res.status(503).json({ 
+            error: 'CoinGecko API unavailable (rate limited)', 
+            message: 'Please wait a minute and try again',
+            cached: false 
+        });
+    }
+    
+    console.log('CoinGecko data received successfully');
     
     // Calculate social engagement score based on available metrics
     const twitterFollowers = coinData?.community_data?.twitter_followers || 0;
@@ -1102,6 +1122,11 @@ app.get('/api/xrp/all', async (req, res) => {
         (Math.min(redditActive / 100, 30)) + 
         (Math.min(twitterFollowers / 100000, 30))
     ));
+    
+    // Use sparkline data for timeseries (last 7 days)
+    const sparkline = coinData?.market_data?.sparkline_7d?.price || [];
+    const now = Date.now();
+    const hourMs = 60 * 60 * 1000;
     
     const data = {
         topic: {
@@ -1129,19 +1154,13 @@ app.get('/api/xrp/all', async (req, res) => {
             percent_change_24h: coinData?.market_data?.price_change_percentage_24h,
             percent_change_7d: coinData?.market_data?.price_change_percentage_7d
         },
-        timeseries: chartData?.prices?.map((p, i) => ({
-            time: Math.floor(p[0] / 1000),
-            price: p[1],
-            volume: chartData?.total_volumes?.[i]?.[1] || 0,
+        timeseries: sparkline.map((price, i) => ({
+            time: Math.floor((now - (sparkline.length - i) * hourMs) / 1000),
+            price: price,
             sentiment: socialScore + (Math.random() - 0.5) * 10 // Simulated variance
-        })) || [],
+        })),
         posts: [], // CoinGecko doesn't provide social posts
         news: [], // CoinGecko doesn't provide news
-        trending: trendingData?.coins?.slice(0, 5).map(c => ({
-            name: c.item?.name,
-            symbol: c.item?.symbol,
-            market_cap_rank: c.item?.market_cap_rank
-        })) || [],
         developer: {
             forks: coinData?.developer_data?.forks || 0,
             stars: coinData?.developer_data?.stars || 0,
@@ -1152,10 +1171,8 @@ app.get('/api/xrp/all', async (req, res) => {
         source: 'coingecko_free'
     };
     
-    // Only cache if we got actual data
-    if (data.topic || data.coin) {
-        setCoinGeckoCache(cacheKey, data);
-    }
+    // Cache the data
+    setCoinGeckoCache(cacheKey, data);
     
     res.json({ data, cached: false });
 });
