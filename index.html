@@ -6028,22 +6028,22 @@
                     <div class="sentiment-card">
                         <div class="sentiment-card-icon">🌟</div>
                         <div class="sentiment-card-value bullish" id="socialSentimentScore">--</div>
-                        <div class="sentiment-card-label">Sentiment Score</div>
+                        <div class="sentiment-card-label">Community Score</div>
                     </div>
                     <div class="sentiment-card">
-                        <div class="sentiment-card-icon">💬</div>
+                        <div class="sentiment-card-icon">🐦</div>
                         <div class="sentiment-card-value" id="socialMentions">--</div>
-                        <div class="sentiment-card-label">Social Volume</div>
+                        <div class="sentiment-card-label">Twitter Followers</div>
                     </div>
                     <div class="sentiment-card">
                         <div class="sentiment-card-icon">📈</div>
                         <div class="sentiment-card-value bullish" id="socialTrend">--</div>
-                        <div class="sentiment-card-label">24h Change</div>
+                        <div class="sentiment-card-label">24h Price Change</div>
                     </div>
                     <div class="sentiment-card">
                         <div class="sentiment-card-icon">🔥</div>
                         <div class="sentiment-card-value" id="socialEngagement">--</div>
-                        <div class="sentiment-card-label">Engagements</div>
+                        <div class="sentiment-card-label">Reddit Active</div>
                     </div>
                 </div>
 
@@ -14892,17 +14892,15 @@
             const trendEl = document.getElementById('socialTrend');
             const engagementEl = document.getElementById('socialEngagement');
 
-            // LunarCrush v4 topic endpoint returns: sentiment (0-100), num_posts, interactions_24h, etc.
-            const sentimentScore = data.sentiment || data.galaxy_score || 50;
-            const socialVolume = data.num_posts || data.social_volume_24h || data.social_volume || 0;
-            const socialEngagement = data.interactions_24h || data.social_engagement || 0;
-            const numContributors = data.num_contributors || 0;
+            // CoinGecko provides: sentiment, twitter_followers, reddit_subscribers, reddit_active, etc.
+            const sentimentScore = data.sentiment || data.sentiment_up || 50;
+            const socialVolume = data.num_posts || data.reddit_active || 0;
+            const socialEngagement = data.interactions_24h || data.twitter_followers || 0;
+            const numContributors = data.num_contributors || data.reddit_active || 0;
             
-            // Calculate trend from topic_rank change
-            const currentRank = data.topic_rank || 0;
-            const previousRank = data.topic_rank_24h_previous || currentRank;
-            const rankChange = previousRank - currentRank; // positive = improvement
-            const trendPercent = previousRank > 0 ? ((rankChange / previousRank) * 100) : 0;
+            // Calculate trend from price change
+            const priceChange = data.price_change_24h || data.percent_change_24h || 0;
+            const trendPercent = priceChange;
 
             if (scoreEl) {
                 scoreEl.textContent = Math.round(sentimentScore);
@@ -14911,12 +14909,14 @@
             }
             
             if (mentionsEl) {
-                if (socialVolume >= 1000000) {
-                    mentionsEl.textContent = (socialVolume / 1000000).toFixed(1) + 'M';
-                } else if (socialVolume >= 1000) {
-                    mentionsEl.textContent = (socialVolume / 1000).toFixed(1) + 'K';
+                // Show Reddit subscribers or Twitter followers
+                const followers = data.twitter_followers || data.reddit_subscribers || socialVolume;
+                if (followers >= 1000000) {
+                    mentionsEl.textContent = (followers / 1000000).toFixed(1) + 'M';
+                } else if (followers >= 1000) {
+                    mentionsEl.textContent = (followers / 1000).toFixed(1) + 'K';
                 } else {
-                    mentionsEl.textContent = socialVolume.toLocaleString();
+                    mentionsEl.textContent = followers.toLocaleString();
                 }
             }
             
@@ -14926,12 +14926,14 @@
             }
             
             if (engagementEl) {
-                if (socialEngagement >= 1000000) {
-                    engagementEl.textContent = (socialEngagement / 1000000).toFixed(1) + 'M';
-                } else if (socialEngagement >= 1000) {
-                    engagementEl.textContent = (socialEngagement / 1000).toFixed(0) + 'K';
+                // Show Reddit active users as engagement proxy
+                const engagement = data.reddit_active || socialEngagement;
+                if (engagement >= 1000000) {
+                    engagementEl.textContent = (engagement / 1000000).toFixed(1) + 'M';
+                } else if (engagement >= 1000) {
+                    engagementEl.textContent = (engagement / 1000).toFixed(0) + 'K';
                 } else {
-                    engagementEl.textContent = socialEngagement.toLocaleString();
+                    engagementEl.textContent = engagement.toLocaleString();
                 }
             }
 
@@ -14940,20 +14942,14 @@
         }
 
         function updateAdditionalStats(data) {
-            // Update alt rank if available
-            const altRank = data.alt_rank || data.altRank;
-            if (altRank) {
-                console.log('XRP AltRank:', altRank);
-            }
-
-            // Log other useful metrics
-            console.log('LunarCrush Metrics:', {
-                galaxyScore: data.galaxy_score,
-                altRank: data.alt_rank,
-                socialVolume: data.social_volume,
-                socialDominance: data.social_dominance,
-                marketDominance: data.market_dominance,
-                sentiment: data.sentiment
+            // Log CoinGecko metrics
+            console.log('CoinGecko Social Metrics:', {
+                sentiment: data.sentiment,
+                sentiment_up: data.sentiment_up,
+                twitter_followers: data.twitter_followers,
+                reddit_subscribers: data.reddit_subscribers,
+                reddit_active: data.reddit_active,
+                market_cap_rank: data.market_cap_rank
             });
         }
 
