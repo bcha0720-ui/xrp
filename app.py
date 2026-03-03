@@ -6,6 +6,7 @@ import logging
 import time
 import os
 import requests
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
