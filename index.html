@@ -6249,7 +6249,7 @@
 
         <!-- Offline Indicator -->
         <div class="offline-indicator" id="offlineIndicator">
-            📡 You're offline - showing cached data
+            📡 No internet connection
         </div>
 
         <!-- Chart Modal -->
@@ -15441,12 +15441,48 @@
             });
             
             window.addEventListener('offline', () => {
-                offlineIndicator?.classList.add('visible');
+                if (offlineIndicator) {
+                    offlineIndicator.textContent = '📡 No internet connection';
+                    offlineIndicator.classList.add('visible');
+                }
             });
             
-            // Check initial state
+            // Only show offline indicator for TRUE network disconnection
+            // Don't show it on page load - let API calls determine status
             if (!navigator.onLine) {
-                offlineIndicator?.classList.add('visible');
+                if (offlineIndicator) {
+                    offlineIndicator.textContent = '📡 No internet connection';
+                    offlineIndicator.classList.add('visible');
+                }
+            }
+        }
+        
+        // Helper function to show API status (not offline, just API issues)
+        function showApiStatus(message, type = 'warning') {
+            const offlineIndicator = document.getElementById('offlineIndicator');
+            if (offlineIndicator && navigator.onLine) {
+                // Only show API issues if we're actually online
+                // This handles Render cold start, API errors, etc.
+                if (type === 'loading') {
+                    offlineIndicator.textContent = '⏳ ' + message;
+                    offlineIndicator.style.background = 'var(--accent-orange)';
+                    offlineIndicator.classList.add('visible');
+                } else if (type === 'error') {
+                    offlineIndicator.textContent = '⚠️ ' + message;
+                    offlineIndicator.style.background = 'var(--accent-red)';
+                    offlineIndicator.classList.add('visible');
+                } else {
+                    offlineIndicator.classList.remove('visible');
+                    offlineIndicator.style.background = 'var(--accent-red)';
+                }
+            }
+        }
+        
+        function hideApiStatus() {
+            const offlineIndicator = document.getElementById('offlineIndicator');
+            if (offlineIndicator && navigator.onLine) {
+                offlineIndicator.classList.remove('visible');
+                offlineIndicator.style.background = 'var(--accent-red)';
             }
         }
 
