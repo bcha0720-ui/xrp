@@ -15435,6 +15435,7 @@
         function setupOfflineDetection() {
             const offlineIndicator = document.getElementById('offlineIndicator');
             
+            // Only show offline indicator when connection DROPS during session
             window.addEventListener('online', () => {
                 offlineIndicator?.classList.remove('visible');
                 showToast('Back online!', 'success');
@@ -15447,22 +15448,14 @@
                 }
             });
             
-            // Only show offline indicator for TRUE network disconnection
-            // Don't show it on page load - let API calls determine status
-            if (!navigator.onLine) {
-                if (offlineIndicator) {
-                    offlineIndicator.textContent = '📡 No internet connection';
-                    offlineIndicator.classList.add('visible');
-                }
-            }
+            // DO NOT check navigator.onLine on page load - it's unreliable
+            // If the page loaded, we clearly have internet!
         }
         
         // Helper function to show API status (not offline, just API issues)
         function showApiStatus(message, type = 'warning') {
             const offlineIndicator = document.getElementById('offlineIndicator');
-            if (offlineIndicator && navigator.onLine) {
-                // Only show API issues if we're actually online
-                // This handles Render cold start, API errors, etc.
+            if (offlineIndicator) {
                 if (type === 'loading') {
                     offlineIndicator.textContent = '⏳ ' + message;
                     offlineIndicator.style.background = 'var(--accent-orange)';
@@ -15480,7 +15473,7 @@
         
         function hideApiStatus() {
             const offlineIndicator = document.getElementById('offlineIndicator');
-            if (offlineIndicator && navigator.onLine) {
+            if (offlineIndicator) {
                 offlineIndicator.classList.remove('visible');
                 offlineIndicator.style.background = 'var(--accent-red)';
             }
