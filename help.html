@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Use - XRP ETF & Holdings Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Help - XRP Insights Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #16161f;
-            --border: #2a2a3a;
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent-xrp: #23f7dd;
-            --accent-purple: #a855f7;
-            --accent-blue: #3b82f6;
             --accent-green: #22c55e;
             --accent-red: #ef4444;
             --accent-orange: #f97316;
-            --accent-yellow: #eab308;
+            --accent-purple: #a855f7;
+            --border: #2d3748;
         }
 
         * {
@@ -33,39 +32,31 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.7;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            line-height: 1.6;
             padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        /* Header */
-        .help-header {
+        .header {
             text-align: center;
-            padding: 3rem 0;
-            border-bottom: 1px solid var(--border);
             margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .help-header h1 {
+        .header h1 {
             font-size: 2.5rem;
-            font-weight: 800;
+            margin-bottom: 0.5rem;
             background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 1rem;
         }
 
-        .help-header p {
+        .header p {
             color: var(--text-secondary);
             font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
         }
 
         .back-link {
@@ -74,95 +65,54 @@
             gap: 0.5rem;
             color: var(--accent-xrp);
             text-decoration: none;
-            font-weight: 500;
             margin-bottom: 2rem;
-            transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .back-link:hover {
-            color: var(--text-primary);
+            text-decoration: underline;
         }
 
-        /* Table of Contents */
-        .toc {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 3rem;
+        .lang-switch {
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .toc h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .toc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .toc-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .toc-item:hover {
-            background: var(--bg-primary);
+        .lang-switch a {
             color: var(--accent-xrp);
-            transform: translateX(5px);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent-xrp);
+            border-radius: 8px;
+            transition: all 0.2s;
         }
 
-        .toc-icon {
-            font-size: 1.25rem;
+        .lang-switch a:hover {
+            background: var(--accent-xrp);
+            color: var(--bg-primary);
         }
 
-        /* Sections */
         .section {
-            margin-bottom: 4rem;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .section-icon {
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--accent-xrp)20, var(--accent-purple)20);
-            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
         .section h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-xrp);
         }
 
         .section h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--accent-xrp);
-            margin: 2rem 0 1rem;
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text-primary);
         }
 
         .section p {
@@ -170,775 +120,301 @@
             margin-bottom: 1rem;
         }
 
-        /* Feature Cards */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin: 1.5rem 0;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            border-color: var(--accent-xrp);
-            transform: translateY(-3px);
-        }
-
-        .feature-card-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .section ul {
+            color: var(--text-secondary);
+            margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .feature-card-icon {
-            font-size: 1.5rem;
+        .section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
         }
 
         .feature-card h4 {
             font-size: 1rem;
-            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .feature-card p {
             font-size: 0.9rem;
-            color: var(--text-muted);
-            margin: 0;
+            margin-bottom: 0;
         }
 
-        /* Info Boxes */
-        .info-box {
-            background: var(--bg-secondary);
-            border-left: 4px solid var(--accent-blue);
-            border-radius: 0 8px 8px 0;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-        }
-
-        .info-box.tip {
-            border-color: var(--accent-green);
-        }
-
-        .info-box.warning {
-            border-color: var(--accent-orange);
-        }
-
-        .info-box.important {
-            border-color: var(--accent-purple);
-        }
-
-        .info-box-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .info-box p {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        /* Metric Explanation */
-        .metric-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .metric-item {
-            display: flex;
-            gap: 1rem;
+        .tip {
+            background: rgba(35, 247, 221, 0.1);
+            border-left: 3px solid var(--accent-xrp);
             padding: 1rem;
-            background: var(--bg-card);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .metric-label {
-            min-width: 150px;
-            font-weight: 600;
-            color: var(--accent-xrp);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .metric-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        /* Use Cases */
-        .use-case {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
             margin: 1rem 0;
         }
 
-        .use-case-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .use-case-badge {
-            padding: 0.25rem 0.75rem;
-            background: var(--accent-purple);
-            color: var(--bg-primary);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .use-case h4 {
-            font-size: 1.1rem;
-        }
-
-        .use-case ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .use-case li {
-            padding: 0.5rem 0;
-            padding-left: 1.5rem;
-            position: relative;
-            color: var(--text-secondary);
-        }
-
-        .use-case li::before {
-            content: "→";
-            position: absolute;
-            left: 0;
+        .tip strong {
             color: var(--accent-xrp);
         }
 
-        /* Tab Preview */
-        .tab-preview {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
+        .warning {
+            background: rgba(249, 115, 22, 0.1);
+            border-left: 3px solid var(--accent-orange);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
         }
 
-        .tab-preview-header {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
+        .warning strong {
+            color: var(--accent-orange);
         }
 
-        .tab-btn {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tab-btn.active {
-            background: var(--accent-xrp);
-            color: var(--bg-primary);
-            border-color: var(--accent-xrp);
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
             font-weight: 600;
+            margin-left: 0.5rem;
         }
 
-        /* FAQ */
-        .faq-item {
-            border-bottom: 1px solid var(--border);
-            padding: 1.5rem 0;
+        .badge-new {
+            background: var(--accent-green);
+            color: white;
         }
 
-        .faq-item:last-child {
-            border-bottom: none;
+        .badge-beta {
+            background: var(--accent-purple);
+            color: white;
         }
 
-        .faq-question {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-
-        .faq-answer {
-            color: var(--text-secondary);
-        }
-
-        /* Footer */
-        .help-footer {
+        .footer {
             text-align: center;
-            padding: 3rem 0;
-            border-top: 1px solid var(--border);
-            margin-top: 3rem;
-        }
-
-        .help-footer p {
+            padding: 2rem;
             color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
         }
 
-        .help-footer a {
+        .footer a {
             color: var(--accent-xrp);
             text-decoration: none;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
+        @media (max-width: 600px) {
+            body {
                 padding: 1rem;
             }
-
-            .help-header h1 {
-                font-size: 1.75rem;
+            
+            .header h1 {
+                font-size: 1.8rem;
             }
-
-            .section-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .metric-item {
-                flex-direction: column;
-            }
-
-            .metric-label {
-                min-width: auto;
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← Back to Dashboard</a>
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    
+    <div class="lang-switch">
+        <a href="help-ko.html">🇰🇷 한국어로 보기</a>
+    </div>
 
-        <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
-            <a href="help.html" style="padding: 0.5rem 1rem; background: #23f7dd; border: 1px solid #23f7dd; border-radius: 8px; color: #0a0a0f; text-decoration: none; font-weight: 600;">🇺🇸 English</a>
-            <a href="help-ko.html" style="padding: 0.5rem 1rem; background: #12121a; border: 1px solid #2a2a3a; border-radius: 8px; color: #94a3b8; text-decoration: none; transition: all 0.2s ease;">🇰🇷 한국어</a>
+    <div class="header">
+        <h1>📊 XRP Insights Dashboard</h1>
+        <p>Your comprehensive XRP market intelligence platform</p>
+    </div>
+
+    <!-- Overview -->
+    <div class="section">
+        <h2>🎯 Overview</h2>
+        <p>XRP Insights Dashboard is a free, real-time analytics platform for tracking XRP ETF holdings, exchange balances, market sentiment, and more. All data is sourced from official APIs and updated regularly.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📈 Real-Time Data</h4>
+                <p>Live price updates, ETF holdings, and exchange balances refreshed every few minutes.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🌐 Multi-Language</h4>
+                <p>Full support for English and Korean languages.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📱 Mobile Ready</h4>
+                <p>Responsive design works on desktop, tablet, and mobile devices.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🤖 AI Powered</h4>
+                <p>AI-generated market insights and analysis using Claude AI.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Guide -->
+    <div class="section">
+        <h2>📑 Dashboard Tabs</h2>
+
+        <h3>📈 Trading Tab</h3>
+        <p>View XRP Spot ETF trading data including daily volume, price, and performance metrics for all US-listed XRP ETFs like GXRP (Grayscale), XRP (Bitwise), XRPC (Canary), and more.</p>
+
+        <h3>💎 Holdings Tab</h3>
+        <p>Track the total XRP holdings across all spot ETFs. See which ETF providers hold the most XRP and monitor daily inflows/outflows with interactive charts.</p>
+
+        <h3>🏦 Exchange Tab</h3>
+        <p>Monitor XRP balances across 40+ major cryptocurrency exchanges. Compare current balances to historical data to identify accumulation or distribution patterns.</p>
+        <ul>
+            <li><strong>Fetch Live Data</strong> - Pulls real-time balances from XRPL</li>
+            <li><strong>Historical Comparison</strong> - Compare to Feb 24, 2025 baseline</li>
+            <li><strong>Net Flow Analysis</strong> - See which exchanges are gaining/losing XRP</li>
+        </ul>
+
+        <h3>📊 Analytics Tab</h3>
+        <p>Deep dive into exchange analytics with charts, rankings, and flow analysis.</p>
+        <ul>
+            <li><strong>Exchange Flow Analysis</strong> <span class="badge badge-new">NEW</span> - Visual breakdown of inflows vs outflows</li>
+            <li><strong>Top Rankings</strong> - See top exchanges by holdings</li>
+            <li><strong>Export Data</strong> - Download as CSV or JSON</li>
+        </ul>
+
+        <h3>🏆 Top 10K Tab</h3>
+        <p>Explore the XRP rich list - the top 10,000 largest XRP wallets on the XRPL.</p>
+        <ul>
+            <li><strong>Whale Alerts</strong> <span class="badge badge-new">NEW</span> - Live large transaction alerts</li>
+            <li><strong>Filter by size</strong> - View Top 25, 50, 100, or 500 wallets</li>
+            <li><strong>Wallet analysis</strong> - See balance distribution and dominance</li>
+        </ul>
+
+        <h3>📰 News Tab</h3>
+        <p>Stay updated with the latest XRP and crypto news from multiple sources.</p>
+        <ul>
+            <li><strong>AI News Summary</strong> <span class="badge badge-new">NEW</span> - AI-generated daily digest</li>
+            <li><strong>Sentiment Analysis</strong> - See bullish/bearish ratings</li>
+            <li><strong>Multiple Sources</strong> - News from CoinDesk, Cointelegraph, and more</li>
+        </ul>
+
+        <h3>🤖 AI Insights Tab</h3>
+        <p>AI-powered market analysis and portfolio tools.</p>
+        <ul>
+            <li><strong>Technical Analysis</strong> <span class="badge badge-new">NEW</span> - RSI, MACD, Bollinger Bands</li>
+            <li><strong>Portfolio Tracker</strong> - Calculate your holdings value and P&L</li>
+            <li><strong>XRPL Live Data</strong> - Real-time ledger statistics</li>
+            <li><strong>Price Scenarios</strong> - See potential portfolio values at different prices</li>
+        </ul>
+
+        <h3>𝕏 Social Tab</h3>
+        <p>Track XRP community sentiment and social metrics.</p>
+        <ul>
+            <li><strong>Sentiment Score</strong> - Community sentiment gauge (0-100)</li>
+            <li><strong>Twitter/Reddit Stats</strong> - Follower counts and activity</li>
+            <li><strong>Trending Topics</strong> - Popular XRP hashtags</li>
+        </ul>
+    </div>
+
+    <!-- New Features -->
+    <div class="section">
+        <h2>✨ New Features</h2>
+
+        <h3>🐋 Whale Alerts</h3>
+        <p>Real-time alerts for large XRP transactions (1M+ XRP). Filter by deposits, withdrawals, or transaction size. Links directly to XRPScan for transaction details.</p>
+
+        <h3>📊 Technical Analysis</h3>
+        <p>Professional-grade technical indicators calculated from 30-day price history:</p>
+        <ul>
+            <li><strong>RSI (14-day)</strong> - Relative Strength Index with overbought/oversold signals</li>
+            <li><strong>MACD (12, 26, 9)</strong> - Moving Average Convergence Divergence with crossover alerts</li>
+            <li><strong>Bollinger Bands (20, 2)</strong> - Price volatility bands with position indicator</li>
+        </ul>
+
+        <h3>💰 Exchange Flow Analysis</h3>
+        <p>Visual analysis of XRP flows across exchanges. Net outflows typically indicate bullish sentiment (less selling pressure), while net inflows may indicate bearish sentiment.</p>
+
+        <h3>🤖 AI News Summarizer</h3>
+        <p>AI-powered daily digest of top XRP news headlines with sentiment analysis. Click "Generate" to create a fresh summary.</p>
+    </div>
+
+    <!-- Tips -->
+    <div class="section">
+        <h2>💡 Tips & Tricks</h2>
+
+        <div class="tip">
+            <strong>💡 Pro Tip:</strong> Use the AI Chat Assistant (bottom-right corner) to ask questions about XRP price, technical indicators, or ETF data in natural language!
         </div>
 
-        <header class="help-header">
-            <h1>📖 How to Use This Dashboard</h1>
-            <p>Your complete guide to tracking XRP ETFs, exchange holdings, whale wallets, and market insights.</p>
-        </header>
+        <div class="tip">
+            <strong>💡 Pro Tip:</strong> Install the dashboard as an app on your phone! Click the "Install App" banner or use your browser's "Add to Home Screen" option.
+        </div>
 
-        <!-- Table of Contents -->
-        <nav class="toc">
-            <h2>📑 Quick Navigation</h2>
-            <div class="toc-grid">
-                <a href="#overview" class="toc-item">
-                    <span class="toc-icon">🏠</span>
-                    <span>Dashboard Overview</span>
-                </a>
-                <a href="#etf-trading" class="toc-item">
-                    <span class="toc-icon">📈</span>
-                    <span>ETF Trading</span>
-                </a>
-                <a href="#etf-holdings" class="toc-item">
-                    <span class="toc-icon">💎</span>
-                    <span>ETF Holdings</span>
-                </a>
-                <a href="#exchange" class="toc-item">
-                    <span class="toc-icon">🏦</span>
-                    <span>Exchange Data</span>
-                </a>
-                <a href="#analytics" class="toc-item">
-                    <span class="toc-icon">📊</span>
-                    <span>Exchange Analytics</span>
-                </a>
-                <a href="#top10k" class="toc-item">
-                    <span class="toc-icon">🏆</span>
-                    <span>Top 10K Rich List</span>
-                </a>
-                <a href="#news" class="toc-item">
-                    <span class="toc-icon">📰</span>
-                    <span>News Feed</span>
-                </a>
-                <a href="#ai-insights" class="toc-item">
-                    <span class="toc-icon">🤖</span>
-                    <span>AI Insights</span>
-                </a>
-                <a href="#faq" class="toc-item">
-                    <span class="toc-icon">❓</span>
-                    <span>FAQ</span>
-                </a>
-            </div>
-        </nav>
+        <div class="tip">
+            <strong>💡 Pro Tip:</strong> Switch between English and Korean using the 🌐 language toggle in the header.
+        </div>
 
-        <!-- Dashboard Overview -->
-        <section id="overview" class="section">
-            <div class="section-header">
-                <div class="section-icon">🏠</div>
-                <h2>Dashboard Overview</h2>
-            </div>
-            
-            <p>The main dashboard provides a quick snapshot of XRP holdings across ETFs and exchanges.</p>
+        <div class="warning">
+            <strong>⚠️ Note:</strong> Data is for informational purposes only. Always do your own research (DYOR) before making investment decisions. This is not financial advice.
+        </div>
+    </div>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">💰</span>
-                        <h4>Total XRP in Spot ETFs</h4>
-                    </div>
-                    <p>Combined XRP holdings across all US Spot ETFs including Canary, Bitwise, Franklin, Grayscale, and others.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🏦</span>
-                        <h4>XRP on Exchanges</h4>
-                    </div>
-                    <p>Total XRP held in wallets belonging to major cryptocurrency exchanges like Binance, Coinbase, Kraken.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🏆</span>
-                        <h4>Top 10K Holdings</h4>
-                    </div>
-                    <p>Total XRP held by the top 10,000 richest wallets on the XRP Ledger.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🔥</span>
-                        <h4>Total XRP Burned</h4>
-                    </div>
-                    <p>Cumulative XRP destroyed through transaction fees since the XRPL launched.</p>
-                </div>
-            </div>
+    <!-- Data Sources -->
+    <div class="section">
+        <h2>📡 Data Sources</h2>
+        <ul>
+            <li><strong>ETF Data</strong> - Yahoo Finance API</li>
+            <li><strong>Exchange Balances</strong> - XRP Ledger (XRPL) via rippled nodes</li>
+            <li><strong>Rich List</strong> - XRPScan API</li>
+            <li><strong>Price Data</strong> - CoinGecko API</li>
+            <li><strong>News</strong> - CryptoPanic API</li>
+            <li><strong>AI Analysis</strong> - Anthropic Claude API</li>
+        </ul>
+    </div>
 
-            <div class="info-box tip">
-                <div class="info-box-header">💡 Pro Tip</div>
-                <p>Click on "Exchange" or "Top 10K" tabs to load live data from the XRP Ledger. The dashboard will update automatically once data is fetched.</p>
-            </div>
-        </section>
+    <!-- FAQ -->
+    <div class="section">
+        <h2>❓ FAQ</h2>
 
-        <!-- ETF Trading -->
-        <section id="etf-trading" class="section">
-            <div class="section-header">
-                <div class="section-icon">📈</div>
-                <h2>ETF Trading Tab</h2>
-            </div>
-            
-            <p>Track real-time trading volume and price data for all XRP-related ETFs.</p>
+        <h3>Why is data not loading?</h3>
+        <p>The backend server may be waking up (free tier has cold starts). Wait 30-60 seconds and refresh. If issues persist, check your internet connection.</p>
 
-            <h3>ETF Categories</h3>
-            <div class="metric-list">
-                <div class="metric-item">
-                    <span class="metric-label">Spot ETFs</span>
-                    <span class="metric-desc">ETFs that hold actual XRP (GXRP, XRP, XRPC, XRPZ, TOXR, XRPR). These directly track XRP price.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Futures ETFs</span>
-                    <span class="metric-desc">ETFs using XRP futures contracts (UXRP, XRPI, XRPM). May include leveraged products.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Index ETFs</span>
-                    <span class="metric-desc">Multi-crypto ETFs with XRP exposure (EZPZ, GDLC, BITW). XRP is one of multiple holdings.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Canada ETFs</span>
-                    <span class="metric-desc">Canadian-listed XRP ETFs (XRP.TO, XRPP.TO). Trade on Toronto Stock Exchange.</span>
-                </div>
-            </div>
+        <h3>How often is data updated?</h3>
+        <p>ETF data: Every 5 minutes. Exchange data: On-demand when you click "Fetch Live Data". News: Every 5 minutes.</p>
 
-            <h3>Time Periods</h3>
-            <p>Switch between different time periods to analyze trading patterns:</p>
-            <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
-                <li><strong>Daily</strong> - Today's trading volume</li>
-                <li><strong>Weekly</strong> - Last 5 trading days</li>
-                <li><strong>Monthly</strong> - Last 30 days</li>
-                <li><strong>Yearly</strong> - Last 12 months</li>
-            </ul>
+        <h3>Is this financial advice?</h3>
+        <p>No. This dashboard is for informational and educational purposes only. Always consult a financial advisor before making investment decisions.</p>
 
-            <div class="use-case">
-                <div class="use-case-header">
-                    <span class="use-case-badge">USE CASE</span>
-                    <h4>Analyzing Institutional Interest</h4>
-                </div>
-                <ul>
-                    <li>High volume in Spot ETFs indicates strong institutional buying/selling</li>
-                    <li>Compare daily vs weekly volume to spot unusual activity</li>
-                    <li>Rising volume with rising price = bullish confirmation</li>
-                    <li>Rising volume with falling price = potential capitulation</li>
-                </ul>
-            </div>
-        </section>
+        <h3>Who built this?</h3>
+        <p>Built by <a href="https://x.com/chachakobe4er" target="_blank">@chachakobe4er</a> for the XRP community. 🅧 XRP Army!</p>
+    </div>
 
-        <!-- ETF Holdings -->
-        <section id="etf-holdings" class="section">
-            <div class="section-header">
-                <div class="section-icon">💎</div>
-                <h2>ETF Holdings Tab</h2>
-            </div>
-            
-            <p>Track how much XRP each ETF actually holds over time. This is crucial for understanding institutional adoption.</p>
+    <!-- Contact -->
+    <div class="section">
+        <h2>📬 Contact & Feedback</h2>
+        <p>Have suggestions or found a bug? Reach out on X (Twitter):</p>
+        <p style="text-align: center; margin-top: 1rem;">
+            <a href="https://x.com/chachakobe4er" target="_blank" style="color: var(--accent-xrp); font-weight: 600; font-size: 1.1rem;">
+                🅧 @chachakobe4er
+            </a>
+        </p>
+    </div>
 
-            <h3>Key Metrics</h3>
-            <div class="metric-list">
-                <div class="metric-item">
-                    <span class="metric-label">XRP Holdings</span>
-                    <span class="metric-desc">Actual XRP tokens held by each ETF. Updated daily based on fund disclosures.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">USD Value</span>
-                    <span class="metric-desc">Dollar value of holdings calculated at current XRP price.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Daily Change</span>
-                    <span class="metric-desc">Change in holdings from previous day. Green = inflows, Red = outflows.</span>
-                </div>
-            </div>
-
-            <div class="info-box important">
-                <div class="info-box-header">🎯 Why This Matters</div>
-                <p>ETF inflows represent new institutional money entering XRP. Consistent inflows are a strong bullish signal as it shows sustained demand from traditional finance.</p>
-            </div>
-
-            <div class="use-case">
-                <div class="use-case-header">
-                    <span class="use-case-badge">USE CASE</span>
-                    <h4>Tracking ETF Flows</h4>
-                </div>
-                <ul>
-                    <li>Monitor daily changes to spot institutional buying patterns</li>
-                    <li>Compare holdings across different ETF providers</li>
-                    <li>Use the trend chart to visualize growth over time</li>
-                    <li>Large single-day inflows often precede price movements</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Exchange Data -->
-        <section id="exchange" class="section">
-            <div class="section-header">
-                <div class="section-icon">🏦</div>
-                <h2>Exchange Tab</h2>
-            </div>
-            
-            <p>View XRP balances held by major cryptocurrency exchanges. Data is fetched directly from the XRP Ledger.</p>
-
-            <h3>What It Shows</h3>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">📊</span>
-                        <h4>Exchange Balances</h4>
-                    </div>
-                    <p>Total XRP held across all known wallets for each exchange (Binance, Uphold, Bitso, Kraken, etc.)</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🔍</span>
-                        <h4>Wallet Breakdown</h4>
-                    </div>
-                    <p>Individual wallet addresses and their balances. Useful for verifying data on-chain.</p>
-                </div>
-            </div>
-
-            <div class="info-box warning">
-                <div class="info-box-header">⚠️ Important Note</div>
-                <p>Exchange balances can indicate selling pressure. High exchange balances = more XRP available to sell. Decreasing balances = users moving to self-custody (bullish).</p>
-            </div>
-        </section>
-
-        <!-- Exchange Analytics -->
-        <section id="analytics" class="section">
-            <div class="section-header">
-                <div class="section-icon">📊</div>
-                <h2>Exchange Analytics Tab</h2>
-            </div>
-            
-            <p>Deep dive into exchange data with historical comparisons, flow analysis, and visualizations.</p>
-
-            <h3>Features</h3>
-            <div class="metric-list">
-                <div class="metric-item">
-                    <span class="metric-label">Historical Compare</span>
-                    <span class="metric-desc">Compare current balances to a benchmark date (Feb 24, 2025) to see net flows.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Top Inflows</span>
-                    <span class="metric-desc">Exchanges that have accumulated the most XRP since benchmark.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Top Outflows</span>
-                    <span class="metric-desc">Exchanges that have seen the largest withdrawals since benchmark.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Charts</span>
-                    <span class="metric-desc">Visualize distribution with bar charts, pie charts, and treemaps.</span>
-                </div>
-            </div>
-
-            <div class="use-case">
-                <div class="use-case-header">
-                    <span class="use-case-badge">USE CASE</span>
-                    <h4>Understanding Market Structure</h4>
-                </div>
-                <ul>
-                    <li>Net outflows from exchanges = bullish (less sell pressure)</li>
-                    <li>Net inflows to exchanges = bearish (more potential selling)</li>
-                    <li>Compare regional exchanges to spot geographic demand</li>
-                    <li>Export data for your own analysis</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Top 10K -->
-        <section id="top10k" class="section">
-            <div class="section-header">
-                <div class="section-icon">🏆</div>
-                <h2>Top 10K Rich List</h2>
-            </div>
-            
-            <p>Explore the top 10,000 wealthiest XRP wallets on the ledger. This data is fetched live from the XRPL.</p>
-
-            <h3>Key Statistics</h3>
-            <div class="metric-list">
-                <div class="metric-item">
-                    <span class="metric-label">Total XRP</span>
-                    <span class="metric-desc">Combined holdings of top 10K wallets (~51.8 billion XRP typically).</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Whale Count</span>
-                    <span class="metric-desc">Number of wallets holding 1 million or more XRP.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Mean Balance</span>
-                    <span class="metric-desc">Average XRP per wallet in the top 10K.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Median Balance</span>
-                    <span class="metric-desc">Middle value - gives better sense of "typical" large holder.</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Top 10 Dominance</span>
-                    <span class="metric-desc">Percentage of top 10K holdings owned by just the top 10 wallets.</span>
-                </div>
-            </div>
-
-            <h3>Wallet Labels</h3>
-            <p>Many wallets are labeled with known entities:</p>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🏦</span>
-                        <h4>Exchange Wallets</h4>
-                    </div>
-                    <p>Binance, Coinbase, Kraken, Uphold, Bitso, and other exchanges.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🏢</span>
-                        <h4>Ripple Wallets</h4>
-                    </div>
-                    <p>Ripple Labs operational wallets and escrow accounts.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🐋</span>
-                        <h4>Unknown Whales</h4>
-                    </div>
-                    <p>Large holders whose identity is not publicly known.</p>
-                </div>
-            </div>
-
-            <div class="info-box">
-                <div class="info-box-header">📈 Distribution Chart</div>
-                <p>The distribution chart shows how wallets are spread across balance ranges (100M+, 50-100M, 10-50M, 1-10M, less than 1M).</p>
-            </div>
-        </section>
-
-        <!-- Burn Data -->
-        <section id="burn" class="section">
-            <div class="section-header">
-                <div class="section-icon">🔥</div>
-                <h2>XRP Burn Tracking</h2>
-            </div>
-            
-            <p>Every XRP transaction burns a small amount of XRP as a fee. This makes XRP deflationary over time.</p>
-
-            <h3>Burn Statistics</h3>
-            <div class="metric-list">
-                <div class="metric-item">
-                    <span class="metric-label">Total Burned</span>
-                    <span class="metric-desc">Total XRP destroyed since XRPL genesis (~14+ million XRP).</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Current Supply</span>
-                    <span class="metric-desc">Remaining XRP in existence (started at 100 billion).</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-label">Daily/Weekly Burn</span>
-                    <span class="metric-desc">Recent burn rates showing network activity levels.</span>
-                </div>
-            </div>
-
-            <div class="info-box tip">
-                <div class="info-box-header">💡 What It Means</div>
-                <p>Higher burn rates indicate more network usage. Unlike inflationary cryptocurrencies, XRP supply decreases over time, creating scarcity.</p>
-            </div>
-        </section>
-
-        <!-- News -->
-        <section id="news" class="section">
-            <div class="section-header">
-                <div class="section-icon">📰</div>
-                <h2>News Feed</h2>
-            </div>
-            
-            <p>Stay updated with AI-curated news about XRP, crypto markets, and ETF developments.</p>
-
-            <h3>News Categories</h3>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">💧</span>
-                        <h4>XRP News</h4>
-                    </div>
-                    <p>Ripple company updates, partnerships, legal developments, and XRP-specific news.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">🌐</span>
-                        <h4>Crypto News</h4>
-                    </div>
-                    <p>Broader cryptocurrency market news, regulations, and industry trends.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">📊</span>
-                        <h4>ETF News</h4>
-                    </div>
-                    <p>Updates about crypto ETF approvals, flows, and institutional adoption.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- AI Insights -->
-        <section id="ai-insights" class="section">
-            <div class="section-header">
-                <div class="section-icon">🤖</div>
-                <h2>AI Insights Tab</h2>
-            </div>
-            
-            <p>Get AI-powered market analysis and chat with an XRP-aware assistant.</p>
-
-            <h3>Features</h3>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">📊</span>
-                        <h4>Market Analysis</h4>
-                    </div>
-                    <p>AI-generated overview of current market conditions, technical indicators, and outlook.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">💬</span>
-                        <h4>Chat Assistant</h4>
-                    </div>
-                    <p>Ask questions about XRP, the market data, or get explanations of metrics.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">📈</span>
-                        <h4>Technical Charts</h4>
-                    </div>
-                    <p>Moving averages, price comparisons, and trend analysis.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-card-header">
-                        <span class="feature-card-icon">📄</span>
-                        <h4>PDF Reports</h4>
-                    </div>
-                    <p>Generate downloadable reports with all dashboard data.</p>
-                </div>
-            </div>
-
-            <div class="use-case">
-                <div class="use-case-header">
-                    <span class="use-case-badge">USE CASE</span>
-                    <h4>Questions to Ask the AI</h4>
-                </div>
-                <ul>
-                    <li>"What's the current XRP market sentiment?"</li>
-                    <li>"Explain what the exchange outflows mean"</li>
-                    <li>"How do ETF holdings compare to last month?"</li>
-                    <li>"What's a good entry point based on current data?"</li>
-                    <li>"Summarize today's key metrics"</li>
-                </ul>
-            </div>
-
-            <div class="info-box warning">
-                <div class="info-box-header">⚠️ Disclaimer</div>
-                <p>AI insights are for informational purposes only. Always do your own research and never invest more than you can afford to lose. This is not financial advice.</p>
-            </div>
-        </section>
-
-        <!-- FAQ -->
-        <section id="faq" class="section">
-            <div class="section-header">
-                <div class="section-icon">❓</div>
-                <h2>Frequently Asked Questions</h2>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">How often is the data updated?</div>
-                <div class="faq-answer">ETF data updates every 5 minutes during market hours. Exchange and Top 10K data is cached for 1-24 hours but can be manually refreshed. Price data updates in real-time from CoinGecko.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Where does the data come from?</div>
-                <div class="faq-answer">ETF data comes from Yahoo Finance. Exchange and rich list data comes directly from the XRP Ledger via XRPScan API. Burn data is calculated from ledger information.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Why do some ETFs show no data?</div>
-                <div class="faq-answer">Some ETFs may be newly launched, not trading yet, or temporarily unavailable. The dashboard shows "—" for unavailable data rather than incorrect numbers.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">What does "whale" mean?</div>
-                <div class="faq-answer">A whale is a wallet holding 1 million or more XRP. These large holders can significantly impact the market when they buy or sell.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">How accurate is the exchange wallet data?</div>
-                <div class="faq-answer">We track known exchange wallets that have been publicly identified. Exchanges may have additional unlabeled wallets, so totals represent a minimum estimate.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Can I export the data?</div>
-                <div class="faq-answer">Yes! The Exchange Analytics tab has CSV and JSON export buttons. The AI Insights tab can generate PDF reports.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">Is this financial advice?</div>
-                <div class="faq-answer">No. This dashboard provides data and information for educational purposes. Always conduct your own research and consult financial advisors before making investment decisions.</div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="help-footer">
-            <p>Built with ❤️ for the XRP Community</p>
-            <p style="margin-top: 0.5rem;">
-                <a href="index.html">Back to Dashboard</a>
-            </p>
-        </footer>
+    <div class="footer">
+        <p>XRP Insights Dashboard © 2025 | Built with ❤️ for the XRP Community</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://x.com/chachakobe4er">Twitter</a> • 
+            <a href="index.html">Dashboard</a>
+        </p>
     </div>
 </body>
 </html>
