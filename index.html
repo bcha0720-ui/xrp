@@ -6838,11 +6838,11 @@
                     </div>
                 </div>
 
-                <!-- Data Attribution -->
+                <!-- LunarCrush Attribution -->
                 <div style="margin-top: 1.5rem; text-align: center; padding: 0.75rem; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
                     <span style="color: var(--text-muted); font-size: 0.85rem;">
-                        Social data powered by <a href="https://coingecko.com" target="_blank" style="color: var(--accent-xrp); text-decoration: none; font-weight: 600;">🦎 CoinGecko</a>
-                        <span style="margin-left: 0.5rem; font-size: 0.75rem;">• Community metrics & sentiment</span>
+                        Powered by <a href="https://lunarcrush.com" target="_blank" style="color: var(--accent-xrp); text-decoration: none; font-weight: 600;">🌙 LunarCrush</a>
+                        <span style="margin-left: 0.5rem; font-size: 0.75rem;">• Real-time social intelligence for crypto</span>
                     </span>
                 </div>
             </div>
@@ -10869,7 +10869,7 @@
         const groupOrder = ['Spot ETFs', 'Futures ETFs', 'Index ETFs', 'Canada ETFs'];
 
         // Default API URL
-        const API_URL = 'https://xrp-1-0jnc.onrender.com';
+        const API_URL = 'https://xrp-gtve.onrender.com';
 
         let currentPeriod = 'daily';
         let cachedData = null;
@@ -13329,7 +13329,7 @@
         }
         
         async function fetchClaudeChatResponse(question, marketData) {
-            const API_URL = window.API_URL || 'https://xrp-1-0jnc.onrender.com';
+            const API_URL = window.API_URL || 'https://xrp-gtve.onrender.com';
             
             const response = await fetch(`${API_URL}/api/chat`, {
                 method: 'POST',
@@ -15410,17 +15410,21 @@
         });
 
         // =====================================================
-        // SOCIAL SENTIMENT - Using CoinGecko (LunarCrush replaced)
+        // NEW FEATURES - Social Sentiment (LunarCrush), Dashboard Settings, Historical Charts
         // =====================================================
 
-        // Use the same API_URL that's defined elsewhere in the code
-        const SOCIAL_BACKEND_URL = typeof API_URL !== 'undefined' ? API_URL : 'https://xrp-1-0jnc.onrender.com';
+        // LunarCrush via existing Render backend
+        // Your Render backend already handles ETF data - now also handles LunarCrush
+        const RENDER_BACKEND_URL = 'https://xrp-gtve.onrender.com'; // Your existing Render URL
+        const LUNARCRUSH_API_KEY = '00kyv32gahqdkkkxcieql160hz89ml0c542vj4hkro6'; // Fallback for direct API
+        const LUNARCRUSH_BASE_URL = 'https://lunarcrush.com/api4/public';
         
         // Social Sentiment Data & Functions
         let sentimentChart = null;
         let inflowOutflowChart = null;
         let lunarCrushData = null;
         let sentimentHistory = [];
+        let useProxy = true; // Use Render backend for LunarCrush
 
         async function refreshSocialSentiment() {
             const refreshBtn = document.querySelector('.sentiment-header .btn');
@@ -15430,64 +15434,168 @@
             }
 
             try {
-                // Fetch from our backend which now uses CoinGecko
-                const response = await fetch(`${SOCIAL_BACKEND_URL}/api/xrp/all`);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Social data response:', result);
+                // Fetch XRP data from LunarCrush (via proxy or direct)
+                const data = await fetchLunarCrushData();
+                if (data) {
+                    lunarCrushData = data;
+                    updateSentimentDisplay(data);
                     
-                    if (result.data) {
-                        const data = {
-                            ...result.data.topic,
-                            ...result.data.coin,
-                            posts: result.data.posts || [],
-                            _fromProxy: true
-                        };
-                        
-                        lunarCrushData = data;
-                        sentimentHistory = result.data.timeseries || [];
-                        
-                        updateSentimentDisplay(data);
-                        renderSentimentChart();
-                        
-                        if (data.posts && data.posts.length > 0) {
-                            updateRecentPosts({ posts: data.posts });
-                        }
-                        
-                        showToast('Social data updated!', 'success');
+                    // If from proxy, timeseries is already loaded
+                    if (!data._fromProxy) {
+                        await fetchSentimentHistory();
+                    }
+                    
+                    renderSentimentChart();
+                    updateTrendingTopics(data);
+                    
+                    // Check if posts came with the data (from proxy)
+                    if (data.posts && data.posts.length > 0) {
+                        updateRecentPosts({ posts: data.posts });
                     } else {
-                        throw new Error('No data in response');
+                        // Fetch posts separately
+                        const posts = await fetchLunarCrushPosts();
+                        if (posts && posts.length > 0) {
+                            updateRecentPosts({ posts: posts });
+                        } else {
+                            updateRecentPosts({ posts: [] });
+                        }
+                    }
+                    
+                    // Show appropriate toast
+                    if (data._fallback) {
+                        showToast('Using cached data (API unavailable)', 'warning');
+                    } else if (data._fromProxy) {
+                        showToast('Social data loaded via proxy!', 'success');
+                    } else {
+                        showToast('Social data updated!', 'success');
                     }
                 } else {
-                    throw new Error('API returned ' + response.status);
+                    showToast('No data received from LunarCrush', 'error');
                 }
             } catch (error) {
-                console.error('Social API error:', error);
-                
-                // Use fallback data so UI still works
-                const fallbackData = {
-                    sentiment: 68,
-                    num_posts: 15000,
-                    interactions_24h: 2500000,
-                    num_contributors: 8500,
-                    trend: 'up',
-                    price_change_24h: 2.5,
-                    twitter_followers: 3200000,
-                    reddit_active: 4500,
-                    _fallback: true
-                };
-                
-                lunarCrushData = fallbackData;
-                updateSentimentDisplay(fallbackData);
-                renderSentimentChartFallback();
-                
-                showToast('Using cached social data', 'warning');
+                console.error('LunarCrush API error:', error);
+                showToast('Failed to load sentiment data', 'error');
             } finally {
                 if (refreshBtn) {
                     refreshBtn.disabled = false;
                     refreshBtn.innerHTML = '🔄 Refresh';
                 }
+            }
+        }
+
+        async function fetchLunarCrushPosts() {
+            try {
+                const response = await fetch(
+                    `${LUNARCRUSH_BASE_URL}/topic/xrp/posts/v1`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${LUNARCRUSH_API_KEY}`
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('LunarCrush posts:', result);
+                    return result.data || [];
+                }
+                return [];
+            } catch (error) {
+                console.error('Failed to fetch posts:', error);
+                return [];
+            }
+        }
+
+        async function fetchLunarCrushData() {
+            // Try Render backend first (your existing backend now has LunarCrush endpoints)
+            if (useProxy) {
+                try {
+                    console.log('Fetching from Render backend:', RENDER_BACKEND_URL);
+                    const response = await fetch(`${RENDER_BACKEND_URL}/api/xrp/all`);
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('Render backend response:', result);
+                        
+                        // Store all data for later use
+                        if (result.data) {
+                            sentimentHistory = result.data.timeseries || [];
+                            
+                            // Return topic data merged with coin data
+                            const topicData = result.data.topic || {};
+                            const coinData = result.data.coin || {};
+                            
+                            return {
+                                ...topicData,
+                                ...coinData,
+                                posts: result.data.posts || [],
+                                news: result.data.news || [],
+                                _fromProxy: true
+                            };
+                        }
+                    }
+                    console.log('Render backend failed, status:', response.status);
+                } catch (error) {
+                    console.log('Render backend error:', error.message);
+                }
+            }
+            
+            // Fallback to direct API (may have CORS issues)
+            const apiUrl = `${LUNARCRUSH_BASE_URL}/topic/xrp/v1`;
+            
+            try {
+                console.log('Trying direct LunarCrush API...');
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${LUNARCRUSH_API_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Direct API success:', result);
+                    return result.data || result;
+                }
+                console.log('Direct API failed with status:', response.status);
+            } catch (error) {
+                console.log('Direct API error (likely CORS):', error.message);
+            }
+            
+            // If all API calls fail, return mock data so the UI still works
+            console.log('All API calls failed, using fallback data');
+            return {
+                topic: 'xrp',
+                title: 'XRP',
+                sentiment: 72,
+                num_posts: 15420,
+                interactions_24h: 2450000,
+                num_contributors: 8750,
+                trend: 'up',
+                topic_rank: 45,
+                topic_rank_24h_previous: 52,
+                _fallback: true
+            };
+        }
+
+        async function fetchSentimentHistory() {
+            try {
+                // Fetch time series data for chart - using topic endpoint
+                const response = await fetch(
+                    `${LUNARCRUSH_BASE_URL}/topic/xrp/time-series/v1?bucket=day&interval=1w`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${LUNARCRUSH_API_KEY}`
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    const result = await response.json();
+                    sentimentHistory = result.data || result.timeSeries || [];
+                    console.log('Sentiment history:', sentimentHistory);
+                }
+            } catch (error) {
+                console.error('Failed to fetch sentiment history:', error);
             }
         }
 
@@ -15497,233 +15605,19 @@
             const trendEl = document.getElementById('socialTrend');
             const engagementEl = document.getElementById('socialEngagement');
 
-            const sentimentScore = data.sentiment || 65;
-            const twitterFollowers = data.twitter_followers || 0;
-            const priceChange = data.price_change_24h || 0;
-            const redditActive = data.reddit_active || data.num_contributors || 0;
+            // CoinGecko provides: sentiment, twitter_followers, reddit_subscribers, reddit_active, etc.
+            const sentimentScore = data.sentiment || data.sentiment_up || 50;
+            const socialVolume = data.num_posts || data.reddit_active || 0;
+            const socialEngagement = data.interactions_24h || data.twitter_followers || 0;
+            const numContributors = data.num_contributors || data.reddit_active || 0;
+            
+            // Calculate trend from price change
+            const priceChange = data.price_change_24h || data.percent_change_24h || 0;
+            const trendPercent = priceChange;
 
             if (scoreEl) {
                 scoreEl.textContent = Math.round(sentimentScore);
                 scoreEl.className = 'sentiment-card-value ' + 
-                    (sentimentScore >= 60 ? 'bullish' : sentimentScore <= 40 ? 'bearish' : '');
-            }
-            
-            if (mentionsEl) {
-                mentionsEl.textContent = twitterFollowers >= 1000000 
-                    ? (twitterFollowers / 1000000).toFixed(1) + 'M'
-                    : twitterFollowers >= 1000 
-                        ? (twitterFollowers / 1000).toFixed(0) + 'K'
-                        : twitterFollowers.toLocaleString();
-            }
-            
-            if (trendEl) {
-                const sign = priceChange >= 0 ? '+' : '';
-                trendEl.textContent = sign + priceChange.toFixed(2) + '%';
-                trendEl.className = 'sentiment-card-value ' + (priceChange >= 0 ? 'bullish' : 'bearish');
-            }
-            
-            if (engagementEl) {
-                engagementEl.textContent = redditActive >= 1000 
-                    ? (redditActive / 1000).toFixed(1) + 'K'
-                    : redditActive.toLocaleString();
-            }
-        }
-
-        function updateRecentPosts(data) {
-            const container = document.getElementById('recentTweets');
-            if (!container || !data.posts || data.posts.length === 0) return;
-            
-            container.innerHTML = data.posts.slice(0, 3).map(post => {
-                const time = post.time ? getTimeAgoShort(new Date(post.time * 1000)) : '2h';
-                const platform = post.social_type === 'reddit' ? '🔴' : '𝕏';
-                const author = post.creator?.name || 'XRP Community';
-                const interactions = post.interactions || 0;
-                
-                return `
-                    <div class="tweet-card">
-                        <div class="tweet-header">
-                            <div class="tweet-avatar">${platform}</div>
-                            <div>
-                                <div class="tweet-author">${author}</div>
-                                <div class="tweet-handle">• ${time}</div>
-                            </div>
-                        </div>
-                        <div class="tweet-content">${post.title || post.body || ''}</div>
-                        <div class="tweet-stats">
-                            <span class="tweet-stat">❤️ ${formatCompact(interactions)}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function formatCompact(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return num.toString();
-        }
-
-        function renderSentimentChart() {
-            const ctx = document.getElementById('sentimentChart');
-            if (!ctx) return;
-            
-            if (sentimentHistory.length === 0) {
-                renderSentimentChartFallback();
-                return;
-            }
-            
-            const labels = sentimentHistory.map(d => {
-                const date = new Date(d.time * 1000);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            
-            const sentiments = sentimentHistory.map(d => d.sentiment || 50);
-            const interactions = sentimentHistory.map(d => (d.interactions || 0) / 1000);
-            
-            if (sentimentChart) sentimentChart.destroy();
-            
-            sentimentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Sentiment Score',
-                            data: sentiments,
-                            borderColor: '#23f7dd',
-                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.3,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Interactions (K)',
-                            data: interactions,
-                            borderColor: '#a855f7',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0.3,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#94a3b8' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { 
-                            type: 'linear',
-                            position: 'left',
-                            min: 0, max: 100,
-                            ticks: { color: '#94a3b8' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            ticks: { color: '#a855f7' },
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderSentimentChartFallback() {
-            const ctx = document.getElementById('sentimentChart');
-            if (!ctx) return;
-            
-            // Generate 7 days of fake data
-            const labels = [];
-            const sentiments = [];
-            const interactions = [];
-            
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                sentiments.push(55 + Math.random() * 25);
-                interactions.push(150 + Math.random() * 200);
-            }
-            
-            if (sentimentChart) sentimentChart.destroy();
-            
-            sentimentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Sentiment Score',
-                            data: sentiments,
-                            borderColor: '#23f7dd',
-                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.3,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Interactions (K)',
-                            data: interactions,
-                            borderColor: '#a855f7',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0.3,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#94a3b8' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { 
-                            type: 'linear',
-                            position: 'left',
-                            min: 0, max: 100,
-                            ticks: { color: '#94a3b8' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            ticks: { color: '#a855f7' },
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateTrendingTopics(data) {
-            // Keep the existing trending topics - they're hardcoded and look fine
-        }
-
-        async function fetchLunarCrushPosts() {
-            // Deprecated - now handled by refreshSocialSentiment
-            return [];
-        }
-
-        async function fetchLunarCrushData() {
-            // Deprecated - now handled by refreshSocialSentiment
-            return null;
-        }
-
-        async function fetchSentimentHistory() {
-            // Deprecated - now handled by refreshSocialSentiment
-        } 
                     (sentimentScore >= 60 ? 'bullish' : sentimentScore <= 40 ? 'bearish' : 'neutral');
             }
             
@@ -15769,6 +15663,224 @@
                 reddit_subscribers: data.reddit_subscribers,
                 reddit_active: data.reddit_active,
                 market_cap_rank: data.market_cap_rank
+            });
+        }
+
+        function updateTrendingTopics(data) {
+            const topicsContainer = document.getElementById('trendingTopics');
+            if (!topicsContainer) return;
+
+            // Generate trending topics based on LunarCrush data
+            const topics = [
+                { tag: '#XRP', hot: true },
+                { tag: '#XRPETF', hot: data.social_volume > 10000 },
+                { tag: '#Ripple', hot: false },
+                { tag: '#XRPArmy', hot: true },
+                { tag: '$XRP', hot: false },
+                { tag: '#Crypto', hot: false },
+                { tag: '#XRPCommunity', hot: false }
+            ];
+
+            // Add dynamic topics based on price movement
+            if (data.percent_change_24h > 5) {
+                topics.unshift({ tag: '#XRPPump', hot: true });
+            }
+            if (data.percent_change_24h < -5) {
+                topics.unshift({ tag: '#XRPDip', hot: true });
+            }
+
+            topicsContainer.innerHTML = topics.map(t => 
+                `<span class="topic-tag${t.hot ? ' hot' : ''}">${t.tag}</span>`
+            ).join('');
+        }
+
+        function updateRecentPosts(data) {
+            const tweetsContainer = document.getElementById('recentTweets');
+            if (!tweetsContainer) return;
+
+            // LunarCrush v4 returns posts with these fields: id, post_type, post_title, post_link, post_image, 
+            // post_created, post_sentiment, creator_id, creator_name, creator_display_name, creator_followers, 
+            // creator_avatar, interactions_24h, interactions_total
+            const posts = data.posts || data.tweets || data.social_posts || [];
+            
+            if (posts.length > 0) {
+                tweetsContainer.innerHTML = posts.slice(0, 5).map(post => `
+                    <div class="tweet-card">
+                        <div class="tweet-header">
+                            <div class="tweet-avatar">${post.creator_avatar ? `<img src="${post.creator_avatar}" alt="" style="width:40px;height:40px;border-radius:50%;">` : '𝕏'}</div>
+                            <div>
+                                <div class="tweet-author">${post.creator_display_name || post.creator_name || 'XRP Community'}</div>
+                                <div class="tweet-handle">@${post.creator_name || 'xrp'} • ${formatTimeAgo(post.post_created)}</div>
+                            </div>
+                        </div>
+                        <div class="tweet-content">${truncateText(post.post_title || '', 280)}</div>
+                        <div class="tweet-stats">
+                            <span class="tweet-stat">🔥 ${formatNumber(post.interactions_24h || post.interactions_total || 0)} interactions</span>
+                            ${post.post_link ? `<a href="${post.post_link}" target="_blank" class="tweet-stat" style="color: var(--accent-xrp); text-decoration: none;">View →</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                // Show sample posts when API doesn't return data
+                tweetsContainer.innerHTML = `
+                    <div class="tweet-card">
+                        <div class="tweet-header">
+                            <div class="tweet-avatar">🐋</div>
+                            <div>
+                                <div class="tweet-author">XRP Whale Alert</div>
+                                <div class="tweet-handle">@whale_alert • 2h ago</div>
+                            </div>
+                        </div>
+                        <div class="tweet-content">Large XRP transfer detected: 50,000,000 XRP moved from unknown wallet to exchange. #XRP #Crypto</div>
+                        <div class="tweet-stats">
+                            <span class="tweet-stat">🔥 12.5K interactions</span>
+                        </div>
+                    </div>
+                    <div class="tweet-card">
+                        <div class="tweet-header">
+                            <div class="tweet-avatar">📊</div>
+                            <div>
+                                <div class="tweet-author">XRP Analysis</div>
+                                <div class="tweet-handle">@xrp_charts • 4h ago</div>
+                            </div>
+                        </div>
+                        <div class="tweet-content">XRP ETF holdings continue to grow! Institutional adoption is accelerating. #XRPETF #XRPArmy</div>
+                        <div class="tweet-stats">
+                            <span class="tweet-stat">🔥 8.2K interactions</span>
+                        </div>
+                    </div>
+                    <div class="tweet-card" style="text-align: center; padding: 1rem;">
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">
+                            ℹ️ Live posts unavailable - showing sample data<br>
+                            <span style="font-size: 0.75rem;">Enable CORS or check API key</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return 'recently';
+            const now = Date.now();
+            const time = typeof timestamp === 'number' ? timestamp * 1000 : new Date(timestamp).getTime();
+            const diff = now - time;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days > 0) return days + 'd ago';
+            if (hours > 0) return hours + 'h ago';
+            if (minutes > 0) return minutes + 'm ago';
+            return 'just now';
+        }
+
+        function formatNumber(num) {
+            if (!num) return '0';
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        function renderSentimentChart() {
+            const ctx = document.getElementById('sentimentChart');
+            if (!ctx) return;
+
+            if (sentimentChart) {
+                sentimentChart.destroy();
+            }
+
+            // Use historical data if available, otherwise generate from current data
+            let labels = [];
+            let sentimentData = [];
+            let volumeData = [];
+
+            if (sentimentHistory && sentimentHistory.length > 0) {
+                // Use real historical data from time-series endpoint
+                // Fields: time, contributors_active, contributors_created, interactions, posts_active, posts_created, sentiment, spam
+                const recentData = sentimentHistory.slice(-7);
+                labels = recentData.map(d => {
+                    const date = new Date(d.time * 1000);
+                    return date.toLocaleDateString('en-US', { weekday: 'short' });
+                });
+                sentimentData = recentData.map(d => d.sentiment || d.galaxy_score || 50);
+                volumeData = recentData.map(d => d.interactions || d.posts_active || 0);
+            } else {
+                // Generate sample data based on current sentiment
+                const currentScore = lunarCrushData?.sentiment || lunarCrushData?.galaxy_score || 65;
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+                    // Vary around current score
+                    sentimentData.push(Math.max(0, Math.min(100, currentScore + (Math.random() - 0.5) * 20)));
+                    volumeData.push(8000 + Math.random() * 8000);
+                }
+            }
+
+            sentimentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Sentiment',
+                            data: sentimentData,
+                            borderColor: '#23f7dd',
+                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Interactions',
+                            data: volumeData,
+                            borderColor: '#a855f7',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            min: 0,
+                            max: 100,
+                            ticks: { color: '#23f7dd' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            ticks: { 
+                                color: '#a855f7',
+                                callback: v => (v/1000) + 'K'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
             });
         }
 
