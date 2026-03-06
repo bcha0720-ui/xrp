@@ -16180,6 +16180,18 @@
         let whaleAlertInterval = null;
         let currentWhaleFilter = 'all';
 
+        // Known exchange wallet addresses
+        const EXCHANGE_WALLETS = {
+            'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh': 'Binance',
+            'rLHzPsX6oXkzU2qL12kHCH8G8cnZv1rBJh': 'Bitstamp',
+            'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv': 'Bitstamp 2',
+            'rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w': 'Coinbase',
+            'rPVMhWBsfF9iMXYj3aAzJVkPDTFNSyWdKy': 'Kraken',
+            'raQwCVAJVqjrVm1Nj5SFRcX8i22BhdC9WA': 'Upbit',
+            'rHWcuuZoFvDS6gNbmHSdpb7u1hZzxvCoMt': 'Bitfinex',
+            'rwGgnbS7VQwE6bqp7HEcYCvYBqRpiPH5PC': 'Huobi'
+        };
+
         async function fetchWhaleTransactions() {
             const statusEl = document.getElementById('whaleAlertStatus');
             const listEl = document.getElementById('whaleAlertList');
@@ -16187,36 +16199,62 @@
             if (statusEl) statusEl.innerHTML = '<span class="status-loading">🔄 Fetching...</span>';
             
             try {
-                const response = await fetch('https://api.xrpscan.com/api/v1/account/rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh/payments?limit=50');
+                // Try to fetch recent large transactions from XRPScan
+                const response = await fetch('https://api.xrpscan.com/api/v1/payments?limit=100', {
+                    headers: { 'Accept': 'application/json' }
+                });
                 
                 if (!response.ok) throw new Error('API error');
                 
-                const transactions = await response.json();
+                const data = await response.json();
+                const transactions = data.payments || data || [];
                 
-                const whales = (transactions.payments || transactions || [])
+                // Filter for large transactions (>1M XRP)
+                const whales = transactions
                     .filter(tx => {
-                        const amount = parseFloat(tx.delivered_amount || tx.Amount || 0) / 1000000;
-                        return amount >= 1;
+                        const amount = parseFloat(tx.delivered_amount || tx.amount || 0);
+                        return amount >= 1000000; // 1M XRP minimum
                     })
                     .slice(0, WHALE_CONFIG.maxAlerts)
                     .map(tx => {
-                        const amount = parseFloat(tx.delivered_amount || tx.Amount || 0) / 1000000;
-                        const isDeposit = tx.destination === 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh';
+                        const amount = parseFloat(tx.delivered_amount || tx.amount || 0);
+                        const fromExchange = EXCHANGE_WALLETS[tx.source] || null;
+                        const toExchange = EXCHANGE_WALLETS[tx.destination] || null;
+                        
+                        let type = 'transfer';
+                        let exchange = 'Unknown Wallet';
+                        
+                        if (fromExchange && !toExchange) {
+                            type = 'withdrawal';
+                            exchange = fromExchange;
+                        } else if (!fromExchange && toExchange) {
+                            type = 'deposit';
+                            exchange = toExchange;
+                        } else if (fromExchange && toExchange) {
+                            type = 'transfer';
+                            exchange = `${fromExchange} → ${toExchange}`;
+                        }
+                        
                         return {
                             hash: tx.hash || tx.tx_hash,
-                            from: tx.source || tx.Account,
-                            to: tx.destination || tx.Destination,
+                            from: tx.source,
+                            to: tx.destination,
                             amount: amount,
                             time: tx.executed_time ? new Date(tx.executed_time) : new Date(),
-                            type: isDeposit ? 'deposit' : 'withdrawal',
-                            exchange: 'Binance'
+                            type: type,
+                            exchange: exchange
                         };
                     });
                 
-                whaleAlerts = whales;
-                renderWhaleAlerts();
-                
-                if (statusEl) statusEl.innerHTML = '<span class="status-success">● Live</span>';
+                if (whales.length > 0) {
+                    whaleAlerts = whales;
+                    renderWhaleAlerts();
+                    if (statusEl) statusEl.innerHTML = '<span class="status-success">● Live</span>';
+                } else {
+                    // No large transactions found, show sample
+                    renderWhaleAlertsFallback();
+                    if (statusEl) statusEl.innerHTML = '<span class="status-warning">● No large txs</span>';
+                }
                 
             } catch (error) {
                 console.error('Whale fetch error:', error);
