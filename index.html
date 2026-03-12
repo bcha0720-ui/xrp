@@ -5319,10 +5319,6 @@
                 <span class="main-tab-icon">🤖</span>
                 <span class="main-tab-text">AI</span>
             </button>
-            <button class="main-tab" onclick="switchMainTab('sentiment')">
-                <span class="main-tab-icon">𝕏</span>
-                <span class="main-tab-text">Social</span>
-            </button>
         </div>
 
         <!-- Trading Tab Content -->
@@ -5788,48 +5784,6 @@
                             </thead>
                             <tbody id="walletDetailsBody"></tbody>
                         </table>
-                    </div>
-                </div>
-
-                <!-- NEW: Exchange Flow Analysis Section -->
-                <div class="exchange-flow-section">
-                    <div class="section-header">
-                        <h3><span>🏦</span> Exchange Flow Analysis</h3>
-                        <div class="header-controls">
-                            <span id="exchangeFlowStatus" class="status-indicator">● Ready</span>
-                            <button class="btn btn-sm" onclick="renderExchangeFlowChart()">🔄 Refresh</button>
-                        </div>
-                    </div>
-                    
-                    <div id="exchangeNetFlowIndicator" class="exchange-net-indicator">
-                        <span class="flow-signal bullish">📊 Load exchange data to see flow analysis</span>
-                    </div>
-                    
-                    <div class="exchange-flow-grid">
-                        <div class="flow-chart-container">
-                            <canvas id="exchangeFlowChart"></canvas>
-                        </div>
-                        
-                        <div class="flow-mini-lists">
-                            <div class="flow-mini-list">
-                                <h4>🟢 Top Inflows (Accumulating)</h4>
-                                <div id="exchangeTopGainers">
-                                    <div class="flow-mini-empty">Load exchange data first</div>
-                                </div>
-                            </div>
-                            
-                            <div class="flow-mini-list" style="margin-top: 1rem;">
-                                <h4>🔴 Top Outflows (Distributing)</h4>
-                                <div id="exchangeTopLosers">
-                                    <div class="flow-mini-empty">Load exchange data first</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flow-note">
-                        💡 <strong>Interpretation:</strong> Net outflows from exchanges are generally bullish (less selling pressure). 
-                        Net inflows are bearish (more coins available to sell).
                     </div>
                 </div>
 
@@ -6319,50 +6273,6 @@
                     </div>
                 </div>
 
-                <!-- Portfolio Tracker (NEW) -->
-                <div class="portfolio-tracker-section">
-                    <h3><span>💼</span> Your Portfolio Tracker</h3>
-                    <div class="portfolio-input-row">
-                        <div class="portfolio-input-group">
-                            <label>Your XRP Holdings</label>
-                            <input type="number" id="userXRPHoldings" placeholder="e.g. 10000" oninput="updatePortfolioTracker()">
-                        </div>
-                        <div class="portfolio-input-group">
-                            <label>Average Buy Price ($)</label>
-                            <input type="number" id="userAvgPrice" placeholder="e.g. 0.50" step="0.01" oninput="updatePortfolioTracker()">
-                        </div>
-                        <div class="portfolio-input-group">
-                            <label>Target Price ($)</label>
-                            <input type="number" id="userTargetPrice" placeholder="e.g. 5.00" step="0.01" oninput="updatePortfolioTracker()">
-                        </div>
-                    </div>
-                    <div class="portfolio-results" id="portfolioResults" style="display: none;">
-                        <div class="portfolio-card current">
-                            <div class="portfolio-label">Current Value</div>
-                            <div class="portfolio-value" id="portfolioCurrentValue">$0</div>
-                            <div class="portfolio-change" id="portfolioChange">--</div>
-                        </div>
-                        <div class="portfolio-card profit">
-                            <div class="portfolio-label">Unrealized P&L</div>
-                            <div class="portfolio-value" id="portfolioPnL">$0</div>
-                            <div class="portfolio-pnl-pct" id="portfolioPnLPct">0%</div>
-                        </div>
-                        <div class="portfolio-card target">
-                            <div class="portfolio-label">Value at Target</div>
-                            <div class="portfolio-value" id="portfolioTargetValue">$0</div>
-                            <div class="portfolio-gain" id="portfolioTargetGain">+0%</div>
-                        </div>
-                        <div class="portfolio-card insight">
-                            <div class="portfolio-label">🤖 AI Insight</div>
-                            <div class="portfolio-insight-text" id="portfolioInsight">Enter your holdings to see personalized insights</div>
-                        </div>
-                    </div>
-                    <div class="portfolio-save-row">
-                        <button class="btn btn-save" onclick="savePortfolio()">💾 Save Portfolio</button>
-                        <span class="save-status" id="saveStatus"></span>
-                    </div>
-                </div>
-
                 <!-- Daily Briefing Card (NEW) -->
                 <div class="daily-briefing-section" id="dailyBriefing">
                     <div class="briefing-card" id="briefingCard">
@@ -6726,125 +6636,6 @@
             <div class="chat-input-area">
                 <input type="text" class="chat-input" id="chatInput" placeholder="Ask about XRP..." onkeypress="handleChatKeypress(event)">
                 <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">➤</button>
-            </div>
-        </div>
-
-        <!-- Social Sentiment Tab -->
-        <div id="sentimentTab" class="tab-content">
-            <div class="social-sentiment-section">
-                <div class="sentiment-header">
-                    <h3><span>𝕏</span> XRP Sentiment on X</h3>
-                    <button class="btn" onclick="refreshSocialSentiment()">🔄 Refresh</button>
-                </div>
-                
-                <div class="sentiment-grid">
-                    <div class="sentiment-card">
-                        <div class="sentiment-card-icon">🌟</div>
-                        <div class="sentiment-card-value bullish" id="socialSentimentScore">--</div>
-                        <div class="sentiment-card-label">Community Score</div>
-                    </div>
-                    <div class="sentiment-card">
-                        <div class="sentiment-card-icon">🐦</div>
-                        <div class="sentiment-card-value" id="socialMentions">--</div>
-                        <div class="sentiment-card-label">Twitter Followers</div>
-                    </div>
-                    <div class="sentiment-card">
-                        <div class="sentiment-card-icon">📈</div>
-                        <div class="sentiment-card-value bullish" id="socialTrend">--</div>
-                        <div class="sentiment-card-label">24h Price Change</div>
-                    </div>
-                    <div class="sentiment-card">
-                        <div class="sentiment-card-icon">🔥</div>
-                        <div class="sentiment-card-value" id="socialEngagement">--</div>
-                        <div class="sentiment-card-label">Reddit Active</div>
-                    </div>
-                </div>
-
-                <div class="trending-topics">
-                    <h4>🔥 Trending Topics</h4>
-                    <div class="topic-tags" id="trendingTopics">
-                        <span class="topic-tag hot">#XRP</span>
-                        <span class="topic-tag">#XRPETF</span>
-                        <span class="topic-tag">#Ripple</span>
-                        <span class="topic-tag">#XRPArmy</span>
-                        <span class="topic-tag hot">#SEC</span>
-                        <span class="topic-tag">#Crypto</span>
-                        <span class="topic-tag">#XRPCommunity</span>
-                    </div>
-                </div>
-
-                <div class="recent-tweets">
-                    <h4>📝 Recent Influential Posts</h4>
-                    <div id="recentTweets">
-                        <div class="tweet-card">
-                            <div class="tweet-header">
-                                <div class="tweet-avatar">🐋</div>
-                                <div>
-                                    <div class="tweet-author">XRP Whale Alert</div>
-                                    <div class="tweet-handle">@XRPWhaleAlert • 2h</div>
-                                </div>
-                            </div>
-                            <div class="tweet-content">
-                                🚨 100,000,000 #XRP transferred from unknown wallet to Bitstamp. ETF accumulation continues! $XRP #XRPArmy
-                            </div>
-                            <div class="tweet-stats">
-                                <span class="tweet-stat">❤️ 2.4K</span>
-                                <span class="tweet-stat">🔁 1.2K</span>
-                                <span class="tweet-stat">💬 342</span>
-                            </div>
-                        </div>
-                        <div class="tweet-card">
-                            <div class="tweet-header">
-                                <div class="tweet-avatar">📊</div>
-                                <div>
-                                    <div class="tweet-author">CryptoAnalyst</div>
-                                    <div class="tweet-handle">@CryptoAnalyst • 4h</div>
-                                </div>
-                            </div>
-                            <div class="tweet-content">
-                                $XRP breaking out of consolidation! ETF volume up 25% this week. Institutional interest is real. Next resistance at $2.50 🎯
-                            </div>
-                            <div class="tweet-stats">
-                                <span class="tweet-stat">❤️ 1.8K</span>
-                                <span class="tweet-stat">🔁 892</span>
-                                <span class="tweet-stat">💬 215</span>
-                            </div>
-                        </div>
-                        <div class="tweet-card">
-                            <div class="tweet-header">
-                                <div class="tweet-avatar">🅧</div>
-                                <div>
-                                    <div class="tweet-author">XRP Insights</div>
-                                    <div class="tweet-handle">@chachakobe4er • 6h</div>
-                                </div>
-                            </div>
-                            <div class="tweet-content">
-                                XRP ETF Holdings Update 📈 Total: 836M+ XRP! Canary leading with 184M. Bullish accumulation pattern forming. DYOR! #XRP #XRPETF
-                            </div>
-                            <div class="tweet-stats">
-                                <span class="tweet-stat">❤️ 956</span>
-                                <span class="tweet-stat">🔁 423</span>
-                                <span class="tweet-stat">💬 87</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sentiment Chart -->
-                <div style="margin-top: 1.5rem;">
-                    <h4 style="color: var(--text-muted); margin-bottom: 0.75rem;">📈 Sentiment & Interactions (7 Days)</h4>
-                    <div style="height: 200px;">
-                        <canvas id="sentimentChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- LunarCrush Attribution -->
-                <div style="margin-top: 1.5rem; text-align: center; padding: 0.75rem; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
-                    <span style="color: var(--text-muted); font-size: 0.85rem;">
-                        Powered by <a href="https://lunarcrush.com" target="_blank" style="color: var(--accent-xrp); text-decoration: none; font-weight: 600;">🌙 LunarCrush</a>
-                        <span style="margin-left: 0.5rem; font-size: 0.75rem;">• Real-time social intelligence for crypto</span>
-                    </span>
-                </div>
             </div>
         </div>
 
@@ -9648,20 +9439,7 @@
         "rhhJhWUpU7A1enRxKAmWqyV5c9Y1xrVQTm": "Coinbase (Cold 157)",
         "rPQmWocoQACFezEbQmmcRPSEhRxqp1Ksz9": "Coinbase (Cold 302)",
         "rGCc2ah3xtnizjpH3gd2wQm6R837eaULa4": "Coinbase (Cold 438)",
-        "r9ZMdQ63S8NvgdCyLpfhkdbWDfQ57eKD9c": "CoinbaseCold366",
-		"rUf5QkXtwVr9XxCdVhn1pFN7ZyMwGhN5Ng": "Coinbase cbXRP (6)",
-        "rLRDoTHU6sAdXR7HA1iYdBAvWYcHXn4GBW": "Coinbase cbXRP",
-        "r41Jx7vxzTaXH7nK3P53zUjm4owTdPE2CR": "Coinbase cbXRP",
-        "rGpqh1aMFFhuB6fsUuvPXjmgvthFtaM8fQ": "Coinbase cbXRP",
-        "r3YxGciPmY3HyobVEN8gfmMHDxqHFmU3wU": "Coinbase cbXRP",
-        "rU1DGbMWhrFSJLPcrtKuV5iPyD1wrVgeaU": "Coinbase cbXRP",
-        "rGsMk4nK4M8MtcjVbjUeaJBppjjKpXyJ7F": "Coinbase cbXRP",
-        "rMbVVXFHaBpSpJhdR1xvy7dkQL1gtnkopg": "Coinbase cbXRP",
-        "rKopBmtBSMmUD6NCFNwGTG3b9ZxNzf7Tt4": "Coinbase cbXRP",
-        "rGoZhmTeMo4Ew7aKQyJaHCA4LbcDo83fRK": "Coinbase cbXRP",
-        "rJUkgjvo3P7qXw8nh6ctHJfGwEoBrRyqhx": "Coinbase cbXRP",
-        "rPLrMQu2RozGABz6FHNaBHkrNLeTThKwNd": "Coinbase cbXRP",
-        "rscyTNHsx52vxVVNb3CvCFyRQMfLtEPYRt": "Coinbase cbXRP"
+        "r9ZMdQ63S8NvgdCyLpfhkdbWDfQ57eKD9c": "CoinbaseCold366"
     },
     "coinone": {
         "rp2diYfVtpbgEMyaoWnuaWgFCAkqCAEg28": "Coinone1",
@@ -16780,18 +16558,10 @@
         // Call init on page load
         document.addEventListener('DOMContentLoaded', initNewFeatures);
 
-        // Update switchMainTab to handle new sentiment tab
-        const originalSwitchMainTab = typeof switchMainTab === 'function' ? switchMainTab : null;
-        
         // Extend tab switching to initialize charts when tabs are shown
         document.querySelectorAll('.main-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 const tabName = this.getAttribute('onclick')?.match(/switchMainTab\('(\w+)'\)/)?.[1];
-                
-                if (tabName === 'sentiment') {
-                    setTimeout(renderSentimentChart, 100);
-                    refreshSocialSentiment();
-                }
                 
                 if (tabName === 'holdings') {
                     setTimeout(renderInflowOutflowChart, 100);
@@ -16803,10 +16573,6 @@
                 
                 if (tabName === 'insights') {
                     fetchPriceHistory();
-                }
-                
-                if (tabName === 'analytics') {
-                    setTimeout(renderExchangeFlowChart, 500);
                 }
                 
                 if (tabName === 'news') {
