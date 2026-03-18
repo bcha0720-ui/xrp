@@ -1183,6 +1183,48 @@ app.get('/api/xrp/clear-cache', (req, res) => {
     res.json({ success: true, message: 'CoinGecko cache cleared' });
 });
 
+// =====================================================
+// NEWS API PROXY (CryptoCompare - FREE)
+// =====================================================
+
+let newsCache = { data: null, timestamp: 0 };
+const NEWS_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+app.get('/api/news', async (req, res) => {
+    // Check cache first
+    if (newsCache.data && Date.now() - newsCache.timestamp < NEWS_CACHE_DURATION) {
+        return res.json({ Data: newsCache.data, cached: true });
+    }
+    
+    try {
+        console.log('Fetching news from CryptoCompare...');
+        const response = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=XRP,Ripple,ETF,Regulation,BTC,ETH&excludeCategories=Sponsored');
+        
+        if (!response.ok) {
+            throw new Error(`CryptoCompare API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.Data && data.Data.length > 0) {
+            newsCache = { data: data.Data, timestamp: Date.now() };
+            console.log(`News fetched: ${data.Data.length} articles`);
+            return res.json({ Data: data.Data, cached: false });
+        } else {
+            throw new Error('No news data returned');
+        }
+    } catch (error) {
+        console.error('News fetch error:', error.message);
+        
+        // Return cached data if available, even if expired
+        if (newsCache.data) {
+            return res.json({ Data: newsCache.data, cached: true, stale: true });
+        }
+        
+        res.status(500).json({ error: 'Failed to fetch news', message: error.message });
+    }
+});
+
 // ETF Data endpoint
 app.get('/api/etf-data', async (req, res) => {
     try {
