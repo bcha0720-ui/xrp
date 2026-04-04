@@ -1196,45 +1196,64 @@ app.get('/api/news', async (req, res) => {
         return res.json({ Data: newsCache.data, cached: true });
     }
     
+    let articles = [];
+    
     try {
-        console.log('Fetching news from CryptoCompare...');
+        console.log('Fetching news...');
         
-        // Try simpler query without category filters first
-        let response = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
-        
-        if (!response.ok) {
-            throw new Error(`CryptoCompare API error: ${response.status}`);
+        // Try CoinGecko status updates (free, no key needed)
+        try {
+            const cgResponse = await fetch('https://api.coingecko.com/api/v3/status_updates?category=general&per_page=20');
+            if (cgResponse.ok) {
+                const cgData = await cgResponse.json();
+                if (cgData.status_updates && cgData.status_updates.length > 0) {
+                    articles = cgData.status_updates.map(item => ({
+                        id: item.created_at,
+                        title: item.project?.name ? `${item.project.name}: ${item.description?.substring(0, 80)}...` : item.description?.substring(0, 100),
+                        body: item.description || '',
+                        source: item.project?.name || 'CoinGecko',
+                        published_on: new Date(item.created_at).getTime() / 1000,
+                        url: item.project?.links?.homepage?.[0] || '#',
+                        imageurl: item.project?.image?.small || '',
+                        categories: 'Crypto'
+                    }));
+                    console.log(`CoinGecko status updates: ${articles.length}`);
+                }
+            }
+        } catch (e) {
+            console.log('CoinGecko status updates failed:', e.message);
         }
         
-        const data = await response.json();
-        console.log('CryptoCompare response:', data.Type, 'Articles:', data.Data?.length || 0);
-        
-        if (data.Data && data.Data.length > 0) {
-            // Filter for XRP/crypto relevant news
-            const filteredNews = data.Data.filter(article => {
-                const text = (article.title + ' ' + article.body + ' ' + (article.categories || '')).toLowerCase();
-                return text.includes('xrp') || 
-                       text.includes('ripple') || 
-                       text.includes('crypto') || 
-                       text.includes('bitcoin') || 
-                       text.includes('ethereum') ||
-                       text.includes('etf') ||
-                       text.includes('sec') ||
-                       text.includes('regulation');
-            });
-            
-            const newsToReturn = filteredNews.length > 0 ? filteredNews : data.Data.slice(0, 20);
-            newsCache = { data: newsToReturn, timestamp: Date.now() };
-            console.log(`News fetched: ${newsToReturn.length} articles`);
-            return res.json({ Data: newsToReturn, cached: false });
-        } else {
-            throw new Error('No news data returned');
+        // If no articles yet, try CryptoCompare with no filters
+        if (articles.length === 0) {
+            try {
+                const ccResponse = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&sortOrder=latest');
+                if (ccResponse.ok) {
+                    const ccData = await ccResponse.json();
+                    if (ccData.Data && ccData.Data.length > 0) {
+                        articles = ccData.Data.slice(0, 20);
+                        console.log(`CryptoCompare news: ${articles.length}`);
+                    }
+                }
+            } catch (e) {
+                console.log('CryptoCompare failed:', e.message);
+            }
         }
+        
+        // If we got articles, cache and return them
+        if (articles.length > 0) {
+            newsCache = { data: articles, timestamp: Date.now() };
+            return res.json({ Data: articles, cached: false });
+        }
+        
+        // If all APIs failed, use fallback
+        throw new Error('All news sources failed');
+        
     } catch (error) {
         console.error('News fetch error:', error.message);
         
-        // Return cached data if available, even if expired
-        if (newsCache.data) {
+        // Return cached data if available
+        if (newsCache.data && newsCache.data.length > 0) {
             return res.json({ Data: newsCache.data, cached: true, stale: true });
         }
         
@@ -1243,7 +1262,7 @@ app.get('/api/news', async (req, res) => {
             {
                 id: 'fallback-1',
                 title: 'XRP ETFs Continue Trading on Major Exchanges',
-                body: 'Multiple XRP spot ETFs are actively trading, marking continued institutional adoption of the digital asset.',
+                body: 'Multiple XRP spot ETFs are actively trading, marking continued institutional adoption of the digital asset. Trading volumes remain strong as investors show growing interest in regulated XRP investment vehicles.',
                 source: 'XRP News',
                 published_on: Math.floor(Date.now() / 1000),
                 url: '#',
@@ -1252,23 +1271,43 @@ app.get('/api/news', async (req, res) => {
             },
             {
                 id: 'fallback-2',
-                title: 'Crypto Market Shows Continued Growth',
-                body: 'Digital assets maintain momentum as institutional interest grows across the cryptocurrency ecosystem.',
-                source: 'Crypto Market',
+                title: 'Ripple Expands Global Payment Network',
+                body: 'Ripple continues to expand its cross-border payment solutions, partnering with financial institutions worldwide to improve transaction efficiency and reduce costs.',
+                source: 'Ripple Updates',
                 published_on: Math.floor(Date.now() / 1000) - 3600,
+                url: '#',
+                imageurl: '',
+                categories: 'Ripple|Payments'
+            },
+            {
+                id: 'fallback-3',
+                title: 'Crypto Market Shows Strong Momentum',
+                body: 'Digital assets maintain positive momentum as institutional interest continues to grow. Market analysts point to increasing adoption and regulatory clarity as key drivers.',
+                source: 'Crypto Market',
+                published_on: Math.floor(Date.now() / 1000) - 7200,
                 url: '#',
                 imageurl: '',
                 categories: 'Crypto|Market'
             },
             {
-                id: 'fallback-3',
-                title: 'Blockchain Adoption Accelerates in Financial Services',
-                body: 'Major financial institutions continue to explore and implement blockchain technology solutions.',
+                id: 'fallback-4',
+                title: 'Blockchain Technology Adoption Accelerates',
+                body: 'Major enterprises continue to implement blockchain solutions for supply chain, finance, and identity management applications.',
                 source: 'Blockchain News',
-                published_on: Math.floor(Date.now() / 1000) - 7200,
+                published_on: Math.floor(Date.now() / 1000) - 10800,
                 url: '#',
                 imageurl: '',
-                categories: 'Blockchain|Finance'
+                categories: 'Blockchain|Enterprise'
+            },
+            {
+                id: 'fallback-5',
+                title: 'Digital Asset Regulation Progress Worldwide',
+                body: 'Regulatory frameworks for cryptocurrencies continue to evolve globally, with several countries introducing clearer guidelines for digital asset markets.',
+                source: 'Regulation Watch',
+                published_on: Math.floor(Date.now() / 1000) - 14400,
+                url: '#',
+                imageurl: '',
+                categories: 'Regulation|Policy'
             }
         ];
         
