@@ -726,6 +726,120 @@ async function fetchExchangeHoldings() {
     return { holdings, total };
 }
 
+// =====================================================
+// DESTINATION TAG ANALYSIS
+// Counts unique destination tags per exchange wallet
+// =====================================================
+
+// Cache for destination tag data (expensive to fetch)
+let destTagCache = { data: null, timestamp: 0 };
+const DEST_TAG_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+async function fetchAccountTransactions(address, limit = 200) {
+    const XRPL_NODE = 'https://xrplcluster.com';
+    
+    try {
+        const response = await fetch(XRPL_NODE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                method: 'account_tx',
+                params: [{
+                    account: address,
+                    ledger_index_min: -1,
+                    ledger_index_max: -1,
+                    limit: limit,
+                    forward: false // Most recent first
+                }]
+            })
+        });
+
+        if (!response.ok) return [];
+
+        const data = await response.json();
+        if (data.result && data.result.transactions) {
+            return data.result.transactions;
+        }
+        return [];
+    } catch (error) {
+        console.error(`Transaction fetch error for ${address}:`, error.message);
+        return [];
+    }
+}
+
+async function analyzeDestinationTags(address, walletName) {
+    console.log(`  Analyzing tags for ${walletName} (${address.substring(0, 10)}...)`);
+    
+    const transactions = await fetchAccountTransactions(address, 500);
+    const uniqueTags = new Set();
+    let incomingCount = 0;
+    let outgoingCount = 0;
+    let taggedTxCount = 0;
+    
+    for (const txWrapper of transactions) {
+        const tx = txWrapper.tx || txWrapper.transaction;
+        if (!tx || tx.TransactionType !== 'Payment') continue;
+        
+        // Check if this is incoming (to this address)
+        if (tx.Destination === address) {
+            incomingCount++;
+            if (tx.DestinationTag !== undefined && tx.DestinationTag !== null) {
+                uniqueTags.add(tx.DestinationTag);
+                taggedTxCount++;
+            }
+        } else if (tx.Account === address) {
+            outgoingCount++;
+        }
+    }
+    
+    return {
+        address: address,
+        name: walletName,
+        uniqueTags: uniqueTags.size,
+        incomingTx: incomingCount,
+        outgoingTx: outgoingCount,
+        taggedTx: taggedTxCount,
+        totalTxAnalyzed: transactions.length,
+        sampleTags: Array.from(uniqueTags).slice(0, 10) // First 10 tags as sample
+    };
+}
+
+async function analyzeAllExchangeTags() {
+    console.log('Analyzing destination tags for all exchanges...');
+    const results = {};
+    let totalUniqueTags = 0;
+    
+    for (const [exchangeName, wallets] of Object.entries(EXCHANGE_WALLETS)) {
+        results[exchangeName] = {
+            wallets: [],
+            totalUniqueTags: 0,
+            totalIncomingTx: 0,
+            totalTaggedTx: 0
+        };
+        
+        for (const [address, walletName] of Object.entries(wallets)) {
+            const analysis = await analyzeDestinationTags(address, walletName);
+            results[exchangeName].wallets.push(analysis);
+            results[exchangeName].totalUniqueTags += analysis.uniqueTags;
+            results[exchangeName].totalIncomingTx += analysis.incomingTx;
+            results[exchangeName].totalTaggedTx += analysis.taggedTx;
+            
+            // Small delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        totalUniqueTags += results[exchangeName].totalUniqueTags;
+        console.log(`  ${exchangeName}: ${results[exchangeName].totalUniqueTags} unique tags from ${results[exchangeName].totalTaggedTx} tagged transactions`);
+    }
+    
+    return {
+        exchanges: results,
+        totalUniqueTags,
+        timestamp: new Date().toISOString(),
+        note: 'Based on last ~500 transactions per wallet. Actual user count is likely much higher.'
+    };
+}
+
 async function generateXPostSummary() {
     try {
         console.log('Generating X post with real data...');
@@ -1181,6 +1295,72 @@ app.get('/api/xrp/all', async (req, res) => {
 app.get('/api/xrp/clear-cache', (req, res) => {
     clearCoinGeckoCache();
     res.json({ success: true, message: 'CoinGecko cache cleared' });
+});
+
+// =====================================================
+// DESTINATION TAGS API ENDPOINT
+// =====================================================
+
+app.get('/api/exchange-tags', async (req, res) => {
+    try {
+        // Check cache first (this is an expensive operation)
+        if (destTagCache.data && Date.now() - destTagCache.timestamp < DEST_TAG_CACHE_DURATION) {
+            return res.json({ ...destTagCache.data, cached: true });
+        }
+        
+        console.log('Analyzing exchange destination tags...');
+        const results = await analyzeAllExchangeTags();
+        
+        // Cache the results
+        destTagCache = { data: results, timestamp: Date.now() };
+        
+        res.json({ ...results, cached: false });
+    } catch (error) {
+        console.error('Destination tag analysis error:', error);
+        res.status(500).json({ error: 'Failed to analyze destination tags', message: error.message });
+    }
+});
+
+// Get tags for a single exchange (faster)
+app.get('/api/exchange-tags/:exchange', async (req, res) => {
+    const exchangeName = req.params.exchange.toLowerCase();
+    
+    if (!EXCHANGE_WALLETS[exchangeName]) {
+        return res.status(404).json({ 
+            error: 'Exchange not found', 
+            available: Object.keys(EXCHANGE_WALLETS) 
+        });
+    }
+    
+    try {
+        console.log(`Analyzing destination tags for ${exchangeName}...`);
+        const wallets = EXCHANGE_WALLETS[exchangeName];
+        const results = {
+            exchange: exchangeName,
+            wallets: [],
+            totalUniqueTags: 0,
+            totalIncomingTx: 0,
+            totalTaggedTx: 0
+        };
+        
+        for (const [address, walletName] of Object.entries(wallets)) {
+            const analysis = await analyzeDestinationTags(address, walletName);
+            results.wallets.push(analysis);
+            results.totalUniqueTags += analysis.uniqueTags;
+            results.totalIncomingTx += analysis.incomingTx;
+            results.totalTaggedTx += analysis.taggedTx;
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        results.timestamp = new Date().toISOString();
+        results.note = 'Based on last ~500 transactions per wallet. Actual user count is likely much higher.';
+        
+        res.json(results);
+    } catch (error) {
+        console.error(`Tag analysis error for ${exchangeName}:`, error);
+        res.status(500).json({ error: 'Failed to analyze destination tags', message: error.message });
+    }
 });
 
 // =====================================================
