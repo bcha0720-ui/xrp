@@ -8846,9 +8846,10 @@
                     <div class="tags-charts-header">
                         <h4>📈 Historical Trends</h4>
                         <div class="tags-history-controls">
+                            <button class="btn" onclick="refreshFromSheets()">🔄 Refresh from GitHub</button>
                             <input type="file" id="tagsHistoryInput" accept=".json" multiple onchange="handleHistoryUpload(event)" style="display: none;">
-                            <button class="btn" onclick="document.getElementById('tagsHistoryInput').click()">📁 Load History (Multiple JSON)</button>
-                            <button class="btn" onclick="clearTagsHistory()">🗑️ Clear History</button>
+                            <button class="btn" onclick="document.getElementById('tagsHistoryInput').click()">📁 Upload JSON</button>
+                            <button class="btn" onclick="clearTagsHistory()">🗑️ Clear</button>
                             <span class="tags-history-count" id="tagsHistoryCount">0 snapshots</span>
                         </div>
                     </div>
@@ -18590,7 +18591,7 @@
         }
 
         // =====================================================
-        // TAGS HISTORICAL CHARTS
+        // TAGS HISTORICAL CHARTS - GITHUB JSON INTEGRATION
         // =====================================================
 
         const tagsHistory = {
@@ -18599,44 +18600,185 @@
                 xrpOverTime: null,
                 tagGrowth: null,
                 exchangeBalance: null
-            }
+            },
+            // GitHub raw URLs for JSON files
+            // Format: https://raw.githubusercontent.com/{user}/{repo}/{branch}/{path}
+            githubRepo: 'bcha0720-ui/xrp',
+            githubBranch: 'main',
+            // JSON files in your repo (add new files here as you generate them)
+            jsonFiles: [
+                'data/all_exchanges_tags_20260409.json',
+                'data/all_exchanges_tags_20260410.json',
+                'data/all_exchanges_tags_20260411.json',
+                'data/all_exchanges_tags_20260412.json'
+            ]
         };
 
-        // Load history from localStorage on init
-        function loadTagsHistoryFromStorage() {
+        // Fetch JSON from GitHub raw URL
+        async function fetchGitHubJSON(filePath) {
+            const url = `https://raw.githubusercontent.com/${tagsHistory.githubRepo}/${tagsHistory.githubBranch}/${filePath}`;
             try {
-                const saved = localStorage.getItem('xrp_tags_history');
-                if (saved) {
-                    tagsHistory.snapshots = JSON.parse(saved);
-                    updateHistoryCount();
-                    if (tagsHistory.snapshots.length > 0) {
-                        document.getElementById('tagsChartsSection').style.display = 'block';
-                        renderAllTagsCharts();
+                console.log(`Fetching ${filePath}...`);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log(`  ⚠ File not found: ${filePath}`);
+                        return null;
                     }
+                    throw new Error(`HTTP ${response.status}`);
                 }
+                const data = await response.json();
+                console.log(`  ✓ Loaded ${filePath}`);
+                return data;
             } catch (e) {
-                console.error('Failed to load tags history:', e);
+                console.error(`Failed to fetch ${filePath}:`, e);
+                return null;
             }
         }
 
-        // Save history to localStorage
-        function saveTagsHistoryToStorage() {
+        // Try to auto-discover JSON files from GitHub directory listing
+        async function discoverJSONFiles() {
+            // Try to fetch the data directory listing via GitHub API
+            const apiUrl = `https://api.github.com/repos/${tagsHistory.githubRepo}/contents/data`;
             try {
-                // Keep only last 90 days
-                const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
-                tagsHistory.snapshots = tagsHistory.snapshots.filter(s => new Date(s.date).getTime() > cutoff);
-                localStorage.setItem('xrp_tags_history', JSON.stringify(tagsHistory.snapshots));
+                const response = await fetch(apiUrl);
+                if (!response.ok) return null;
+                
+                const files = await response.json();
+                const jsonFiles = files
+                    .filter(f => f.name.endsWith('.json') && f.name.startsWith('all_exchanges_tags_'))
+                    .map(f => `data/${f.name}`)
+                    .sort();
+                
+                console.log(`Auto-discovered ${jsonFiles.length} JSON files from GitHub`);
+                return jsonFiles;
             } catch (e) {
-                console.error('Failed to save tags history:', e);
+                console.log('Could not auto-discover files, using configured list');
+                return null;
             }
+        }
+
+        // Process JSON data into snapshot format
+        function processJSONToSnapshot(data) {
+            if (!data || !data.exchanges) return null;
+            
+            const timestamp = data.timestamp || new Date().toISOString();
+            
+            let totalXrp = 0;
+            let totalTags = 0;
+            const exchanges = {};
+            
+            for (const [name, exData] of Object.entries(data.exchanges)) {
+                const xrp = exData.total_balance_xrp || 0;
+                const tags = exData.total_unique_tags || 0;
+                totalXrp += xrp;
+                totalTags += tags;
+                exchanges[name] = { xrp, tags };
+            }
+            
+            return {
+                date: timestamp,
+                totalXrp,
+                totalTags,
+                exchanges
+            };
+        }
+
+        // Load ALL JSON files from GitHub for historical data
+        async function loadTagsHistoryFromSheets() {
+            console.log('Loading tags history from GitHub...');
+            document.getElementById('tagsHistoryCount').textContent = 'Loading...';
+            
+            try {
+                // Try to auto-discover files first
+                const discoveredFiles = await discoverJSONFiles();
+                const filesToFetch = discoveredFiles || tagsHistory.jsonFiles;
+                
+                console.log(`Will fetch ${filesToFetch.length} files`);
+                
+                const snapshots = [];
+                let latestData = null;
+                let latestDate = null;
+                
+                // Fetch each JSON file
+                for (const filePath of filesToFetch) {
+                    const data = await fetchGitHubJSON(filePath);
+                    
+                    if (data) {
+                        const snapshot = processJSONToSnapshot(data);
+                        if (snapshot) {
+                            snapshots.push(snapshot);
+                            
+                            // Track latest for main display
+                            const snapshotDate = new Date(snapshot.date);
+                            if (!latestDate || snapshotDate > latestDate) {
+                                latestData = data;
+                                latestDate = snapshotDate;
+                            }
+                            
+                            console.log(`  ${snapshot.date.split('T')[0]}: ${snapshot.totalTags.toLocaleString()} tags, ${(snapshot.totalXrp/1e9).toFixed(2)}B XRP`);
+                        }
+                    }
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(r => setTimeout(r, 100));
+                }
+                
+                // Sort by date and remove duplicates (keep latest per day)
+                snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
+                const byDate = {};
+                for (const s of snapshots) {
+                    const dateKey = s.date.split('T')[0];
+                    if (!byDate[dateKey] || new Date(s.date) > new Date(byDate[dateKey].date)) {
+                        byDate[dateKey] = s;
+                    }
+                }
+                tagsHistory.snapshots = Object.values(byDate).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                updateHistoryCount();
+                
+                if (tagsHistory.snapshots.length > 0) {
+                    document.getElementById('tagsChartsSection').style.display = 'block';
+                    renderAllTagsCharts();
+                }
+                
+                // Update main tags display with latest data
+                if (latestData) {
+                    updateTagsFromJSON(latestData);
+                }
+                
+                showToast(`Loaded ${tagsHistory.snapshots.length} day(s) from GitHub!`, 'success');
+                
+            } catch (e) {
+                console.error('Failed to load from GitHub:', e);
+                showToast('Failed to load: ' + e.message, 'error');
+                updateHistoryCount();
+            }
+        }
+
+        // Update main tags display from JSON data
+        function updateTagsFromJSON(data) {
+            if (!data || !data.exchanges) return;
+            
+            tagsState.data = data;
+            
+            // Extract all tags for table
+            extractAllTags();
+            
+            // Update display
+            updateTagsDisplay();
+            
+            // Update filename display
+            const dateStr = data.timestamp ? data.timestamp.split('T')[0] : 'GitHub';
+            document.getElementById('tagsFileName').textContent = `📊 ${dateStr}`;
         }
 
         function updateHistoryCount() {
             document.getElementById('tagsHistoryCount').textContent = 
-                `${tagsHistory.snapshots.length} snapshot${tagsHistory.snapshots.length !== 1 ? 's' : ''}`;
+                `${tagsHistory.snapshots.length} day${tagsHistory.snapshots.length !== 1 ? 's' : ''}`;
         }
 
-        // Handle multiple file upload for history
+        // Handle JSON file upload (backup option)
         async function handleHistoryUpload(event) {
             const files = Array.from(event.target.files);
             if (files.length === 0) return;
@@ -18656,26 +18798,13 @@
             }
 
             if (added > 0) {
-                // Sort by date
                 tagsHistory.snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                // Remove duplicates (same date)
-                const seen = new Set();
-                tagsHistory.snapshots = tagsHistory.snapshots.filter(s => {
-                    const dateKey = s.date.split('T')[0];
-                    if (seen.has(dateKey)) return false;
-                    seen.add(dateKey);
-                    return true;
-                });
-
-                saveTagsHistoryToStorage();
                 updateHistoryCount();
                 document.getElementById('tagsChartsSection').style.display = 'block';
                 renderAllTagsCharts();
-                showToast(`Added ${added} snapshot(s) to history!`, 'success');
+                showToast(`Added ${added} snapshot(s)!`, 'success');
             }
 
-            // Reset file input
             event.target.value = '';
         }
 
@@ -18685,12 +18814,9 @@
             const timestamp = data.timestamp || new Date().toISOString();
             const dateKey = timestamp.split('T')[0];
 
-            // Check if we already have this date
-            if (tagsHistory.snapshots.some(s => s.date.split('T')[0] === dateKey)) {
-                return false;  // Skip duplicate
-            }
-
-            // Extract summary
+            // Update existing or add new
+            const existingIdx = tagsHistory.snapshots.findIndex(s => s.date.split('T')[0] === dateKey);
+            
             let totalXrp = 0;
             let totalTags = 0;
             const exchanges = {};
@@ -18703,22 +18829,26 @@
                 exchanges[name] = { xrp, tags };
             }
 
-            tagsHistory.snapshots.push({
+            const snapshot = {
                 date: timestamp,
                 totalXrp,
                 totalTags,
                 exchanges
-            });
+            };
+
+            if (existingIdx >= 0) {
+                tagsHistory.snapshots[existingIdx] = snapshot;
+            } else {
+                tagsHistory.snapshots.push(snapshot);
+            }
 
             return true;
         }
 
-        // Also add current data to history when uploaded
         function addCurrentToHistory() {
             if (tagsState.data) {
                 if (addSnapshotFromData(tagsState.data)) {
                     tagsHistory.snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
-                    saveTagsHistoryToStorage();
                     updateHistoryCount();
                     document.getElementById('tagsChartsSection').style.display = 'block';
                     renderAllTagsCharts();
@@ -18727,12 +18857,10 @@
         }
 
         function clearTagsHistory() {
-            if (confirm('Clear all historical data? This cannot be undone.')) {
+            if (confirm('Clear chart history?')) {
                 tagsHistory.snapshots = [];
-                localStorage.removeItem('xrp_tags_history');
                 updateHistoryCount();
                 
-                // Destroy charts
                 if (tagsHistory.charts.xrpOverTime) {
                     tagsHistory.charts.xrpOverTime.destroy();
                     tagsHistory.charts.xrpOverTime = null;
@@ -18748,6 +18876,10 @@
                 
                 showToast('History cleared', 'success');
             }
+        }
+
+        async function refreshFromSheets() {
+            await loadTagsHistoryFromSheets();
         }
 
         function renderAllTagsCharts() {
@@ -18988,8 +19120,22 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
-            loadTagsHistoryFromStorage();
+            // Auto-load from Google Sheets when tags tab is first visited
+            console.log('Tags dashboard initialized');
         });
+
+        // Load from sheets when tags tab is activated
+        let tagsHistoryLoaded = false;
+        const originalSwitchMainTabForTags = switchMainTab;
+        switchMainTab = function(tabName) {
+            originalSwitchMainTabForTags(tabName);
+            if (tabName === 'tags' && !tagsHistoryLoaded) {
+                tagsHistoryLoaded = true;
+                setTimeout(() => {
+                    loadTagsHistoryFromSheets();
+                }, 500);
+            }
+        };
 
         // Modify the existing handleTagsFileUpload to also add to history
         const originalHandleTagsFileUpload = handleTagsFileUpload;
