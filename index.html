@@ -18349,7 +18349,8 @@
         }
 
         function formatTagXRP(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
             if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
             return formatTagNumber(num, 2);
         }
@@ -18770,14 +18771,14 @@
                 const d = new Date(s.date);
                 return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             });
-            const data = snapshots.map(s => s.totalXrp / 1e6);  // In millions
+            const data = snapshots.map(s => s.totalXrp / 1e9);  // In billions
 
             tagsHistory.charts.xrpOverTime = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels,
                     datasets: [{
-                        label: 'XRP on Exchanges (M)',
+                        label: 'XRP on Exchanges (B)',
                         data,
                         borderColor: '#22c55e',
                         backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -18794,7 +18795,7 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `${ctx.parsed.y.toFixed(2)}M XRP`
+                                label: (ctx) => `${ctx.parsed.y.toFixed(2)}B XRP`
                             }
                         }
                     },
@@ -18807,7 +18808,7 @@
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: { 
                                 color: '#94a3b8',
-                                callback: (v) => v.toFixed(1) + 'M'
+                                callback: (v) => v.toFixed(1) + 'B'
                             }
                         }
                     }
@@ -18824,8 +18825,8 @@
                 const colorClass = change >= 0 ? 'red' : 'green';  // More XRP on exchanges = bearish
                 
                 document.getElementById('xrpChartSummary').innerHTML = 
-                    `<span class="highlight">${formatTagXRP(last)}</span> XRP on exchanges | ` +
-                    `<span class="${colorClass}">${arrow} ${formatTagXRP(Math.abs(change))} (${pct}%)</span> since ${labels[0]}`;
+                    `<span class="highlight">${(last / 1e9).toFixed(2)}B</span> XRP on exchanges | ` +
+                    `<span class="${colorClass}">${arrow} ${(Math.abs(change) / 1e9).toFixed(2)}B (${pct}%)</span> since ${labels[0]}`;
             }
         }
 
@@ -18943,7 +18944,7 @@
 
             const datasets = topExchanges.map((exchange, i) => ({
                 label: exchange,
-                data: snapshots.map(s => (s.exchanges[exchange]?.xrp || 0) / 1e6),
+                data: snapshots.map(s => (s.exchanges[exchange]?.xrp || 0) / 1e9),  // In billions
                 borderColor: colors[i % colors.length],
                 backgroundColor: colors[i % colors.length] + '20',
                 fill: false,
@@ -18964,7 +18965,7 @@
                         },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}M XRP`
+                                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}B XRP`
                             }
                         }
                     },
@@ -18977,7 +18978,7 @@
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: { 
                                 color: '#94a3b8',
-                                callback: (v) => v.toFixed(0) + 'M'
+                                callback: (v) => v.toFixed(1) + 'B'
                             }
                         }
                     }
