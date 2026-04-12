@@ -6859,6 +6859,95 @@
             font-size: 0.8rem;
         }
 
+        /* Tags Historical Charts */
+        .tags-charts-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .tags-charts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tags-charts-header h4 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .tags-history-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tags-history-count {
+            font-size: 0.85rem;
+            color: var(--accent-xrp);
+            font-weight: 500;
+        }
+
+        .tags-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1rem;
+        }
+
+        .tags-chart-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .tags-chart-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tags-chart-wrapper {
+            height: 250px;
+            position: relative;
+        }
+
+        .tags-chart-summary {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .tags-chart-summary .highlight {
+            color: var(--accent-xrp);
+            font-weight: 600;
+        }
+
+        .tags-chart-summary .green {
+            color: var(--accent-green);
+        }
+
+        .tags-chart-summary .red {
+            color: var(--accent-red);
+        }
+
+        @media (max-width: 768px) {
+            .tags-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Customizable Dashboard */
         .dashboard-settings-btn {
             position: fixed;
@@ -8749,6 +8838,57 @@
                         <div class="tags-stat-icon">👛</div>
                         <div class="tags-stat-value" id="tagsWalletCount">--</div>
                         <div class="tags-stat-label">Wallets</div>
+                    </div>
+                </div>
+
+                <!-- Historical Charts Section -->
+                <div class="tags-charts-section" id="tagsChartsSection" style="display: none;">
+                    <div class="tags-charts-header">
+                        <h4>📈 Historical Trends</h4>
+                        <div class="tags-history-controls">
+                            <input type="file" id="tagsHistoryInput" accept=".json" multiple onchange="handleHistoryUpload(event)" style="display: none;">
+                            <button class="btn" onclick="document.getElementById('tagsHistoryInput').click()">📁 Load History (Multiple JSON)</button>
+                            <button class="btn" onclick="clearTagsHistory()">🗑️ Clear History</button>
+                            <span class="tags-history-count" id="tagsHistoryCount">0 snapshots</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tags-charts-grid">
+                        <!-- XRP on Exchanges Over Time -->
+                        <div class="tags-chart-card">
+                            <div class="tags-chart-title">
+                                <span>💰</span> XRP on Exchanges Over Time
+                            </div>
+                            <div class="tags-chart-wrapper">
+                                <canvas id="xrpOverTimeChart"></canvas>
+                            </div>
+                            <div class="tags-chart-summary" id="xrpChartSummary">
+                                Upload multiple daily snapshots to see trends
+                            </div>
+                        </div>
+                        
+                        <!-- Tag Growth Over Time -->
+                        <div class="tags-chart-card">
+                            <div class="tags-chart-title">
+                                <span>🏷️</span> Tag Growth Over Time
+                            </div>
+                            <div class="tags-chart-wrapper">
+                                <canvas id="tagGrowthChart"></canvas>
+                            </div>
+                            <div class="tags-chart-summary" id="tagGrowthSummary">
+                                Track unique destination tags (user accounts) growth
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Per-Exchange Breakdown -->
+                    <div class="tags-chart-card" style="margin-top: 1rem;">
+                        <div class="tags-chart-title">
+                            <span>🏦</span> XRP Balance by Exchange Over Time
+                        </div>
+                        <div class="tags-chart-wrapper" style="height: 350px;">
+                            <canvas id="exchangeBalanceChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -18288,6 +18428,9 @@
             // Render exchange cards
             renderExchangeCards();
 
+            // Show charts section (always visible once data is loaded)
+            document.getElementById('tagsChartsSection').style.display = 'block';
+
             // Show table section
             document.getElementById('tagsTableSection').style.display = 'block';
 
@@ -18444,6 +18587,416 @@
             document.getElementById('tagsPaginationInfo').textContent = 
                 `Showing ${start + 1}-${end} of ${formatTagNumber(tags.length)} tags`;
         }
+
+        // =====================================================
+        // TAGS HISTORICAL CHARTS
+        // =====================================================
+
+        const tagsHistory = {
+            snapshots: [],  // Array of {date, totalXrp, totalTags, exchanges: {name: {xrp, tags}}}
+            charts: {
+                xrpOverTime: null,
+                tagGrowth: null,
+                exchangeBalance: null
+            }
+        };
+
+        // Load history from localStorage on init
+        function loadTagsHistoryFromStorage() {
+            try {
+                const saved = localStorage.getItem('xrp_tags_history');
+                if (saved) {
+                    tagsHistory.snapshots = JSON.parse(saved);
+                    updateHistoryCount();
+                    if (tagsHistory.snapshots.length > 0) {
+                        document.getElementById('tagsChartsSection').style.display = 'block';
+                        renderAllTagsCharts();
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load tags history:', e);
+            }
+        }
+
+        // Save history to localStorage
+        function saveTagsHistoryToStorage() {
+            try {
+                // Keep only last 90 days
+                const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
+                tagsHistory.snapshots = tagsHistory.snapshots.filter(s => new Date(s.date).getTime() > cutoff);
+                localStorage.setItem('xrp_tags_history', JSON.stringify(tagsHistory.snapshots));
+            } catch (e) {
+                console.error('Failed to save tags history:', e);
+            }
+        }
+
+        function updateHistoryCount() {
+            document.getElementById('tagsHistoryCount').textContent = 
+                `${tagsHistory.snapshots.length} snapshot${tagsHistory.snapshots.length !== 1 ? 's' : ''}`;
+        }
+
+        // Handle multiple file upload for history
+        async function handleHistoryUpload(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            let added = 0;
+            for (const file of files) {
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    if (addSnapshotFromData(data)) {
+                        added++;
+                    }
+                } catch (e) {
+                    console.error(`Failed to parse ${file.name}:`, e);
+                }
+            }
+
+            if (added > 0) {
+                // Sort by date
+                tagsHistory.snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                // Remove duplicates (same date)
+                const seen = new Set();
+                tagsHistory.snapshots = tagsHistory.snapshots.filter(s => {
+                    const dateKey = s.date.split('T')[0];
+                    if (seen.has(dateKey)) return false;
+                    seen.add(dateKey);
+                    return true;
+                });
+
+                saveTagsHistoryToStorage();
+                updateHistoryCount();
+                document.getElementById('tagsChartsSection').style.display = 'block';
+                renderAllTagsCharts();
+                showToast(`Added ${added} snapshot(s) to history!`, 'success');
+            }
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function addSnapshotFromData(data) {
+            if (!data || !data.exchanges) return false;
+
+            const timestamp = data.timestamp || new Date().toISOString();
+            const dateKey = timestamp.split('T')[0];
+
+            // Check if we already have this date
+            if (tagsHistory.snapshots.some(s => s.date.split('T')[0] === dateKey)) {
+                return false;  // Skip duplicate
+            }
+
+            // Extract summary
+            let totalXrp = 0;
+            let totalTags = 0;
+            const exchanges = {};
+
+            for (const [name, exData] of Object.entries(data.exchanges)) {
+                const xrp = exData.total_balance_xrp || 0;
+                const tags = exData.total_unique_tags || 0;
+                totalXrp += xrp;
+                totalTags += tags;
+                exchanges[name] = { xrp, tags };
+            }
+
+            tagsHistory.snapshots.push({
+                date: timestamp,
+                totalXrp,
+                totalTags,
+                exchanges
+            });
+
+            return true;
+        }
+
+        // Also add current data to history when uploaded
+        function addCurrentToHistory() {
+            if (tagsState.data) {
+                if (addSnapshotFromData(tagsState.data)) {
+                    tagsHistory.snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    saveTagsHistoryToStorage();
+                    updateHistoryCount();
+                    document.getElementById('tagsChartsSection').style.display = 'block';
+                    renderAllTagsCharts();
+                }
+            }
+        }
+
+        function clearTagsHistory() {
+            if (confirm('Clear all historical data? This cannot be undone.')) {
+                tagsHistory.snapshots = [];
+                localStorage.removeItem('xrp_tags_history');
+                updateHistoryCount();
+                
+                // Destroy charts
+                if (tagsHistory.charts.xrpOverTime) {
+                    tagsHistory.charts.xrpOverTime.destroy();
+                    tagsHistory.charts.xrpOverTime = null;
+                }
+                if (tagsHistory.charts.tagGrowth) {
+                    tagsHistory.charts.tagGrowth.destroy();
+                    tagsHistory.charts.tagGrowth = null;
+                }
+                if (tagsHistory.charts.exchangeBalance) {
+                    tagsHistory.charts.exchangeBalance.destroy();
+                    tagsHistory.charts.exchangeBalance = null;
+                }
+                
+                showToast('History cleared', 'success');
+            }
+        }
+
+        function renderAllTagsCharts() {
+            renderXrpOverTimeChart();
+            renderTagGrowthChart();
+            renderExchangeBalanceChart();
+        }
+
+        function renderXrpOverTimeChart() {
+            const ctx = document.getElementById('xrpOverTimeChart');
+            if (!ctx) return;
+
+            if (tagsHistory.charts.xrpOverTime) {
+                tagsHistory.charts.xrpOverTime.destroy();
+            }
+
+            const snapshots = tagsHistory.snapshots;
+            if (snapshots.length === 0) return;
+
+            const labels = snapshots.map(s => {
+                const d = new Date(s.date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const data = snapshots.map(s => s.totalXrp / 1e6);  // In millions
+
+            tagsHistory.charts.xrpOverTime = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'XRP on Exchanges (M)',
+                        data,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.parsed.y.toFixed(2)}M XRP`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: (v) => v.toFixed(1) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update summary
+            if (snapshots.length >= 2) {
+                const first = snapshots[0].totalXrp;
+                const last = snapshots[snapshots.length - 1].totalXrp;
+                const change = last - first;
+                const pct = ((change / first) * 100).toFixed(2);
+                const arrow = change >= 0 ? '↑' : '↓';
+                const colorClass = change >= 0 ? 'red' : 'green';  // More XRP on exchanges = bearish
+                
+                document.getElementById('xrpChartSummary').innerHTML = 
+                    `<span class="highlight">${formatTagXRP(last)}</span> XRP on exchanges | ` +
+                    `<span class="${colorClass}">${arrow} ${formatTagXRP(Math.abs(change))} (${pct}%)</span> since ${labels[0]}`;
+            }
+        }
+
+        function renderTagGrowthChart() {
+            const ctx = document.getElementById('tagGrowthChart');
+            if (!ctx) return;
+
+            if (tagsHistory.charts.tagGrowth) {
+                tagsHistory.charts.tagGrowth.destroy();
+            }
+
+            const snapshots = tagsHistory.snapshots;
+            if (snapshots.length === 0) return;
+
+            const labels = snapshots.map(s => {
+                const d = new Date(s.date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const data = snapshots.map(s => s.totalTags);
+
+            tagsHistory.charts.tagGrowth = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Unique Tags',
+                        data,
+                        borderColor: '#23f7dd',
+                        backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.parsed.y.toLocaleString()} tags`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update summary
+            if (snapshots.length >= 2) {
+                const first = snapshots[0].totalTags;
+                const last = snapshots[snapshots.length - 1].totalTags;
+                const change = last - first;
+                const pct = ((change / first) * 100).toFixed(2);
+                const arrow = change >= 0 ? '↑' : '↓';
+                const colorClass = change >= 0 ? 'green' : 'red';  // More tags = more users = bullish
+                
+                document.getElementById('tagGrowthSummary').innerHTML = 
+                    `<span class="highlight">${last.toLocaleString()}</span> unique tags | ` +
+                    `<span class="${colorClass}">${arrow} ${Math.abs(change).toLocaleString()} (${pct}%)</span> since ${labels[0]}`;
+            }
+        }
+
+        function renderExchangeBalanceChart() {
+            const ctx = document.getElementById('exchangeBalanceChart');
+            if (!ctx) return;
+
+            if (tagsHistory.charts.exchangeBalance) {
+                tagsHistory.charts.exchangeBalance.destroy();
+            }
+
+            const snapshots = tagsHistory.snapshots;
+            if (snapshots.length === 0) return;
+
+            // Get all unique exchanges
+            const allExchanges = new Set();
+            snapshots.forEach(s => {
+                Object.keys(s.exchanges || {}).forEach(e => allExchanges.add(e));
+            });
+
+            // Get top 8 exchanges by latest balance
+            const latestSnapshot = snapshots[snapshots.length - 1];
+            const topExchanges = Array.from(allExchanges)
+                .map(name => ({
+                    name,
+                    balance: latestSnapshot.exchanges[name]?.xrp || 0
+                }))
+                .sort((a, b) => b.balance - a.balance)
+                .slice(0, 8)
+                .map(e => e.name);
+
+            const labels = snapshots.map(s => {
+                const d = new Date(s.date);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+
+            const colors = [
+                '#23f7dd', '#22c55e', '#3b82f6', '#a855f7', 
+                '#f97316', '#eab308', '#ef4444', '#ec4899'
+            ];
+
+            const datasets = topExchanges.map((exchange, i) => ({
+                label: exchange,
+                data: snapshots.map(s => (s.exchanges[exchange]?.xrp || 0) / 1e6),
+                borderColor: colors[i % colors.length],
+                backgroundColor: colors[i % colors.length] + '20',
+                fill: false,
+                tension: 0.3,
+                pointRadius: 2
+            }));
+
+            tagsHistory.charts.exchangeBalance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#94a3b8', boxWidth: 12, padding: 15 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}M XRP`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: (v) => v.toFixed(0) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTagsHistoryFromStorage();
+        });
+
+        // Modify the existing handleTagsFileUpload to also add to history
+        const originalHandleTagsFileUpload = handleTagsFileUpload;
+        handleTagsFileUpload = async function(event) {
+            await originalHandleTagsFileUpload(event);
+            // After loading current data, add it to history
+            setTimeout(addCurrentToHistory, 100);
+        };
 
     </script>
 </body>
