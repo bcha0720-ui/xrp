@@ -73,6 +73,55 @@ descriptions = {
 # NEWS API ENDPOINTS (CryptoPanic)
 # =====================================================
 
+@app.route('/api/news')
+def get_news_compat():
+    """Compatibility endpoint — frontend calls /api/news, returns data.Data format"""
+    try:
+        now = datetime.now()
+        if news_cache['data'] and news_cache['timestamp']:
+            age = (now - news_cache['timestamp']).total_seconds()
+            if age < news_cache['cache_duration']:
+                return jsonify({'Data': news_cache['data'], 'cached': True, 'cache_age': int(age)})
+
+        response = requests.get(
+            f"{CRYPTOPANIC_BASE_URL}/posts/",
+            params={'currencies': 'XRP', 'kind': 'news', 'public': 'true'},
+            timeout=10
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            results = data.get('results', [])
+            news_items = []
+            for item in results[:20]:
+                votes = item.get('votes', {})
+                news_items.append({
+                    'title': item.get('title', ''),
+                    'url':   item.get('url', ''),
+                    'body':  item.get('title', ''),   # CryptoPanic free tier has no body; reuse title
+                    'source': {'name': item.get('source', {}).get('title', 'Unknown')},
+                    'published_on': item.get('published_at', ''),
+                    'votes': {
+                        'positive': votes.get('positive', 0),
+                        'negative': votes.get('negative', 0),
+                    },
+                    'sentiment': 'positive' if votes.get('positive', 0) > votes.get('negative', 0) else 'neutral'
+                })
+            news_cache['data'] = news_items
+            news_cache['timestamp'] = now
+            return jsonify({'Data': news_items, 'cached': False})
+        else:
+            if news_cache['data']:
+                return jsonify({'Data': news_cache['data'], 'cached': True, 'stale': True})
+            return jsonify({'Data': [], 'error': 'Failed to fetch news'}), 500
+
+    except Exception as e:
+        logging.error(f"/api/news error: {e}")
+        if news_cache['data']:
+            return jsonify({'Data': news_cache['data'], 'cached': True, 'stale': True})
+        return jsonify({'Data': [], 'error': str(e)}), 500
+
+
 @app.route('/api/xrp/news')
 def get_xrp_news():
     """Get XRP news from CryptoPanic"""
@@ -909,6 +958,7 @@ def home():
             '/api/chat',
             '/api/health',
             '--- News (CryptoPanic) ---',
+            '/api/news (frontend compat — returns Data[] format)',
             '/api/xrp/news',
             '/api/crypto/news',
             '--- XRP Data ---',
