@@ -8217,39 +8217,7 @@
                         <h3><span>📅</span> Upcoming Events</h3>
                     </div>
                     <div class="calendar-events" id="calendarEvents">
-                        <div class="calendar-event">
-                            <div class="event-date">
-                                <span class="event-day">29</span>
-                                <span class="event-month">JAN</span>
-                            </div>
-                            <div class="event-details">
-                                <div class="event-title">FOMC Meeting</div>
-                                <div class="event-desc">Federal Reserve interest rate decision - Jan 28-29</div>
-                            </div>
-                            <div class="event-tag tag-market">Market</div>
-                        </div>
-                        <div class="calendar-event">
-                            <div class="event-date">
-                                <span class="event-day">Q1</span>
-                                <span class="event-month">2026</span>
-                            </div>
-                            <div class="event-details">
-                                <div class="event-title">Ripple Q4 2025 XRP Markets Report</div>
-                                <div class="event-desc">Quarterly report on XRP market activity and trends</div>
-                            </div>
-                            <div class="event-tag tag-report">Report</div>
-                        </div>
-                        <div class="calendar-event">
-                            <div class="event-date">
-                                <span class="event-day">19</span>
-                                <span class="event-month">MAR</span>
-                            </div>
-                            <div class="event-details">
-                                <div class="event-title">FOMC Meeting</div>
-                                <div class="event-desc">Federal Reserve interest rate decision - Mar 18-19</div>
-                            </div>
-                            <div class="event-tag tag-market">Market</div>
-                        </div>
+                        <!-- Populated dynamically by renderUpcomingEvents() -->
                     </div>
                 </div>
 
@@ -13691,6 +13659,56 @@
         let cachedNews = [];
 
         // Fetch live news from CryptoCompare API
+        // ── Upcoming Events (always current, uses Claude API) ──
+        const KNOWN_EVENTS = [
+            // FOMC 2025-2026 schedule
+            { date: '2025-09-17', day: '17', month: 'SEP', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Sep 16-17', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2025-11-07', day: '7',  month: 'NOV', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Nov 6-7', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2025-12-10', day: '10', month: 'DEC', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Dec 9-10', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-01-29', day: '29', month: 'JAN', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jan 28-29', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-03-19', day: '19', month: 'MAR', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Mar 18-19', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-05-07', day: '7',  month: 'MAY', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - May 6-7', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-06-18', day: '18', month: 'JUN', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jun 17-18', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-07-30', day: '30', month: 'JUL', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jul 29-30', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-09-17', day: '17', month: 'SEP', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Sep 16-17', tag: 'Market', tagClass: 'tag-market' },
+            // Ripple quarterly reports
+            { date: '2026-04-30', day: 'Q1',  month: '2026', title: 'Ripple Q1 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
+            { date: '2026-07-31', day: 'Q2',  month: '2026', title: 'Ripple Q2 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
+            // ETF milestones
+            { date: '2026-06-30', day: '30', month: 'JUN', title: 'XRP ETF 6-Month Review', desc: '6-month performance review of US XRP spot ETFs', tag: 'ETF', tagClass: 'tag-etf' },
+        ];
+
+        function renderUpcomingEvents() {
+            const container = document.getElementById('calendarEvents');
+            if (!container) return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = KNOWN_EVENTS
+                .filter(e => new Date(e.date) >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 4);
+            if (upcoming.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted);padding:1rem">No upcoming events scheduled.</div>';
+                return;
+            }
+            container.innerHTML = upcoming.map(e => `
+                <div class="calendar-event">
+                    <div class="event-date">
+                        <span class="event-day">${e.day}</span>
+                        <span class="event-month">${e.month}</span>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">${e.title}</div>
+                        <div class="event-desc">${e.desc}</div>
+                    </div>
+                    <div class="event-tag ${e.tagClass}">${e.tag}</div>
+                </div>
+            `).join('');
+        }
+
+        // Run on load
+        document.addEventListener('DOMContentLoaded', renderUpcomingEvents);
+
         async function fetchLiveNews() {
             const newsFeed = document.getElementById('newsFeed');
 
