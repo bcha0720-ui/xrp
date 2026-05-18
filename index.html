@@ -7484,13 +7484,13 @@
 
         <!-- Main Tab Navigation -->
         <div class="main-tabs" style="flex-wrap: wrap;">
-            <button class="main-tab active" onclick="switchMainTab('trading')">
-                <span class="main-tab-icon">📈</span>
-                <span class="main-tab-text">Trading</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('holdings')">
+            <button class="main-tab active" onclick="switchMainTab('holdings')">
                 <span class="main-tab-icon">💎</span>
                 <span class="main-tab-text">Holdings</span>
+            </button>
+            <button class="main-tab" onclick="switchMainTab('trading')">
+                <span class="main-tab-icon">📈</span>
+                <span class="main-tab-text">Trading</span>
             </button>
             <button class="main-tab" onclick="switchMainTab('exchange')">
                 <span class="main-tab-icon">🏦</span>
@@ -7519,7 +7519,7 @@
         </div>
 
         <!-- Trading Tab Content -->
-        <div id="tradingTab" class="tab-content active">
+        <div id="tradingTab" class="tab-content">
             <div class="controls">
                 <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
                 <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
@@ -7542,7 +7542,7 @@
         </div>
 
         <!-- Holdings Tab Content -->
-        <div id="holdingsTab" class="tab-content">
+        <div id="holdingsTab" class="tab-content active">
             <div class="holdings-summary" id="holdingsSummary">
                 <div class="summary-card highlight">
                     <div class="summary-label">Total XRP</div>
@@ -16918,6 +16918,15 @@
 
                 // Start auto refresh
                 startAutoRefresh();
+
+                // Holdings is now the landing tab - render its charts
+                renderHoldingsTable();
+                updateHoldingsSummary();
+                setTimeout(() => {
+                    renderHoldingsChart();
+                    renderHoldingsTrendChart();
+                    updateDashboardOverview();
+                }, 150);
 
                 // Load saved portfolio
                 loadPortfolio();
