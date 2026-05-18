@@ -8777,12 +8777,14 @@
                 <div class="tags-header">
                     <h3><span>🏷️</span> XRP Exchange Destination Tags</h3>
                     <div class="tags-upload-section">
-                        <input type="file" id="tagsFileInput" accept=".json" onchange="handleTagsFileUpload(event)" style="display: none;">
-                        <button class="btn" onclick="document.getElementById('tagsFileInput').click()">📤 Upload JSON</button>
+                        <input type="file" id="tagsFileInput" accept=".json" onchange="handleTagsFileUpload(event)"
+                            style="display: none;">
+                        <button class="btn" onclick="document.getElementById('tagsFileInput').click()">📤 Upload
+                            JSON</button>
                         <span class="tags-file-name" id="tagsFileName">No file loaded</span>
                     </div>
                 </div>
-                
+
                 <div class="tags-timestamp" id="tagsTimestamp"></div>
 
                 <!-- Tags Stats Summary -->
@@ -8815,13 +8817,15 @@
                         <h4>📈 Historical Trends</h4>
                         <div class="tags-history-controls">
                             <button class="btn" onclick="refreshFromSheets()">🔄 Refresh from GitHub</button>
-                            <input type="file" id="tagsHistoryInput" accept=".json" multiple onchange="handleHistoryUpload(event)" style="display: none;">
-                            <button class="btn" onclick="document.getElementById('tagsHistoryInput').click()">📁 Upload JSON</button>
+                            <input type="file" id="tagsHistoryInput" accept=".json" multiple
+                                onchange="handleHistoryUpload(event)" style="display: none;">
+                            <button class="btn" onclick="document.getElementById('tagsHistoryInput').click()">📁 Upload
+                                JSON</button>
                             <button class="btn" onclick="clearTagsHistory()">🗑️ Clear</button>
                             <span class="tags-history-count" id="tagsHistoryCount">0 snapshots</span>
                         </div>
                     </div>
-                    
+
                     <div class="tags-charts-grid">
                         <!-- XRP on Exchanges Over Time -->
                         <div class="tags-chart-card">
@@ -8835,7 +8839,7 @@
                                 Upload multiple daily snapshots to see trends
                             </div>
                         </div>
-                        
+
                         <!-- Tag Growth Over Time -->
                         <div class="tags-chart-card">
                             <div class="tags-chart-title">
@@ -8849,7 +8853,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Per-Exchange Breakdown -->
                     <div class="tags-chart-card" style="margin-top: 1rem;">
                         <div class="tags-chart-title">
@@ -8891,7 +8895,8 @@
                         </div>
                         <div class="tags-filter-group tags-search">
                             <label>Search</label>
-                            <input type="text" id="tagsSearchInput" onkeyup="filterTags()" placeholder="Search tag #...">
+                            <input type="text" id="tagsSearchInput" onkeyup="filterTags()"
+                                placeholder="Search tag #...">
                         </div>
                     </div>
                     <div class="tags-table-container">
@@ -9128,8 +9133,8 @@
                 accounts: "accounts",
 
                 // Tab Names
-                tabETFTrading: "ETF Trading",
-                tabETFHoldings: "ETF Holdings",
+                tabETFTrading: "ETF SPOT Holdings",
+                tabETFHoldings: "ETF Trading",
                 tabExchange: "Exchange",
                 tabAnalytics: "Exchange Analytics",
                 tabTop10K: "Top 10K",
@@ -13663,17 +13668,17 @@
         const KNOWN_EVENTS = [
             // FOMC 2025-2026 schedule
             { date: '2025-09-17', day: '17', month: 'SEP', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Sep 16-17', tag: 'Market', tagClass: 'tag-market' },
-            { date: '2025-11-07', day: '7',  month: 'NOV', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Nov 6-7', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2025-11-07', day: '7', month: 'NOV', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Nov 6-7', tag: 'Market', tagClass: 'tag-market' },
             { date: '2025-12-10', day: '10', month: 'DEC', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Dec 9-10', tag: 'Market', tagClass: 'tag-market' },
             { date: '2026-01-29', day: '29', month: 'JAN', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jan 28-29', tag: 'Market', tagClass: 'tag-market' },
             { date: '2026-03-19', day: '19', month: 'MAR', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Mar 18-19', tag: 'Market', tagClass: 'tag-market' },
-            { date: '2026-05-07', day: '7',  month: 'MAY', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - May 6-7', tag: 'Market', tagClass: 'tag-market' },
+            { date: '2026-05-07', day: '7', month: 'MAY', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - May 6-7', tag: 'Market', tagClass: 'tag-market' },
             { date: '2026-06-18', day: '18', month: 'JUN', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jun 17-18', tag: 'Market', tagClass: 'tag-market' },
             { date: '2026-07-30', day: '30', month: 'JUL', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Jul 29-30', tag: 'Market', tagClass: 'tag-market' },
             { date: '2026-09-17', day: '17', month: 'SEP', title: 'FOMC Meeting', desc: 'Federal Reserve interest rate decision - Sep 16-17', tag: 'Market', tagClass: 'tag-market' },
             // Ripple quarterly reports
-            { date: '2026-04-30', day: 'Q1',  month: '2026', title: 'Ripple Q1 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
-            { date: '2026-07-31', day: 'Q2',  month: '2026', title: 'Ripple Q2 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
+            { date: '2026-04-30', day: 'Q1', month: '2026', title: 'Ripple Q1 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
+            { date: '2026-07-31', day: 'Q2', month: '2026', title: 'Ripple Q2 2026 XRP Markets Report', desc: 'Quarterly report on XRP market activity and trends', tag: 'Report', tagClass: 'tag-report' },
             // ETF milestones
             { date: '2026-06-30', day: '30', month: 'JUN', title: 'XRP ETF 6-Month Review', desc: '6-month performance review of US XRP spot ETFs', tag: 'ETF', tagClass: 'tag-etf' },
         ];
@@ -18487,7 +18492,7 @@
             // Update timestamp
             const ts = tagsState.data.timestamp;
             if (ts) {
-                document.getElementById('tagsTimestamp').textContent = 
+                document.getElementById('tagsTimestamp').textContent =
                     '📅 Data from: ' + new Date(ts).toLocaleString();
             }
 
@@ -18495,16 +18500,16 @@
             const summary = tagsState.data.summary || {};
             const exchanges = Object.keys(tagsState.data.exchanges || {});
 
-            document.getElementById('tagsTotalUnique').textContent = 
+            document.getElementById('tagsTotalUnique').textContent =
                 formatTagNumber(summary.total_unique_tags || tagsState.allTags.length);
-            document.getElementById('tagsTotalXRP').textContent = 
+            document.getElementById('tagsTotalXRP').textContent =
                 formatTagXRP(summary.total_balance_xrp || 0);
             document.getElementById('tagsExchangeCount').textContent = exchanges.length;
             document.getElementById('tagsWalletCount').textContent = summary.total_wallets || 0;
 
             // Update exchange filter
             const filterSelect = document.getElementById('tagsExchangeFilter');
-            filterSelect.innerHTML = '<option value="">All Exchanges</option>' + 
+            filterSelect.innerHTML = '<option value="">All Exchanges</option>' +
                 exchanges.sort().map(e => `<option value="${e}">${e}</option>`).join('');
 
             // Render exchange cards
@@ -18570,7 +18575,7 @@
         function selectTagsExchange(exchange) {
             document.getElementById('tagsExchangeFilter').value = exchange;
             filterTags();
-            
+
             // Scroll to table
             document.getElementById('tagsTableSection').scrollIntoView({ behavior: 'smooth' });
         }
@@ -18594,7 +18599,7 @@
 
             // Filter by search
             if (searchTerm) {
-                filtered = filtered.filter(t => 
+                filtered = filtered.filter(t =>
                     String(t.tag).includes(searchTerm) ||
                     t.exchange.toLowerCase().includes(searchTerm) ||
                     t.wallet.toLowerCase().includes(searchTerm)
@@ -18666,7 +18671,7 @@
 
             // Update pagination info
             const end = Math.min(start + tagsState.rowsPerPage, tags.length);
-            document.getElementById('tagsPaginationInfo').textContent = 
+            document.getElementById('tagsPaginationInfo').textContent =
                 `Showing ${start + 1}-${end} of ${formatTagNumber(tags.length)} tags`;
         }
 
@@ -18723,13 +18728,13 @@
             try {
                 const response = await fetch(apiUrl);
                 if (!response.ok) return null;
-                
+
                 const files = await response.json();
                 const jsonFiles = files
                     .filter(f => f.name.endsWith('.json') && f.name.startsWith('all_exchanges_tags_'))
                     .map(f => `data/${f.name}`)
                     .sort();
-                
+
                 console.log(`Auto-discovered ${jsonFiles.length} JSON files from GitHub`);
                 return jsonFiles;
             } catch (e) {
@@ -18741,13 +18746,13 @@
         // Process JSON data into snapshot format
         function processJSONToSnapshot(data) {
             if (!data || !data.exchanges) return null;
-            
+
             const timestamp = data.timestamp || new Date().toISOString();
-            
+
             let totalXrp = 0;
             let totalTags = 0;
             const exchanges = {};
-            
+
             for (const [name, exData] of Object.entries(data.exchanges)) {
                 const xrp = exData.total_balance_xrp || 0;
                 const tags = exData.total_unique_tags || 0;
@@ -18755,7 +18760,7 @@
                 totalTags += tags;
                 exchanges[name] = { xrp, tags };
             }
-            
+
             return {
                 date: timestamp,
                 totalXrp,
@@ -18768,42 +18773,42 @@
         async function loadTagsHistoryFromSheets() {
             console.log('Loading tags history from GitHub...');
             document.getElementById('tagsHistoryCount').textContent = 'Loading...';
-            
+
             try {
                 // Try to auto-discover files first
                 const discoveredFiles = await discoverJSONFiles();
                 const filesToFetch = discoveredFiles || tagsHistory.jsonFiles;
-                
+
                 console.log(`Will fetch ${filesToFetch.length} files`);
-                
+
                 const snapshots = [];
                 let latestData = null;
                 let latestDate = null;
-                
+
                 // Fetch each JSON file
                 for (const filePath of filesToFetch) {
                     const data = await fetchGitHubJSON(filePath);
-                    
+
                     if (data) {
                         const snapshot = processJSONToSnapshot(data);
                         if (snapshot) {
                             snapshots.push(snapshot);
-                            
+
                             // Track latest for main display
                             const snapshotDate = new Date(snapshot.date);
                             if (!latestDate || snapshotDate > latestDate) {
                                 latestData = data;
                                 latestDate = snapshotDate;
                             }
-                            
-                            console.log(`  ${snapshot.date.split('T')[0]}: ${snapshot.totalTags.toLocaleString()} tags, ${(snapshot.totalXrp/1e9).toFixed(2)}B XRP`);
+
+                            console.log(`  ${snapshot.date.split('T')[0]}: ${snapshot.totalTags.toLocaleString()} tags, ${(snapshot.totalXrp / 1e9).toFixed(2)}B XRP`);
                         }
                     }
-                    
+
                     // Small delay to avoid rate limiting
                     await new Promise(r => setTimeout(r, 100));
                 }
-                
+
                 // Sort by date and remove duplicates (keep latest per day)
                 snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
                 const byDate = {};
@@ -18814,21 +18819,21 @@
                     }
                 }
                 tagsHistory.snapshots = Object.values(byDate).sort((a, b) => new Date(a.date) - new Date(b.date));
-                
+
                 updateHistoryCount();
-                
+
                 if (tagsHistory.snapshots.length > 0) {
                     document.getElementById('tagsChartsSection').style.display = 'block';
                     renderAllTagsCharts();
                 }
-                
+
                 // Update main tags display with latest data
                 if (latestData) {
                     updateTagsFromJSON(latestData);
                 }
-                
+
                 showToast(`Loaded ${tagsHistory.snapshots.length} day(s) from GitHub!`, 'success');
-                
+
             } catch (e) {
                 console.error('Failed to load from GitHub:', e);
                 showToast('Failed to load: ' + e.message, 'error');
@@ -18839,22 +18844,22 @@
         // Update main tags display from JSON data
         function updateTagsFromJSON(data) {
             if (!data || !data.exchanges) return;
-            
+
             tagsState.data = data;
-            
+
             // Extract all tags for table
             extractAllTags();
-            
+
             // Update display
             updateTagsDisplay();
-            
+
             // Update filename display
             const dateStr = data.timestamp ? data.timestamp.split('T')[0] : 'GitHub';
             document.getElementById('tagsFileName').textContent = `📊 ${dateStr}`;
         }
 
         function updateHistoryCount() {
-            document.getElementById('tagsHistoryCount').textContent = 
+            document.getElementById('tagsHistoryCount').textContent =
                 `${tagsHistory.snapshots.length} day${tagsHistory.snapshots.length !== 1 ? 's' : ''}`;
         }
 
@@ -18868,7 +18873,7 @@
                 try {
                     const text = await file.text();
                     const data = JSON.parse(text);
-                    
+
                     if (addSnapshotFromData(data)) {
                         added++;
                     }
@@ -18896,7 +18901,7 @@
 
             // Update existing or add new
             const existingIdx = tagsHistory.snapshots.findIndex(s => s.date.split('T')[0] === dateKey);
-            
+
             let totalXrp = 0;
             let totalTags = 0;
             const exchanges = {};
@@ -18940,7 +18945,7 @@
             if (confirm('Clear chart history?')) {
                 tagsHistory.snapshots = [];
                 updateHistoryCount();
-                
+
                 if (tagsHistory.charts.xrpOverTime) {
                     tagsHistory.charts.xrpOverTime.destroy();
                     tagsHistory.charts.xrpOverTime = null;
@@ -18953,7 +18958,7 @@
                     tagsHistory.charts.exchangeBalance.destroy();
                     tagsHistory.charts.exchangeBalance = null;
                 }
-                
+
                 showToast('History cleared', 'success');
             }
         }
@@ -19018,7 +19023,7 @@
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { 
+                            ticks: {
                                 color: '#94a3b8',
                                 callback: (v) => v.toFixed(1) + 'B'
                             }
@@ -19035,8 +19040,8 @@
                 const pct = ((change / first) * 100).toFixed(2);
                 const arrow = change >= 0 ? '↑' : '↓';
                 const colorClass = change >= 0 ? 'red' : 'green';  // More XRP on exchanges = bearish
-                
-                document.getElementById('xrpChartSummary').innerHTML = 
+
+                document.getElementById('xrpChartSummary').innerHTML =
                     `<span class="highlight">${(last / 1e9).toFixed(2)}B</span> XRP on exchanges | ` +
                     `<span class="${colorClass}">${arrow} ${(Math.abs(change) / 1e9).toFixed(2)}B (${pct}%)</span> since ${labels[0]}`;
             }
@@ -19092,9 +19097,9 @@
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { 
+                            ticks: {
                                 color: '#94a3b8',
-                                callback: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v
+                                callback: (v) => v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v
                             }
                         }
                     }
@@ -19109,8 +19114,8 @@
                 const pct = ((change / first) * 100).toFixed(2);
                 const arrow = change >= 0 ? '↑' : '↓';
                 const colorClass = change >= 0 ? 'green' : 'red';  // More tags = more users = bullish
-                
-                document.getElementById('tagGrowthSummary').innerHTML = 
+
+                document.getElementById('tagGrowthSummary').innerHTML =
                     `<span class="highlight">${last.toLocaleString()}</span> unique tags | ` +
                     `<span class="${colorClass}">${arrow} ${Math.abs(change).toLocaleString()} (${pct}%)</span> since ${labels[0]}`;
             }
@@ -19150,7 +19155,7 @@
             });
 
             const colors = [
-                '#23f7dd', '#22c55e', '#3b82f6', '#a855f7', 
+                '#23f7dd', '#22c55e', '#3b82f6', '#a855f7',
                 '#f97316', '#eab308', '#ef4444', '#ec4899'
             ];
 
@@ -19188,7 +19193,7 @@
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { 
+                            ticks: {
                                 color: '#94a3b8',
                                 callback: (v) => v.toFixed(1) + 'B'
                             }
@@ -19207,7 +19212,7 @@
         // Load from sheets when tags tab is activated
         let tagsHistoryLoaded = false;
         const originalSwitchMainTabForTags = switchMainTab;
-        switchMainTab = function(tabName) {
+        switchMainTab = function (tabName) {
             originalSwitchMainTabForTags(tabName);
             if (tabName === 'tags' && !tagsHistoryLoaded) {
                 tagsHistoryLoaded = true;
@@ -19219,7 +19224,7 @@
 
         // Modify the existing handleTagsFileUpload to also add to history
         const originalHandleTagsFileUpload = handleTagsFileUpload;
-        handleTagsFileUpload = async function(event) {
+        handleTagsFileUpload = async function (event) {
             await originalHandleTagsFileUpload(event);
             // After loading current data, add it to history
             setTimeout(addCurrentToHistory, 100);
