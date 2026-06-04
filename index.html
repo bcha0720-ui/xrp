@@ -3,20 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="XRP Insights">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#080c14">
     <meta name="description" content="Track XRP ETF holdings, exchange balances, and market data in real-time">
-    <title>XRP Insights - ETFs, Exchange, Crypto New, and AI Analysis </title>
+    <title>XRP Insights - ETFs, Exchange, Crypto News, and AI Analysis</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-
-    <!-- Icons for iOS and Android -->
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
@@ -31,72 +28,569 @@
         gtag('config', 'G-JFYKZKVTMZ');
     </script>
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            /* Professional Dark Theme - Midnight Blue */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --border: #334155;
+            --bg-0:#080c14; --bg-1:#0d1220; --bg-2:#111827; --bg-3:#1a2235; --bg-4:#1e2d42;
+            --border-subtle:rgba(99,179,237,.08); --border-dim:rgba(99,179,237,.14);
+            --border-med:rgba(99,179,237,.22); --border-hi:rgba(99,179,237,.35);
+            --accent:#3b82f6; --accent2:#06b6d4; --accent3:#8b5cf6;
+            --green:#10b981; --red:#f43f5e; --amber:#f59e0b; --xrp:#23f7dd;
+            --text-1:#e2e8f0; --text-2:#94a3b8; --text-3:#4b5a70; --text-4:#2d3a4f;
+            /* Legacy JS compat aliases */
+            --bg-primary:#080c14; --bg-secondary:#0d1220; --bg-card:#111827;
+            --bg-card-hover:#1a2235; --border:#1e2d42;
+            --text-primary:#e2e8f0; --text-secondary:#94a3b8; --text-muted:#4b5a70;
+            --accent-xrp:#23f7dd; --accent-xrp-dim:rgba(35,247,221,.12);
+            --accent-green:#10b981; --accent-red:#f43f5e; --accent-blue:#3b82f6;
+            --accent-purple:#8b5cf6; --accent-orange:#f97316; --accent-yellow:#f59e0b;
+            --status-loading:#f97316; --status-success:#10b981; --status-error:#f43f5e;
+            --glass-bg:rgba(13,18,32,.7); --glass-bg-light:rgba(13,18,32,.4);
+            --glass-border:rgba(99,179,237,.1); --glass-shadow:0 8px 32px rgba(0,0,0,.5);
+            --glass-blur:12px;
+            --font-sans:'Space Grotesk',system-ui,sans-serif;
+            --font-mono:'Space Mono','Courier New',monospace;
+            --r-sm:6px; --r-md:8px; --r-lg:12px; --r-xl:16px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+        html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+        body{font-family:var(--font-sans);background:var(--bg-0);color:var(--text-1);min-height:100vh;overflow-x:hidden;touch-action:manipulation;overscroll-behavior-y:contain;}
+        .glass{background:var(--bg-1);border:1px solid var(--border-dim);}
+        .glass-light{background:rgba(13,18,32,.5);border:1px solid var(--border-subtle);}
+        .glass-accent{background:linear-gradient(135deg,rgba(35,247,221,.07),rgba(139,92,246,.07));border:1px solid rgba(35,247,221,.18);}
 
-            /* Text Colors - WCAG AA Compliant */
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
+        /* APP SHELL */
+        .app-layout{display:flex;flex-direction:column;min-height:100vh;}
 
-            /* Accent Colors */
-            --accent-xrp: #23f7dd;
-            --accent-xrp-dim: rgba(35, 247, 221, 0.15);
-            --accent-green: #22c55e;
-            --accent-red: #ef4444;
-            --accent-blue: #3b82f6;
-            --accent-purple: #a855f7;
-            --accent-orange: #f97316;
-            --accent-yellow: #eab308;
+        /* TOPBAR */
+        .topbar{position:sticky;top:0;z-index:200;height:56px;background:var(--bg-1);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:0;padding:0 16px;}
+        .topbar-logo{display:flex;align-items:center;gap:10px;margin-right:20px;text-decoration:none;flex-shrink:0;}
+        .topbar-logo-icon{width:28px;height:28px;flex-shrink:0;}
+        .topbar-logo-text{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--xrp);letter-spacing:.04em;white-space:nowrap;}
+        .topbar-price{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-md);padding:5px 12px;margin-right:12px;flex-shrink:0;}
+        .topbar-price-label{font-size:10px;color:var(--text-2);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+        .topbar-price-value{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--green);}
+        .ticker-strip{flex:1;overflow:hidden;height:100%;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent 0%,black 6%,black 94%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,black 6%,black 94%,transparent 100%);}
+        .ticker-track{display:inline-flex;animation:tickerScroll 30s linear infinite;white-space:nowrap;will-change:transform;}
+        .ticker-track:hover{animation-play-state:paused;}
+        @keyframes tickerScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+        .ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 18px;font-size:11px;font-family:var(--font-mono);height:56px;}
+        .ticker-symbol{font-weight:700;color:var(--xrp);}
+        .ticker-price{color:var(--text-1);}
+        .ticker-change{padding:1px 5px;border-radius:4px;font-size:10px;font-weight:500;}
+        .ticker-change.positive{background:rgba(16,185,129,.15);color:var(--green);}
+        .ticker-change.negative{background:rgba(244,63,94,.15);color:var(--red);}
+        .ticker-divider{color:var(--border-med);}
+        .topbar-actions{display:flex;align-items:center;gap:8px;margin-left:12px;flex-shrink:0;}
+        .topbar-btn{display:flex;align-items:center;gap:5px;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-2);font-family:var(--font-sans);font-size:11px;font-weight:500;padding:6px 10px;border-radius:var(--r-md);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s;text-decoration:none;}
+        .topbar-btn:hover{border-color:var(--border-med);color:var(--text-1);}
+        .topbar-btn.accent{background:rgba(35,247,221,.07);border-color:rgba(35,247,221,.2);color:var(--xrp);}
 
-            /* Status Colors */
-            --status-loading: #f97316;
-            --status-success: #22c55e;
-            --status-error: #ef4444;
+        /* BODY LAYOUT */
+        .body-layout{display:flex;flex:1;min-height:0;}
 
-            /* Glassmorphism */
-            --glass-bg: rgba(30, 41, 59, 0.6);
-            --glass-bg-light: rgba(30, 41, 59, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --glass-blur: 12px;
+        /* SIDEBAR */
+        .sidebar{width:220px;flex-shrink:0;background:var(--bg-1);border-right:1px solid var(--border-dim);display:flex;flex-direction:column;padding:12px 10px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+        .sidebar-section-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:12px 8px 5px;}
+        .sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-md);font-size:12.5px;font-weight:400;color:var(--text-2);cursor:pointer;border:1px solid transparent;transition:all .15s;background:transparent;text-align:left;width:100%;}
+        .sidebar-item:hover{background:var(--bg-2);color:var(--text-1);}
+        .sidebar-item.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.18);color:var(--accent);font-weight:500;}
+        .sidebar-item-icon{font-size:14px;width:18px;text-align:center;opacity:.8;flex-shrink:0;}
+        .sidebar-item-label{flex:1;}
+        .sidebar-badge{font-size:9px;font-family:var(--font-mono);padding:2px 5px;border-radius:4px;background:rgba(59,130,246,.12);color:var(--accent);}
+        .sidebar-badge.live{background:rgba(16,185,129,.12);color:var(--green);}
+        .sidebar-badge.amber{background:rgba(245,158,11,.12);color:var(--amber);}
+        .sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);}
+        .sidebar-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-md);background:rgba(35,247,221,.05);border:1px solid rgba(35,247,221,.12);color:var(--xrp);font-size:11px;text-decoration:none;margin-bottom:6px;transition:border-color .15s;}
+        .sidebar-link:hover{border-color:rgba(35,247,221,.25);}
+        .settings-trigger{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-md);font-size:12.5px;font-weight:400;color:var(--text-2);cursor:pointer;border:1px solid transparent;transition:all .15s;background:transparent;width:100%;text-align:left;}
+        .settings-trigger:hover{background:var(--bg-2);color:var(--text-1);}
+
+        /* CONTENT AREA */
+        .content-area{flex:1;min-width:0;overflow-y:auto;}
+
+        /* DASHBOARD OVERVIEW */
+        .dashboard-overview{padding:16px 20px 0;}
+        .dashboard-overview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .dashboard-overview-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-2);letter-spacing:.02em;}
+        .xrp-mini-logo{width:20px;height:20px;flex-shrink:0;}
+        .header-buttons{display:flex;align-items:center;gap:8px;}
+        .language-switcher{display:flex;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:2px;gap:2px;}
+        .lang-btn{font-size:10px;font-weight:500;color:var(--text-3);background:transparent;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;transition:all .15s;}
+        .lang-btn.active{background:var(--bg-3);color:var(--xrp);}
+        .help-button{font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:5px 10px;border-radius:var(--r-md);text-decoration:none;transition:color .15s;}
+        .help-button:hover{color:var(--text-1);}
+        .header-theme-toggle{background:var(--bg-2);border:1px solid var(--border-dim);color:var(--text-2);padding:5px 8px;border-radius:var(--r-md);cursor:pointer;font-size:14px;}
+
+        .daily-summary-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+        .summary-item{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s;}
+        .summary-item:hover{background:var(--bg-3);border-color:var(--border-med);}
+        .summary-item-header{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
+        .summary-item-icon{font-size:12px;}
+        .summary-item-value{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:2px;}
+        .summary-item-value.positive{color:var(--green);}
+        .summary-item-value.negative{color:var(--red);}
+        .summary-item-subtitle{font-size:10px;color:var(--text-3);margin-bottom:4px;}
+        .summary-item-link{font-size:10px;color:var(--accent);opacity:.7;}
+
+        .dashboard-grid{display:grid;grid-template-columns:1fr 180px;gap:12px;margin-bottom:12px;}
+        .dashboard-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .dashboard-metric{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;position:relative;overflow:hidden;}
+        .dashboard-metric::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2);opacity:.5;}
+        .dashboard-metric-label{font-size:10px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+        .dashboard-metric-value{font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-1);line-height:1.1;}
+        .dashboard-metric-value.animated{color:var(--xrp);}
+        .dashboard-metric-change{font-size:10px;color:var(--text-3);margin-top:4px;display:flex;align-items:center;gap:3px;}
+        .dashboard-metric-change.positive{color:var(--green);}
+        .dashboard-metric-change.negative{color:var(--red);}
+        .dashboard-pie-container{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+        .dashboard-pie-chart{width:100px;height:100px;}
+        .dashboard-pie-legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+        .pie-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-2);}
+        .pie-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+        .dashboard-secondary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+        .dashboard-metric-small{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+        .dashboard-metric-small.burn{border-color:rgba(244,63,94,.2);}
+        .dashboard-metric-icon{font-size:18px;flex-shrink:0;}
+        .dashboard-metric-info{min-width:0;}
+        .dashboard-metric-value.small{font-family:var(--font-mono);font-size:14px;font-weight:700;}
+
+        /* TAB BAR */
+        .main-tabs{display:flex;gap:0;background:var(--bg-1);border-bottom:1px solid var(--border-dim);padding:0 16px;overflow-x:auto;scrollbar-width:none;position:sticky;top:56px;z-index:100;}
+        .main-tabs::-webkit-scrollbar{display:none;}
+        .main-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:42px;font-family:var(--font-sans);font-size:12px;font-weight:500;color:var(--text-3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;letter-spacing:.02em;}
+        .main-tab:hover{color:var(--text-2);}
+        .main-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+        .main-tab-icon{font-size:13px;}
+
+        /* TAB CONTENT */
+        .tab-content{display:none;}
+        .tab-content.active{display:block;}
+
+        /* CONTROLS */
+        .controls{display:flex;align-items:center;gap:6px;padding:12px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-1);flex-wrap:wrap;}
+        .btn{font-family:var(--font-sans);font-size:12px;font-weight:500;color:var(--text-2);background:var(--bg-2);border:1px solid var(--border-dim);padding:6px 12px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+        .btn:hover{background:var(--bg-3);border-color:var(--border-med);color:var(--text-1);}
+        .btn.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .btn-refresh{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:var(--accent);}
+        .btn-refresh:hover{background:rgba(59,130,246,.15);}
+        .btn-chart{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);color:var(--accent3);}
+
+        /* MAIN CONTENT */
+        #mainContent{padding:16px 20px;}
+        .loading-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:12px;}
+        .loading-text{font-size:12px;color:var(--text-3);font-family:var(--font-mono);}
+        .spinner{width:28px;height:28px;border:2px solid var(--border-dim);border-top-color:var(--xrp);border-radius:50%;animation:spin .7s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        /* ETF CARDS */
+        .etf-group{margin-bottom:24px;}
+        .etf-group-title{font-size:11px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);padding:0 0 8px;border-bottom:1px solid var(--border-subtle);margin-bottom:10px;}
+        .etf-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
+        .etf-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;}
+        .etf-card:hover{background:var(--bg-3);border-color:var(--border-med);}
+        .etf-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+        .etf-symbol{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--xrp);}
+        .etf-change-badge{font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:5px;font-weight:700;}
+        .etf-change-badge.positive{background:rgba(16,185,129,.12);color:var(--green);}
+        .etf-change-badge.negative{background:rgba(244,63,94,.12);color:var(--red);}
+        .etf-name{font-size:11px;color:var(--text-2);margin-bottom:10px;}
+        .etf-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+        .etf-stat-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;}
+        .etf-stat-value{font-size:12px;font-family:var(--font-mono);font-weight:600;color:var(--text-1);margin-top:2px;}
+
+        /* HOLDINGS TAB */
+        .holdings-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:16px 20px;border-bottom:1px solid var(--border-subtle);}
+        .summary-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;}
+        .summary-card.highlight{border-color:rgba(35,247,221,.2);background:rgba(35,247,221,.04);}
+        .summary-label{font-size:10px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+        .summary-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-1);}
+        .summary-value.accent{color:var(--xrp);}
+        .summary-value.positive{color:var(--green);}
+        .summary-value.negative{color:var(--red);}
+        .holdings-chart-container{padding:16px 20px;border-bottom:1px solid var(--border-subtle);}
+        .chart-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+        .chart-section-title{font-size:12px;font-weight:600;color:var(--text-2);font-family:var(--font-mono);letter-spacing:.04em;text-transform:uppercase;}
+        .chart-type-btns{display:flex;gap:2px;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:2px;}
+        .chart-type-btn{font-size:10px;color:var(--text-3);background:transparent;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;transition:all .15s;}
+        .chart-type-btn.active{background:var(--bg-3);color:var(--accent2);}
+        #holdingsChart{max-height:280px;}
+        #holdingsPieChart{max-height:260px;}
+        .historical-section{padding:16px 20px;}
+        .historical-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .historical-section-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+        .period-buttons{display:flex;gap:2px;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:2px;}
+        .period-btn{font-size:10px;color:var(--text-3);background:transparent;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;transition:all .15s;}
+        .period-btn.active{background:var(--bg-3);color:var(--accent2);}
+        .holdings-table-wrapper{padding:0 20px 16px;overflow-x:auto;}
+        .holdings-table{width:100%;border-collapse:collapse;font-size:12px;}
+        .holdings-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border-dim);background:var(--bg-1);white-space:nowrap;}
+        .holdings-table td{padding:8px 12px;border-bottom:1px solid var(--border-subtle);color:var(--text-2);font-family:var(--font-mono);font-size:11px;white-space:nowrap;}
+        .holdings-table tr:hover td{background:var(--bg-2);}
+        .holdings-table .positive{color:var(--green);}
+        .holdings-table .negative{color:var(--red);}
+        .holdings-table .neutral{color:var(--text-3);}
+        .holdings-table .date-cell{color:var(--text-2);font-weight:500;}
+        .holdings-table .total-cell{color:var(--xrp);font-weight:700;}
+        .chart-actions{display:flex;gap:6px;}
+        .btn-export,.btn-fullscreen{font-size:10px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:4px 8px;border-radius:var(--r-sm);cursor:pointer;transition:color .15s;}
+        .btn-export:hover,.btn-fullscreen:hover{color:var(--text-1);}
+
+        /* EXCHANGE TAB */
+        .exchange-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:16px 20px;border-bottom:1px solid var(--border-subtle);}
+        .exchange-stat-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;}
+        .exchange-stat-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+        .exchange-stat-value{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text-1);}
+        .exchange-stat-value.accent{color:var(--xrp);}
+        .exchange-controls{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+        .exchange-status{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--font-mono);}
+        .exchange-status-dot{width:6px;height:6px;border-radius:50%;background:var(--text-3);}
+        .exchange-status-dot.live{background:var(--green);animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+        .exchange-note{font-size:10px;color:var(--text-3);padding:8px 20px;font-family:var(--font-mono);}
+        .exchange-table-wrapper{padding:0 20px 16px;overflow-x:auto;}
+        .exchange-table-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px;}
+        .exchange-table-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+        .exchange-count{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
+
+        /* ANALYTICS TAB */
+        .analytics-controls{display:flex;align-items:center;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+        .analytics-kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:14px 20px;border-bottom:1px solid var(--border-subtle);}
+        .analytics-kpi{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;}
+        .analytics-kpi-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+        .analytics-kpi-value{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--text-1);}
+        .analytics-kpi-value.positive{color:var(--green);}
+        .analytics-kpi-value.negative{color:var(--red);}
+        .analytics-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px 20px;}
+        .analytics-chart-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px;}
+        .analytics-chart-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+
+        /* WHALE TAB */
+        .whale-kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:14px 20px;border-bottom:1px solid var(--border-subtle);}
+        .whale-kpi{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;}
+        .whale-kpi-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+        .whale-kpi-value{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--text-1);}
+        .whale-controls{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+        .whale-table-wrapper{padding:0 20px 16px;overflow-x:auto;}
+        .whale-table{width:100%;border-collapse:collapse;font-size:12px;}
+        .whale-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border-dim);background:var(--bg-1);}
+        .whale-table td{padding:8px 12px;border-bottom:1px solid var(--border-subtle);color:var(--text-2);font-family:var(--font-mono);font-size:11px;}
+        .whale-table tr:hover td{background:var(--bg-2);}
+        .concentration-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;border-bottom:1px solid var(--border-subtle);}
+        .conc-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:10px 12px;text-align:center;}
+        .conc-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;}
+        .conc-value{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--xrp);margin-top:3px;}
+        .whale-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 20px;}
+        .whale-chart-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px;}
+        .whale-chart-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .activity-feed{padding:12px 20px;border-top:1px solid var(--border-subtle);}
+        .activity-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+        .activity-item{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-subtle);font-size:11px;color:var(--text-2);}
+        .activity-item:last-child{border-bottom:none;}
+        .whale-note{font-size:10px;color:var(--text-3);padding:8px 20px;font-family:var(--font-mono);border-top:1px solid var(--border-subtle);}
+
+        /* NEWS TAB */
+        .news-header{padding:14px 20px;border-bottom:1px solid var(--border-dim);}
+        .news-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .news-title{font-size:14px;font-weight:600;color:var(--text-1);}
+        .news-subtitle{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
+        .news-filter-tabs{display:flex;gap:4px;}
+        .news-filter-btn{font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:4px 10px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
+        .news-filter-btn.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .news-insight-banner{margin:12px 20px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:var(--r-lg);padding:14px 16px;}
+        .news-insight-label{font-size:9px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent3);margin-bottom:6px;}
+        .news-insight-value{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:4px;}
+        .news-insight-sub{font-size:11px;color:var(--text-2);}
+        .news-events-section{padding:12px 20px;border-bottom:1px solid var(--border-subtle);}
+        .news-events-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+        .news-ai-section{padding:12px 20px;border-bottom:1px solid var(--border-subtle);}
+        .news-ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .news-ai-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+        .news-headlines-section{padding:12px 20px;}
+        .news-headlines-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .news-headlines-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+        .news-load-more{display:block;width:100%;text-align:center;margin-top:10px;}
+        .news-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:8px;transition:border-color .15s;}
+        .news-card:hover{border-color:var(--border-med);}
+
+        /* AI INSIGHTS TAB */
+        .insights-content{padding:16px 20px;}
+        .insights-refresh-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+        .xrpl-panel{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .xrpl-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+        .xrpl-panel-title{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--font-mono);font-weight:700;color:var(--xrp);text-transform:uppercase;letter-spacing:.05em;}
+        .xrpl-status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-3);}
+        .xrpl-status-dot.connected{background:var(--green);animation:pulse 2s infinite;}
+        .xrpl-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+        .xrpl-metric{background:var(--bg-3);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;}
+        .xrpl-metric-icon{font-size:16px;margin-bottom:4px;}
+        .xrpl-metric-value{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text-1);}
+        .xrpl-metric-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;margin-top:2px;}
+        .xrpl-tx-feed{background:var(--bg-3);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;max-height:160px;overflow-y:auto;}
+        .xrpl-tx-title{font-size:9px;font-family:var(--font-mono);color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+        .portfolio-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .portfolio-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
+        .portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+        .portfolio-input-group{display:flex;flex-direction:column;gap:4px;}
+        .portfolio-input-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;}
+        .portfolio-input{background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-1);font-family:var(--font-mono);font-size:12px;padding:7px 10px;border-radius:var(--r-md);outline:none;transition:border-color .15s;}
+        .portfolio-input:focus{border-color:var(--border-med);}
+        .portfolio-results{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+        .portfolio-result{background:var(--bg-3);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;}
+        .portfolio-result-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;}
+        .portfolio-result-value{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text-1);}
+        .portfolio-result-value.positive{color:var(--green);}
+        .portfolio-result-value.negative{color:var(--red);}
+        .briefing-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .briefing-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+        .briefing-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+        .briefing-stats-row{display:flex;gap:16px;margin-bottom:12px;}
+        .briefing-stat{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);font-family:var(--font-mono);}
+        .sentiment-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .sentiment-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .sentiment-scale{display:flex;gap:4px;margin-bottom:6px;}
+        .sentiment-btn{flex:1;font-size:10px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-dim);padding:5px;border-radius:var(--r-sm);cursor:pointer;text-align:center;transition:all .15s;}
+        .sentiment-btn.bullish.active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:var(--green);}
+        .sentiment-btn.neutral.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:var(--amber);}
+        .sentiment-btn.bearish.active{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.25);color:var(--red);}
+        .scenarios-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .scenarios-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .scenarios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+        .scenario-card{background:var(--bg-3);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:12px;}
+        .scenario-badge{font-size:9px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
+        .scenario-badge.bull{background:rgba(16,185,129,.12);color:var(--green);}
+        .scenario-badge.base{background:rgba(6,182,212,.12);color:var(--accent2);}
+        .scenario-badge.bear{background:rgba(244,63,94,.12);color:var(--red);}
+        .scenario-range{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text-1);margin:4px 0;}
+        .scenario-desc{font-size:10px;color:var(--text-3);line-height:1.4;}
+        .scenario-prob{font-size:9px;color:var(--text-3);font-family:var(--font-mono);margin-top:5px;}
+        .technical-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .technical-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .price-levels-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-family:var(--font-mono);font-size:11px;}
+        .price-level-support{color:var(--green);}
+        .price-level-current{color:var(--xrp);font-weight:700;}
+        .price-level-resistance{color:var(--red);}
+        .price-bar-track{flex:1;height:4px;background:var(--bg-3);border-radius:2px;position:relative;}
+        .price-bar-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--green),var(--xrp));border-radius:2px;}
+        .ai-analysis-text{font-size:12px;color:var(--text-2);line-height:1.7;}
+        .ai-analysis-text strong{color:var(--text-1);font-weight:600;}
+        .moving-averages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+        .ma-card{background:var(--bg-3);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:10px 12px;}
+        .ma-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;}
+        .ma-value{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text-1);margin-top:3px;}
+        .ma-signal{font-size:10px;color:var(--green);}
+        .key-metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+        .key-metric-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;}
+        .key-metric-icon{font-size:18px;margin-bottom:4px;}
+        .key-metric-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;}
+        .key-metric-value{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text-1);margin-top:3px;}
+        .key-metric-sub{font-size:9px;color:var(--text-3);margin-top:2px;}
+        .etf-rec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+        .etf-rec-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;}
+        .etf-rec-badge{display:inline-block;font-size:9px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:rgba(6,182,212,.1);color:var(--accent2);margin-bottom:6px;}
+        .etf-rec-ticker{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--xrp);}
+        .etf-rec-name{font-size:11px;color:var(--text-2);margin-bottom:5px;}
+        .etf-rec-desc{font-size:11px;color:var(--text-3);line-height:1.5;}
+        .etf-compare-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .etf-compare-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .compare-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+        .compare-tab{font-size:10px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-dim);padding:4px 8px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;}
+        .compare-tab.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .compare-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .compare-metric{background:var(--bg-3);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;}
+        .compare-metric-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;}
+        .compare-metric-row{display:flex;justify-content:space-between;margin-top:4px;}
+        .compare-metric-val{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text-1);}
+        .report-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
+        .report-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+        .report-sections{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+        .report-section-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2);padding:5px 8px;background:var(--bg-3);border-radius:var(--r-sm);}
+        .report-check{color:var(--green);font-size:12px;}
+
+        /* TAGS TAB */
+        .tags-dashboard-section{padding:16px 20px;}
+        .tags-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .tags-header h3{font-size:13px;font-weight:600;color:var(--text-1);display:flex;align-items:center;gap:6px;}
+        .tags-upload-section{display:flex;align-items:center;gap:8px;}
+        .tags-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+        .tags-kpi{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;}
+        .tags-kpi-icon{font-size:18px;margin-bottom:4px;}
+        .tags-kpi-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;}
+        .tags-kpi-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-1);margin-top:3px;}
+        .tags-charts-section{margin-bottom:14px;}
+        .tags-charts-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+        .tags-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+        .tags-exchange-section{margin-bottom:14px;}
+        .tags-exchange-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+        .exchange-overview-empty{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:32px;text-align:center;}
+        .exchange-overview-empty-icon{font-size:32px;margin-bottom:8px;}
+        .exchange-overview-empty-text{font-size:12px;color:var(--text-3);}
+        .tags-table-section{margin-bottom:14px;}
+        .tags-table-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+        .tags-filter-select{background:var(--bg-2);border:1px solid var(--border-dim);color:var(--text-2);font-size:11px;padding:5px 8px;border-radius:var(--r-md);outline:none;font-family:var(--font-sans);}
+        .tags-filter-input{background:var(--bg-2);border:1px solid var(--border-dim);color:var(--text-1);font-size:11px;font-family:var(--font-mono);padding:5px 10px;border-radius:var(--r-md);outline:none;flex:1;}
+        .tags-table{width:100%;border-collapse:collapse;font-size:11px;}
+        .tags-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border-dim);background:var(--bg-1);}
+        .tags-table td{padding:7px 10px;border-bottom:1px solid var(--border-subtle);color:var(--text-2);font-family:var(--font-mono);}
+        .tags-pagination{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;}
+        .tags-history-section{margin-bottom:14px;}
+        .tags-history-title{font-size:11px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+        .tags-history-controls{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+        .tags-history-count{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
+
+        /* CHAT WIDGET */
+        .chat-toggle-btn{position:fixed;bottom:24px;right:24px;width:46px;height:46px;background:var(--bg-2);border:1px solid var(--border-med);border-radius:50%;font-size:18px;cursor:pointer;z-index:300;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .15s,border-color .15s;}
+        .chat-toggle-btn:hover{transform:scale(1.08);border-color:var(--border-hi);}
+        .chat-toggle-btn.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);}
+        .chat-widget{position:fixed;bottom:78px;right:24px;width:320px;max-height:480px;background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:300;display:none;flex-direction:column;overflow:hidden;}
+        .chat-widget.open{display:flex;}
+        .chat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-dim);background:var(--bg-2);}
+        .chat-header-icon{font-size:18px;}
+        .chat-header-title{font-size:13px;font-weight:600;color:var(--text-1);}
+        .chat-header-subtitle{font-size:10px;color:var(--text-3);}
+        .chat-close-btn{margin-left:auto;background:none;border:none;color:var(--text-3);font-size:18px;cursor:pointer;padding:0 4px;}
+        .chat-close-btn:hover{color:var(--text-1);}
+        .chat-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+        .chat-message{font-size:12px;line-height:1.6;max-width:88%;}
+        .chat-message.assistant{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:8px 8px 8px 2px;padding:8px 10px;color:var(--text-2);}
+        .chat-message.user{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:8px 8px 2px 8px;padding:8px 10px;color:var(--text-1);align-self:flex-end;}
+        .chat-message.typing{opacity:.6;}
+        .chat-suggestions{display:flex;gap:4px;padding:6px 12px;flex-wrap:wrap;border-top:1px solid var(--border-subtle);}
+        .chat-suggestion{font-size:10px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:4px 8px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
+        .chat-suggestion:hover{color:var(--text-1);border-color:var(--border-med);}
+        .chat-input-area{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border-dim);background:var(--bg-2);}
+        .chat-input{flex:1;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-1);font-family:var(--font-sans);font-size:12px;padding:7px 10px;border-radius:var(--r-md);outline:none;}
+        .chat-input:focus{border-color:var(--border-med);}
+        .chat-send-btn{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--accent);padding:7px 12px;border-radius:var(--r-md);font-size:13px;cursor:pointer;transition:background .15s;}
+        .chat-send-btn:hover{background:rgba(59,130,246,.2);}
+
+        /* MODALS */
+        .settings-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center;}
+        .settings-modal.active{display:flex;}
+        .settings-panel{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:20px;width:360px;max-height:80vh;overflow-y:auto;}
+        .settings-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .settings-header h2{font-size:14px;font-weight:600;color:var(--text-1);}
+        .settings-close{background:none;border:none;color:var(--text-3);font-size:18px;cursor:pointer;}
+        .settings-close:hover{color:var(--text-1);}
+        .settings-section{margin-bottom:14px;}
+        .settings-section h3{font-size:11px;font-family:var(--font-mono);color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+        .widget-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-subtle);font-size:12px;color:var(--text-2);}
+        .widget-toggle:last-child{border-bottom:none;}
+        .widget-toggle-label{display:flex;align-items:center;gap:6px;}
+        .toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0;}
+        .toggle-switch input{display:none;}
+        .toggle-slider{position:absolute;inset:0;background:var(--bg-3);border:1px solid var(--border-dim);border-radius:10px;cursor:pointer;transition:background .2s;}
+        .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;top:2px;left:2px;background:var(--text-3);border-radius:50%;transition:transform .2s,background .2s;}
+        .toggle-switch input:checked+.toggle-slider{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.4);}
+        .toggle-switch input:checked+.toggle-slider::before{transform:translateX(16px);background:var(--green);}
+        .chart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;}
+        .chart-overlay.active{display:flex;}
+        .chart-modal{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:20px;width:680px;max-width:95vw;}
+        .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+        .chart-header h2{font-size:14px;font-weight:600;color:var(--text-1);}
+        .chart-close{background:none;border:none;color:var(--text-3);font-size:22px;cursor:pointer;}
+        .chart-close:hover{color:var(--text-1);}
+        .chart-controls,.chart-period-controls{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
+        .chart-tab,.chart-period{font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:5px 10px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
+        .chart-tab.active,.chart-period.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .chart-loading{display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px;}
+        .chart-container{position:relative;height:320px;}
+        .chart-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text-2);}
+        .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;}
+        .popup-overlay.active{display:flex;}
+        .popup-modal{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:28px 24px;width:320px;text-align:center;position:relative;}
+        .popup-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-3);font-size:20px;cursor:pointer;}
+        .popup-icon{font-size:32px;margin-bottom:8px;}
+        .popup-title{font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:6px;}
+        .popup-text{font-size:12px;color:var(--text-2);margin-bottom:14px;}
+        .popup-follow-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(35,247,221,.08);border:1px solid rgba(35,247,221,.25);color:var(--xrp);font-size:13px;font-weight:600;padding:10px 16px;border-radius:var(--r-lg);text-decoration:none;margin-bottom:8px;transition:background .15s;}
+        .popup-follow-btn:hover{background:rgba(35,247,221,.15);}
+        .popup-x-icon{font-size:16px;}
+        .popup-later{background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer;}
+        .fullscreen-chart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;}
+        .fullscreen-chart-overlay.active{display:flex;}
+        .fullscreen-chart-container{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:24px;width:90vw;max-width:1100px;position:relative;}
+        .fullscreen-chart-close{position:absolute;top:14px;right:16px;background:var(--bg-2);border:1px solid var(--border-dim);color:var(--text-2);font-size:18px;width:30px;height:30px;border-radius:var(--r-md);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .fullscreen-chart-canvas{position:relative;height:60vh;}
+
+        /* MISC */
+        .offline-indicator{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg-2);border-top:1px solid var(--border-dim);color:var(--text-3);font-size:11px;font-family:var(--font-mono);padding:8px 16px;z-index:200;}
+        .install-banner{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin:10px 16px;cursor:pointer;}
+        .install-banner.hidden{display:none;}
+        .install-banner-content{display:flex;align-items:center;gap:10px;}
+        .install-banner-icon{font-size:20px;}
+        .install-banner-text h4{font-size:12px;font-weight:600;color:var(--text-1);}
+        .install-banner-text p{font-size:10px;color:var(--text-3);}
+        .install-banner-btn{background:rgba(35,247,221,.08);border:1px solid rgba(35,247,221,.2);color:var(--xrp);font-size:11px;font-weight:500;padding:6px 12px;border-radius:var(--r-md);cursor:pointer;}
+        .install-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;}
+        .install-modal-overlay.active{display:flex;}
+        .install-modal{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:20px;width:360px;}
+        .install-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .install-modal-header h3{font-size:14px;font-weight:600;color:var(--text-1);}
+        .install-modal-close{background:none;border:none;color:var(--text-3);font-size:20px;cursor:pointer;}
+        .install-platform{margin-bottom:14px;}
+        .install-platform h4{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:8px;}
+        .install-steps{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
+        .install-steps li{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--text-2);}
+        .step-number{width:18px;height:18px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);color:var(--accent);border-radius:50%;font-size:9px;font-family:var(--font-mono);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .bg-grid{display:none;}
+        .bg-glow{display:none;}
+        .container{flex:1;display:flex;flex-direction:column;min-height:0;}
+        .price-ticker{display:none;}
+        select,input[type="number"],input[type="text"]{background:var(--bg-2);border:1px solid var(--border-dim);color:var(--text-1);font-family:var(--font-sans);font-size:11px;padding:6px 10px;border-radius:var(--r-md);outline:none;}
+        select:focus,input:focus{border-color:var(--border-med);}
+        a{color:var(--accent);}
+        a:hover{color:var(--accent2);}
+        .status{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--font-mono);color:var(--text-3);}
+        .status-dot{width:6px;height:6px;border-radius:50%;background:var(--text-4);}
+        .status-dot.live{background:var(--green);animation:pulse 2s infinite;}
+        .last-updated{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
+        .auto-refresh-info{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
+        .wallet-details-table{overflow-x:auto;margin-top:8px;}
+        .install-mini{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--xrp);cursor:pointer;background:rgba(35,247,221,.06);border:1px solid rgba(35,247,221,.15);padding:4px 8px;border-radius:var(--r-md);}
+        .twitter-handle,.site-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--xrp);text-decoration:none;background:rgba(35,247,221,.05);border:1px solid rgba(35,247,221,.12);padding:5px 10px;border-radius:var(--r-md);transition:border-color .15s;}
+        .twitter-handle:hover,.site-link:hover{border-color:rgba(35,247,221,.25);}
+        .twitter-icon,.site-link-icon{font-size:14px;}
+        .twitter-name,.twitter-user,.site-link-name,.site-link-desc{font-size:10px;}
+        ::-webkit-scrollbar{width:5px;height:5px;}
+        ::-webkit-scrollbar-track{background:var(--bg-0);}
+        ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:3px;}
+        ::-webkit-scrollbar-thumb:hover{background:var(--border-med);}
+
+        /* RESPONSIVE */
+        @media(max-width:900px){
+            .sidebar{display:none;}
+            .body-layout{flex-direction:column;}
+            .dashboard-metrics{grid-template-columns:repeat(2,1fr);}
+            .daily-summary-banner{grid-template-columns:repeat(2,1fr);}
+            .analytics-chart-grid,.whale-charts-grid{grid-template-columns:1fr;}
+            .scenarios-grid{grid-template-columns:1fr;}
+            .xrpl-metrics{grid-template-columns:repeat(2,1fr);}
+        }
+        @media(max-width:600px){
+            .topbar-logo-text{display:none;}
+            .topbar-price-label{display:none;}
+            .dashboard-metrics,.dashboard-secondary-grid,.key-metrics-grid{grid-template-columns:1fr 1fr;}
+            .etf-rec-grid{grid-template-columns:1fr;}
+            .concentration-grid,.tags-kpi-row{grid-template-columns:repeat(2,1fr);}
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* Status footer */
+        .status-footer{background:var(--bg-1);border-top:1px solid var(--border-subtle);padding:6px 20px;display:flex;align-items:center;gap:20px;font-family:var(--font-mono);font-size:10px;color:var(--text-3);flex-shrink:0;}
+        .status-footer-item{display:flex;align-items:center;gap:5px;}
+        .status-footer-dot{width:5px;height:5px;border-radius:50%;background:var(--text-4);}
+        .status-footer-dot.live{background:var(--green);animation:pulse 2s infinite;}
+        .status-footer-right{margin-left:auto;display:flex;gap:16px;}
+    </style>
 
-        /* Smooth scrolling and touch improvements */
-        html {
-            scroll-behavior: smooth;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        body {
-            touch-action: manipulation;
-            overscroll-behavior-y: contain;
-        }
-
-        /* Glassmorphism Base Styles */
-        .glass {
-            background: var(--glass-bg);
+    <!-- Original component styles (news, analytics, whale, etc.) -->
+    <style>
+        /* ===== COMPAT: Original component CSS ===== */
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
@@ -7224,301 +7718,399 @@
         .widget-hidden {
             display: none !important;
         }
+
+    </style>
+    <!-- Layout overrides: new design wins over compat CSS -->
+    <style>
+        /* ===== OVERRIDES: new layout takes priority ===== */
+
+        /* Hide original header, footer, legacy sidebar, old tab bar */
+        header { display: none !important; }
+        footer { display: none !important; }
+        .price-ticker { display: none !important; }
+
+        /* Topbar — restore our design */
+        .topbar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 200 !important;
+            height: 56px !important;
+            background: var(--bg-1) !important;
+            border-bottom: 1px solid var(--border-dim) !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 16px !important;
+            margin-bottom: 0 !important;
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+        }
+
+        /* Dashboard overview — remove original teal border box */
+        .dashboard-overview {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 16px 20px 0 !important;
+            margin-bottom: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .dashboard-overview::before { display: none !important; }
+
+        /* Main tab bar — restore our slim sticky bar */
+        .main-tabs {
+            display: flex !important;
+            gap: 0 !important;
+            background: var(--bg-1) !important;
+            border-bottom: 1px solid var(--border-dim) !important;
+            border-radius: 0 !important;
+            padding: 0 16px !important;
+            margin-bottom: 0 !important;
+            border: none !important;
+            border-bottom: 1px solid var(--border-dim) !important;
+            position: sticky !important;
+            top: 56px !important;
+            z-index: 100 !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            flex-wrap: wrap !important;
+        }
+        .main-tab {
+            flex: 0 0 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            padding: 0 14px !important;
+            height: 42px !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            color: var(--text-3) !important;
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 2px solid transparent !important;
+            border-radius: 0 !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            transition: color .15s, border-color .15s !important;
+            justify-content: flex-start !important;
+        }
+        .main-tab:hover { background: transparent !important; color: var(--text-2) !important; }
+        .main-tab.active {
+            background: transparent !important;
+            color: var(--accent2) !important;
+            border-bottom: 2px solid var(--accent2) !important;
+        }
+
+        /* Body layout — sidebar + content */
+        .body-layout {
+            display: flex !important;
+            flex: 1 !important;
+            min-height: 0 !important;
+        }
+        .sidebar {
+            width: 220px !important;
+            flex-shrink: 0 !important;
+            background: var(--bg-1) !important;
+            border-right: 1px solid var(--border-dim) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 12px 10px !important;
+            position: sticky !important;
+            top: 56px !important;
+            height: calc(100vh - 56px) !important;
+            overflow-y: auto !important;
+        }
+        .content-area {
+            flex: 1 !important;
+            min-width: 0 !important;
+            overflow-y: auto !important;
+        }
+
+        /* Status footer */
+        .status-footer {
+            background: var(--bg-1) !important;
+            border-top: 1px solid var(--border-subtle) !important;
+            padding: 6px 20px !important;
+            font-size: 10px !important;
+            color: var(--text-3) !important;
+        }
+
+        /* Hide Yahoo Finance footer text everywhere */
+        footer, .data-footer, .yahoo-footer { display: none !important; }
+
+        /* Summary cards — restore our card style */
+        .summary-item {
+            background: var(--bg-2) !important;
+            border: 1px solid var(--border-dim) !important;
+            border-radius: var(--r-lg) !important;
+            padding: 12px 14px !important;
+            cursor: pointer !important;
+            transition: border-color .15s, background .15s !important;
+            box-shadow: none !important;
+        }
+        .summary-item:hover {
+            background: var(--bg-3) !important;
+            border-color: var(--border-med) !important;
+        }
+
+        /* Dashboard metric cards */
+        .dashboard-metric {
+            background: var(--bg-2) !important;
+            border: 1px solid var(--border-dim) !important;
+            border-radius: var(--r-lg) !important;
+            padding: 14px 16px !important;
+            box-shadow: none !important;
+        }
+        .dashboard-metric-small {
+            background: var(--bg-2) !important;
+            border: 1px solid var(--border-dim) !important;
+            border-radius: var(--r-lg) !important;
+        }
+        .dashboard-metric-small.burn { border-color: rgba(244,63,94,.2) !important; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none !important; }
+            .body-layout { flex-direction: column !important; }
+        }
     </style>
 </head>
 
 <body>
-    <!-- Animated Price Ticker -->
-    <div class="price-ticker">
-        <div class="ticker-track" id="tickerTrack"></div>
+<div class="app-layout">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-logo">
+            <svg class="topbar-logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="32" fill="#0d1220"/>
+                <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
+            </svg>
+            <span class="topbar-logo-text">XRP_INSIGHTS</span>
+        </div>
+        <div class="topbar-price">
+            <span class="topbar-price-label">XRP</span>
+            <span class="topbar-price-value" id="xrpPriceTopbar">Loading...</span>
+        </div>
+        <div class="ticker-strip">
+            <div class="ticker-track" id="tickerTrack"></div>
+        </div>
+        <div class="topbar-actions">
+            <div class="language-switcher">
+                <button class="lang-btn active" onclick="setLanguage('en')" title="English">🇺🇸 EN</button>
+                <button class="lang-btn" onclick="setLanguage('ko')" title="한국어">🇰🇷 KO</button>
+            </div>
+            <a href="help.html" class="topbar-btn" title="How to Use This Dashboard">❓ Help</a>
+            <button class="topbar-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">🌓</button>
+            <div class="topbar-btn accent" id="installMini" onclick="showInstallModal()" style="cursor:pointer;">📲 Install</div>
+        </div>
     </div>
 
-    <div class="bg-grid"></div>
-    <div class="bg-glow"></div>
+    <!-- BODY -->
+    <div class="body-layout">
 
-    <div class="container">
-        <!-- Install App Banner - Hidden by default, mini version shown in header -->
-        <div class="install-banner hidden" id="installBanner" onclick="showInstallModal()">
-            <div class="install-banner-content">
-                <span class="install-banner-icon">📲</span>
-                <div class="install-banner-text">
-                    <h4>Install XRP Insights</h4>
-                    <p>Add to your home screen for quick access</p>
-                </div>
-            </div>
-            <button class="install-banner-btn">Install</button>
-        </div>
-
-        <!-- Install Modal -->
-        <div class="install-modal-overlay" id="installModal">
-            <div class="install-modal">
-                <div class="install-modal-header">
-                    <h3>📲 Install App</h3>
-                    <button class="install-modal-close" onclick="hideInstallModal()">×</button>
-                </div>
-
-                <div class="install-platform">
-                    <h4 class="ios">🍎 iPhone / iPad (Safari)</h4>
-                    <ol class="install-steps">
-                        <li><span class="step-number">1</span> Tap the <strong>Share</strong> button <span
-                                style="background:#007AFF;color:white;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.7rem;">□↑</span>
-                        </li>
-                        <li><span class="step-number">2</span> Scroll down and tap <strong>"Add to Home Screen"</strong>
-                        </li>
-                        <li><span class="step-number">3</span> Tap <strong>"Add"</strong> in the top right</li>
-                    </ol>
-                </div>
-
-                <div class="install-platform">
-                    <h4 class="android">🤖 Android (Chrome)</h4>
-                    <ol class="install-steps">
-                        <li><span class="step-number">1</span> Tap the <strong>⋮ menu</strong> (3 dots top right)</li>
-                        <li><span class="step-number">2</span> Tap <strong>"Install app"</strong> or <strong>"Add to
-                                Home screen"</strong></li>
-                        <li><span class="step-number">3</span> Tap <strong>"Install"</strong></li>
-                    </ol>
-                </div>
-
-                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:1rem;">
-                    ✨ The app will appear on your home screen like a native app!
-                </p>
-
-                <button
-                    style="width:100%;margin-top:1rem;padding:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.8rem;cursor:pointer;"
-                    onclick="dismissInstallBanner()">
-                    Don't show again
-                </button>
-            </div>
-        </div>
-
-        <header>
-            <div class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="32" cy="32" r="32" fill="#23292f" />
-                        <path
-                            d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z"
-                            fill="#fff" />
-                    </svg>
-                </div>
-                <h1>XRP Insights</h1>
-            </div>
-            <div class="xrp-price" id="xrpPrice">
-                <span class="xrp-label">XRP Price</span>
-                <span class="xrp-value">Loading...</span>
-            </div>
-            <a href="https://x.com/chachakobe4er" target="_blank" class="twitter-handle">
-                <span class="twitter-icon">𝕏</span>
-                <span class="twitter-name">XRP 🅧 Army</span>
-                <span class="twitter-user">@chachakobe4er</span>
-            </a>
-            <a href="https://xrpexchange.streamlit.app/" target="_blank" class="site-link">
-                <span class="site-link-icon">📊</span>
-                <span class="site-link-name">XRP Exchange</span>
-                <span class="site-link-desc">Holdings Tracker</span>
-            </a>
-            <div class="header-meta">
-                <div class="install-mini" id="installMini" onclick="showInstallModal()">
-                    <span class="install-mini-icon">📲</span>
-                    <span class="install-mini-text">Install XRP Insights</span>
-                </div>
-                <div class="last-updated" id="lastUpdated">Not yet loaded</div>
-                <div class="status">
-                    <span class="status-dot"></span>
-                    <span id="statusText">Ready</span>
-                </div>
-                <div class="auto-refresh-info" id="autoRefreshInfo">Auto-refresh: every 5 minutes</div>
-            </div>
-        </header>
-
-        <!-- Dashboard Overview Section -->
-        <div class="dashboard-overview">
-            <div class="dashboard-overview-header">
-                <div class="dashboard-overview-title">
-                    <span class="xrp-mini-logo"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="32" cy="32" r="32" fill="#23292f" />
-                            <path
-                                d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z"
-                                fill="#23f7dd" />
-                        </svg></span>
-                    XRP Holdings - Exchange & SPOT ETFs
-                </div>
-                <div class="header-buttons">
-                    <div class="language-switcher">
-                        <button class="lang-btn active" onclick="setLanguage('en')" title="English">
-                            🇺🇸 EN
-                        </button>
-                        <button class="lang-btn" onclick="setLanguage('ko')" title="한국어">
-                            🇰🇷 KO
-                        </button>
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <div class="sidebar-section-label">Overview</div>
+            <button class="sidebar-item active" onclick="switchMainTab('holdings')">
+                <span class="sidebar-item-icon">💎</span>
+                <span class="sidebar-item-label">ETF Holdings</span>
+                <span class="sidebar-badge live">Live</span>
+            </button>
+            <button class="sidebar-item" onclick="switchMainTab('trading')">
+                <span class="sidebar-item-icon">📈</span>
+                <span class="sidebar-item-label">ETF Trading</span>
+            </button>
+            <button class="sidebar-item" onclick="switchMainTab('exchange')">
+                <span class="sidebar-item-icon">🏦</span>
+                <span class="sidebar-item-label">Exchange Balances</span>
+                <span class="sidebar-badge">43</span>
+            </button>
+            <div class="sidebar-section-label">Analytics</div>
+            <button class="sidebar-item" onclick="switchMainTab('analytics')">
+                <span class="sidebar-item-icon">📊</span>
+                <span class="sidebar-item-label">Analytics</span>
+            </button>
+            <button class="sidebar-item" onclick="switchMainTab('whales')">
+                <span class="sidebar-item-icon">🏆</span>
+                <span class="sidebar-item-label">Top 10K Rich List</span>
+            </button>
+            <div class="sidebar-section-label">Intelligence</div>
+            <button class="sidebar-item" onclick="switchMainTab('news')">
+                <span class="sidebar-item-icon">📰</span>
+                <span class="sidebar-item-label">News Feed</span>
+                <span class="sidebar-badge amber" id="sidebarNewsBadge">–</span>
+            </button>
+            <button class="sidebar-item" onclick="switchMainTab('insights')">
+                <span class="sidebar-item-icon">🤖</span>
+                <span class="sidebar-item-label">AI Insights</span>
+            </button>
+            <div class="sidebar-section-label">Tools</div>
+            <button class="sidebar-item" onclick="switchMainTab('tags')">
+                <span class="sidebar-item-icon">🏷️</span>
+                <span class="sidebar-item-label">Dest. Tags</span>
+            </button>
+            <button class="settings-trigger" onclick="openSettings()">
+                <span class="sidebar-item-icon">⚙️</span>
+                <span class="sidebar-item-label">Settings</span>
+            </button>
+            <div class="sidebar-footer">
+                <a href="https://x.com/chachakobe4er" target="_blank" class="sidebar-link">
+                    <span>𝕏</span><span>@chachakobe4er</span>
+                </a>
+                <a href="https://xrpexchange.streamlit.app/" target="_blank" class="sidebar-link">
+                    <span>📊</span><span>Exchange Tracker</span>
+                </a>
+                <div style="padding:6px 10px;">
+                    <div class="last-updated" id="lastUpdated">Not yet loaded</div>
+                    <div class="status" style="margin-top:4px;">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">Ready</span>
                     </div>
-                    <a href="help.html" class="help-button" title="How to Use This Dashboard" data-i18n="help">
-                        ❓ Help
-                    </a>
-                    <button class="header-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
-                        🌓
-                    </button>
+                    <div class="auto-refresh-info" id="autoRefreshInfo">Auto-refresh: every 5 minutes</div>
                 </div>
             </div>
+        </nav>
 
-            <!-- Daily Summary Banner -->
-            <div class="daily-summary-banner">
-                <div class="summary-item" onclick="switchMainTab('holdings')">
-                    <div class="summary-item-header">
-                        <span class="summary-item-icon">💎</span>
-                        <span>Today's ETF Change</span>
-                    </div>
-                    <div class="summary-item-value positive" id="summaryETFChange">+0 XRP</div>
-                    <div class="summary-item-subtitle" id="summaryETFDetail">Loading...</div>
-                    <div class="summary-item-link">↓ ETF Holdings</div>
-                </div>
+        <!-- CONTENT AREA -->
+        <div class="content-area">
 
-                <div class="summary-item" onclick="switchMainTab('trading')">
-                    <div class="summary-item-header">
-                        <span class="summary-item-icon">📊</span>
-                        <span>ETF Trading Volume</span>
-                    </div>
-                    <div class="summary-item-value" id="summaryVolume">$0</div>
-                    <div class="summary-item-subtitle" id="summaryVolumeDetail">Today's volume</div>
-                    <div class="summary-item-link">↓ Trading Data</div>
+            <!-- Hidden legacy header (JS compat) -->
+            <header style="display:none;">
+                <div class="logo"><div class="logo-icon"></div><h1>XRP Insights</h1></div>
+                <div class="xrp-price" id="xrpPrice">
+                    <span class="xrp-label">XRP Price</span>
+                    <span class="xrp-value">Loading...</span>
                 </div>
+                <a href="https://x.com/chachakobe4er" target="_blank" class="twitter-handle">
+                    <span class="twitter-icon">𝕏</span><span class="twitter-name">XRP 🅧 Army</span><span class="twitter-user">@chachakobe4er</span>
+                </a>
+                <a href="https://xrpexchange.streamlit.app/" target="_blank" class="site-link">
+                    <span class="site-link-icon">📊</span><span class="site-link-name">XRP Exchange</span><span class="site-link-desc">Holdings Tracker</span>
+                </a>
+                <div class="header-meta">
+                    <div class="install-mini" onclick="showInstallModal()"><span class="install-mini-icon">📲</span><span class="install-mini-text">Install XRP Insights</span></div>
+                </div>
+            </header>
 
-                <div class="summary-item" onclick="switchMainTab('whales')">
-                    <div class="summary-item-header">
-                        <span class="summary-item-icon">🐋</span>
-                        <span>Top Holders</span>
-                    </div>
-                    <div class="summary-item-value" id="summaryWhales">--</div>
-                    <div class="summary-item-subtitle" id="summaryWhalesDetail">Whale accounts</div>
-                    <div class="summary-item-link">↓ Top 10K</div>
+            <!-- Install Banner -->
+            <div class="install-banner hidden" id="installBanner" onclick="showInstallModal()">
+                <div class="install-banner-content">
+                    <span class="install-banner-icon">📲</span>
+                    <div class="install-banner-text"><h4>Install XRP Insights</h4><p>Add to your home screen for quick access</p></div>
                 </div>
-
-                <div class="summary-item" onclick="switchMainTab('news')">
-                    <div class="summary-item-header">
-                        <span class="summary-item-icon">📰</span>
-                        <span>Latest News</span>
-                    </div>
-                    <div class="summary-item-value" id="summaryNews">--</div>
-                    <div class="summary-item-subtitle" id="summaryNewsDetail">Recent headlines</div>
-                    <div class="summary-item-link">↓ All News</div>
-                </div>
+                <button class="install-banner-btn">Install</button>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="dashboard-metrics">
-                    <div class="dashboard-metric">
-                        <div class="dashboard-metric-label">Total XRP in Spot ETFs</div>
-                        <div class="dashboard-metric-value animated" id="dashboardETFXRP">--</div>
-                        <div class="dashboard-metric-change positive" id="dashboardETFChange">
-                            <span>●</span> <span>Live Data</span>
+            <!-- DASHBOARD OVERVIEW -->
+            <div class="dashboard-overview">
+                <div class="dashboard-overview-header">
+                    <div class="dashboard-overview-title">
+                        <span class="xrp-mini-logo">
+                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                                <circle cx="32" cy="32" r="32" fill="#0d1220"/>
+                                <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
+                            </svg>
+                        </span>
+                        <span data-i18n="dashboardTitle">XRP Holdings - Exchange &amp; SPOT ETFs</span>
+                    </div>
+                    <div class="header-buttons">
+                        <a href="help.html" class="help-button" data-i18n="help">❓ Help</a>
+                        <button class="header-theme-toggle" onclick="toggleTheme()">🌓</button>
+                    </div>
+                </div>
+
+                <div class="daily-summary-banner">
+                    <div class="summary-item" onclick="switchMainTab('holdings')">
+                        <div class="summary-item-header"><span class="summary-item-icon">💎</span><span>Today's ETF Change</span></div>
+                        <div class="summary-item-value positive" id="summaryETFChange">+0 XRP</div>
+                        <div class="summary-item-subtitle" id="summaryETFDetail">Loading...</div>
+                        <div class="summary-item-link">↓ ETF Holdings</div>
+                    </div>
+                    <div class="summary-item" onclick="switchMainTab('trading')">
+                        <div class="summary-item-header"><span class="summary-item-icon">📊</span><span>ETF Trading Volume</span></div>
+                        <div class="summary-item-value" id="summaryVolume">$0</div>
+                        <div class="summary-item-subtitle" id="summaryVolumeDetail">Today's volume</div>
+                        <div class="summary-item-link">↓ Trading Data</div>
+                    </div>
+                    <div class="summary-item" onclick="switchMainTab('whales')">
+                        <div class="summary-item-header"><span class="summary-item-icon">🐋</span><span>Top Holders</span></div>
+                        <div class="summary-item-value" id="summaryWhales">--</div>
+                        <div class="summary-item-subtitle" id="summaryWhalesDetail">Whale accounts</div>
+                        <div class="summary-item-link">↓ Top 10K</div>
+                    </div>
+                    <div class="summary-item" onclick="switchMainTab('news')">
+                        <div class="summary-item-header"><span class="summary-item-icon">📰</span><span>Latest News</span></div>
+                        <div class="summary-item-value" id="summaryNews">--</div>
+                        <div class="summary-item-subtitle" id="summaryNewsDetail">Recent headlines</div>
+                        <div class="summary-item-link">↓ All News</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-metrics">
+                        <div class="dashboard-metric">
+                            <div class="dashboard-metric-label">Total XRP in Spot ETFs</div>
+                            <div class="dashboard-metric-value animated" id="dashboardETFXRP">--</div>
+                            <div class="dashboard-metric-change positive" id="dashboardETFChange"><span>●</span><span>Live Data</span></div>
+                        </div>
+                        <div class="dashboard-metric">
+                            <div class="dashboard-metric-label">ETF Value (USD)</div>
+                            <div class="dashboard-metric-value animated" id="dashboardETFValue">--</div>
+                        </div>
+                        <div class="dashboard-metric">
+                            <div class="dashboard-metric-label">XRP on Exchanges</div>
+                            <div class="dashboard-metric-value animated" id="dashboardExchangeXRP">--</div>
+                            <div class="dashboard-metric-change neutral" id="dashboardExchangeChange"><span>→</span><span>Click Exchange tab</span></div>
+                        </div>
+                        <div class="dashboard-metric">
+                            <div class="dashboard-metric-label">Exchange Value (USD)</div>
+                            <div class="dashboard-metric-value animated" id="dashboardExchangeValue">--</div>
                         </div>
                     </div>
-                    <div class="dashboard-metric">
-                        <div class="dashboard-metric-label">ETF Value (USD)</div>
-                        <div class="dashboard-metric-value animated" id="dashboardETFValue">--</div>
-                    </div>
-                    <div class="dashboard-metric">
-                        <div class="dashboard-metric-label">XRP on Exchanges</div>
-                        <div class="dashboard-metric-value animated" id="dashboardExchangeXRP">--</div>
-                        <div class="dashboard-metric-change neutral" id="dashboardExchangeChange">
-                            <span>→</span> <span>Click Exchange tab</span>
+                    <div class="dashboard-pie-container">
+                        <div class="dashboard-pie-chart"><canvas id="dashboardPieChart"></canvas></div>
+                        <div class="dashboard-pie-legend">
+                            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:#23f7dd;"></div><span>ETFs</span></div>
+                            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:#8b5cf6;"></div><span>Exchanges</span></div>
                         </div>
-                    </div>
-                    <div class="dashboard-metric">
-                        <div class="dashboard-metric-label">Exchange Value (USD)</div>
-                        <div class="dashboard-metric-value animated" id="dashboardExchangeValue">--</div>
                     </div>
                 </div>
-                <div class="dashboard-pie-container">
-                    <div class="dashboard-pie-chart">
-                        <canvas id="dashboardPieChart"></canvas>
-                    </div>
-                    <div class="dashboard-pie-legend">
-                        <div class="pie-legend-item">
-                            <div class="pie-legend-dot" style="background: #23f7dd;"></div>
-                            <span>ETFs</span>
+
+                <div class="dashboard-secondary-grid">
+                    <div class="dashboard-metric-small">
+                        <div class="dashboard-metric-icon">🏆</div>
+                        <div class="dashboard-metric-info">
+                            <div class="dashboard-metric-label">Top 10K Holdings</div>
+                            <div class="dashboard-metric-value small" id="dashboardTop10KXRP">--</div>
+                            <div class="dashboard-metric-change neutral" id="dashboardTop10KChange"><span>→</span><span>Click Top 10K tab</span></div>
                         </div>
-                        <div class="pie-legend-item">
-                            <div class="pie-legend-dot" style="background: #a855f7;"></div>
-                            <span>Exchanges</span>
+                    </div>
+                    <div class="dashboard-metric-small">
+                        <div class="dashboard-metric-icon">🐋</div>
+                        <div class="dashboard-metric-info">
+                            <div class="dashboard-metric-label">Whale Accounts (≥1M)</div>
+                            <div class="dashboard-metric-value small" id="dashboardWhaleCount">--</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-metric-small burn">
+                        <div class="dashboard-metric-icon">🔥</div>
+                        <div class="dashboard-metric-info">
+                            <div class="dashboard-metric-label">Total XRP Burned</div>
+                            <div class="dashboard-metric-value small" id="burnTotal">--</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-metric-small">
+                        <div class="dashboard-metric-icon">💎</div>
+                        <div class="dashboard-metric-info">
+                            <div class="dashboard-metric-label">Current Supply</div>
+                            <div class="dashboard-metric-value small" id="currentSupply">--</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Top 10K & Burn Stats Row -->
-            <div class="dashboard-secondary-grid">
-                <div class="dashboard-metric-small">
-                    <div class="dashboard-metric-icon">🏆</div>
-                    <div class="dashboard-metric-info">
-                        <div class="dashboard-metric-label">Top 10K Holdings</div>
-                        <div class="dashboard-metric-value small" id="dashboardTop10KXRP">--</div>
-                        <div class="dashboard-metric-change neutral" id="dashboardTop10KChange">
-                            <span>→</span> <span>Click Top 10K tab</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="dashboard-metric-small">
-                    <div class="dashboard-metric-icon">🐋</div>
-                    <div class="dashboard-metric-info">
-                        <div class="dashboard-metric-label">Whale Accounts (≥1M)</div>
-                        <div class="dashboard-metric-value small" id="dashboardWhaleCount">--</div>
-                    </div>
-                </div>
-                <div class="dashboard-metric-small burn">
-                    <div class="dashboard-metric-icon">🔥</div>
-                    <div class="dashboard-metric-info">
-                        <div class="dashboard-metric-label">Total XRP Burned</div>
-                        <div class="dashboard-metric-value small" id="burnTotal">--</div>
-                    </div>
-                </div>
-                <div class="dashboard-metric-small">
-                    <div class="dashboard-metric-icon">💎</div>
-                    <div class="dashboard-metric-info">
-                        <div class="dashboard-metric-label">Current Supply</div>
-                        <div class="dashboard-metric-value small" id="currentSupply">--</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Tab Navigation -->
-        <div class="main-tabs" style="flex-wrap: wrap;">
-            <button class="main-tab active" onclick="switchMainTab('holdings')">
-                <span class="main-tab-icon">💎</span>
-                <span class="main-tab-text">Holdings</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('trading')">
-                <span class="main-tab-icon">📈</span>
-                <span class="main-tab-text">Trading</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('exchange')">
-                <span class="main-tab-icon">🏦</span>
-                <span class="main-tab-text">Exchange</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('analytics')">
-                <span class="main-tab-icon">📊</span>
-                <span class="main-tab-text">Analytics</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('whales')">
-                <span class="main-tab-icon">🏆</span>
-                <span class="main-tab-text">Top 10K</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('news')">
-                <span class="main-tab-icon">📰</span>
-                <span class="main-tab-text">News</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('insights')">
-                <span class="main-tab-icon">🤖</span>
-                <span class="main-tab-text">AI</span>
-            </button>
-            <button class="main-tab" onclick="switchMainTab('tags')">
-                <span class="main-tab-icon">🏷️</span>
-                <span class="main-tab-text">Tags</span>
-            </button>
-        </div>
-
-        <!-- Trading Tab Content -->
         <div id="tradingTab" class="tab-content">
             <div class="controls">
                 <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
@@ -9104,6 +9696,67 @@
         </div>
     </div>
 
+
+        <div class="install-modal-overlay" id="installModal">
+            <div class="install-modal">
+                <div class="install-modal-header">
+                    <h3>📲 Install App</h3>
+                    <button class="install-modal-close" onclick="hideInstallModal()">×</button>
+                </div>
+
+                <div class="install-platform">
+                    <h4 class="ios">🍎 iPhone / iPad (Safari)</h4>
+                    <ol class="install-steps">
+                        <li><span class="step-number">1</span> Tap the <strong>Share</strong> button <span
+                                style="background:#007AFF;color:white;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.7rem;">□↑</span>
+                        </li>
+                        <li><span class="step-number">2</span> Scroll down and tap <strong>"Add to Home Screen"</strong>
+                        </li>
+                        <li><span class="step-number">3</span> Tap <strong>"Add"</strong> in the top right</li>
+                    </ol>
+                </div>
+
+                <div class="install-platform">
+                    <h4 class="android">🤖 Android (Chrome)</h4>
+                    <ol class="install-steps">
+                        <li><span class="step-number">1</span> Tap the <strong>⋮ menu</strong> (3 dots top right)</li>
+                        <li><span class="step-number">2</span> Tap <strong>"Install app"</strong> or <strong>"Add to
+                                Home screen"</strong></li>
+                        <li><span class="step-number">3</span> Tap <strong>"Install"</strong></li>
+                    </ol>
+                </div>
+
+                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:1rem;">
+                    ✨ The app will appear on your home screen like a native app!
+                </p>
+
+                <button
+                    style="width:100%;margin-top:1rem;padding:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.8rem;cursor:pointer;"
+                    onclick="dismissInstallBanner()">
+                    Don't show again
+                </button>
+            </div>
+        </div>
+
+        </div><!-- end content-area -->
+    </div><!-- end body-layout -->
+
+    <!-- STATUS FOOTER -->
+    <div class="status-footer">
+        <div class="status-footer-item">
+            <div class="status-footer-dot live"></div>
+            <span id="statusFooterText">Ready</span>
+        </div>
+        <div class="status-footer-item">
+            <span id="statusFooterUpdated">Not yet loaded</span>
+        </div>
+        <div class="status-footer-right">
+            <span>XRP Insights v2.0</span>
+            <a href="https://x.com/chachakobe4er" target="_blank" style="color:var(--xrp);text-decoration:none;">@chachakobe4er</a>
+        </div>
+    </div>
+
+</div><!-- end app-layout -->
     <script>
         // =====================================================
         // INTERNATIONALIZATION (i18n) - Language Support
@@ -13718,9 +14371,10 @@
             const newsFeed = document.getElementById('newsFeed');
 
             newsFeed.innerHTML = `
-                <div class="news-item">
-                    <div class="news-source"><span class="source-icon">⏳</span><span class="source-name">Loading...</span></div>
-                    <h3 class="news-title">Fetching latest news...</h3>
+                <div class="news-item" style="padding:1.5rem;text-align:center;">
+                    <div class="spinner" style="margin:0 auto 1rem;"></div>
+                    <div class="news-source"><span class="source-icon">📡</span><span class="source-name">Fetching live XRP news...</span></div>
+                    <p class="news-summary" style="margin-top:.5rem;font-size:.85rem;opacity:.7;">Trying Render backend → CoinTelegraph → Decrypt → CoinDesk → Google News</p>
                 </div>
             `;
 
@@ -13766,7 +14420,7 @@
 
         async function fetchNewsFromBackend() {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+            const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout (Render cold start)
             try {
                 const response = await fetch('https://xrp-gtve.onrender.com/api/news', { signal: controller.signal });
                 clearTimeout(timeout);
@@ -13780,41 +14434,57 @@
         }
 
         async function fetchNewsFromCryptoPanic() {
-            // Use Claude API to generate current XRP news - works locally, no CORS issues
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            // Multi-source RSS news fetcher via allorigins CORS proxy
+            // Tries multiple crypto RSS feeds until one works
+            const proxy = (url) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+            const nowTs = () => Math.floor(Date.now() / 1000);
 
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 1000,
-                    messages: [{
-                        role: 'user',
-                        content: `Today is ${dateStr}. Generate 8 realistic XRP/crypto news headlines reflecting the current market environment. Return ONLY a JSON array, no markdown, no explanation. Each object must have exactly: title (headline), body (1-2 sentence summary), source_name (e.g. CoinDesk, Decrypt, The Block, Cointelegraph, Reuters), hours_ago (integer 1-23), category (one of: xrp, etf, crypto, regulation), sentiment (one of: bullish, bearish, neutral), url (use "#"). Mix sentiments. Include XRP ETF flows, XRPL activity, market moves, regulatory news.`
-                    }]
-                })
-            });
+            const rssFeeds = [
+                { url: 'https://cointelegraph.com/rss/tag/xrp', source: 'CoinTelegraph' },
+                { url: 'https://cointelegraph.com/rss', source: 'CoinTelegraph' },
+                { url: 'https://decrypt.co/feed', source: 'Decrypt' },
+                { url: 'https://www.coindesk.com/arc/outboundfeeds/rss/', source: 'CoinDesk' },
+                { url: 'https://news.google.com/rss/search?q=XRP+ripple&hl=en-US&gl=US&ceid=US:en', source: 'Google News' },
+                { url: 'https://news.google.com/rss/search?q=XRP+crypto+news&hl=en-US&gl=US&ceid=US:en', source: 'Google News' },
+            ];
 
-            if (!response.ok) throw new Error('Claude API ' + response.status);
-            const data = await response.json();
-            const text = data.content[0].text.replace(/```json|```/g, '').trim();
-            const items = JSON.parse(text);
-            if (!Array.isArray(items) || items.length === 0) throw new Error('No items from Claude');
+            function parseRSS(xmlText, defaultSource) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlText, 'text/xml');
+                const items = Array.from(doc.querySelectorAll('item')).slice(0, 12);
+                if (items.length === 0) return null;
+                return items.map(item => {
+                    const title = item.querySelector('title')?.textContent?.replace('<![CDATA[','').replace(']]>','').trim() || '';
+                    const link = item.querySelector('link')?.textContent?.trim() || '#';
+                    const pubDate = item.querySelector('pubDate')?.textContent;
+                    const ts = pubDate ? Math.floor(new Date(pubDate).getTime() / 1000) : nowTs();
+                    const srcName = item.querySelector('source')?.textContent?.trim() || defaultSource;
+                    const desc = item.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim() || title;
+                    const hoursAgo = Math.max(0, Math.floor((nowTs() - ts) / 3600));
+                    const lcTitle = title.toLowerCase();
+                    const sentiment = lcTitle.includes('surge') || lcTitle.includes('rally') || lcTitle.includes('bull') || lcTitle.includes('gain') ? 'bullish'
+                                    : lcTitle.includes('drop') || lcTitle.includes('fall') || lcTitle.includes('bear') || lcTitle.includes('crash') || lcTitle.includes('plunge') ? 'bearish'
+                                    : 'neutral';
+                    return { title, url: link, body: desc.slice(0, 160), source_info: { name: srcName }, published_on: ts, categories: 'xrp', sentiment };
+                });
+            }
 
-            const nowTs = Math.floor(Date.now() / 1000);
-            return items.map(item => ({
-                title: item.title || '',
-                url: item.url || '#',
-                body: item.body || item.title || '',
-                source_info: { name: item.source_name || 'Crypto News' },
-                published_on: nowTs - (item.hours_ago || 1) * 3600,
-                categories: item.category || 'crypto',
-                sentiment: item.sentiment || 'neutral'
-            }));
+            for (const feed of rssFeeds) {
+                try {
+                    const r = await fetch(proxy(feed.url), { signal: AbortSignal.timeout(7000) });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const wrapper = await r.json();
+                    const items = parseRSS(wrapper.contents || '', feed.source);
+                    if (items && items.length > 0) {
+                        console.log('News loaded from:', feed.source, '(' + items.length + ' items)');
+                        return items;
+                    }
+                } catch(e) {
+                    console.warn('Feed failed:', feed.source, e.message);
+                }
+            }
+            throw new Error('All RSS feeds failed');
         }
-
         function refreshAIAnalysis() {
             if (cachedNews.length > 0) {
                 renderAIAnalysis(cachedNews.slice(0, 4));
@@ -19230,7 +19900,49 @@
             setTimeout(addCurrentToHistory, 100);
         };
 
+
+        // =====================================================
+        // UI PATCH: Sync topbar price + sidebar active state
+        // =====================================================
+        (function() {
+            // 1. Patch switchMainTab to also update sidebar active items
+            const _origSwitch = typeof switchMainTab === 'function' ? switchMainTab : null;
+            if (_origSwitch) {
+                window.switchMainTab = function(tabName) {
+                    _origSwitch(tabName);
+                    // Update sidebar items
+                    document.querySelectorAll('.sidebar-item, .settings-trigger').forEach(function(el) {
+                        el.classList.remove('active');
+                    });
+                    const mapping = {
+                        holdings: 0, trading: 1, exchange: 2,
+                        analytics: 3, whales: 4, news: 5, insights: 6, tags: 7
+                    };
+                    const idx = mapping[tabName];
+                    if (idx !== undefined) {
+                        const items = document.querySelectorAll('.sidebar-item');
+                        if (items[idx]) items[idx].classList.add('active');
+                    }
+                };
+            }
+
+            // 2. Mirror #xrpPrice updates to #xrpPriceTopbar
+            const xrpPriceEl = document.getElementById('xrpPrice');
+            const xrpTopbarEl = document.getElementById('xrpPriceTopbar');
+            if (xrpPriceEl && xrpTopbarEl) {
+                const observer = new MutationObserver(function() {
+                    const valEl = xrpPriceEl.querySelector('.xrp-value');
+                    if (valEl) {
+                        xrpTopbarEl.textContent = valEl.textContent;
+                        // Color: green if contains $, otherwise neutral
+                        xrpTopbarEl.style.color = valEl.textContent.includes('$') ? 'var(--green)' : 'var(--text-2)';
+                    }
+                });
+                observer.observe(xrpPriceEl, { childList: true, subtree: true, characterData: true });
+            }
+        })();
+
+
     </script>
 </body>
 
-</html>
