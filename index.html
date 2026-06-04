@@ -14496,6 +14496,7 @@
                 ? [() => fetchNewsFromCryptoPanic()]
                 : [];
 
+            let lastError = 'Unknown error';
             for (const source of sources) {
                 try {
                     const items = await source();
@@ -14507,18 +14508,22 @@
                         return;
                     }
                 } catch (e) {
+                    lastError = e.message;
                     console.warn('News source failed:', e.message);
                 }
             }
 
             // All sources failed
-            console.error('All news sources failed');
+            console.error('All news sources failed. Last error:', lastError);
             if (newsFeed) newsFeed.innerHTML = `
                 <div style="padding:2rem;text-align:center;border:1px solid rgba(244,63,94,.3);border-radius:12px;margin:16px 0;background:rgba(244,63,94,.05);">
                     <div style="font-size:2rem;margin-bottom:8px;">📡</div>
                     <div style="font-weight:600;color:var(--text-1);margin-bottom:6px;">News unavailable</div>
+                    <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-family:monospace;background:rgba(0,0,0,.3);padding:6px 10px;border-radius:6px;text-align:left;">
+                        Error: ${lastError || 'Unknown'}
+                    </div>
                     <div style="font-size:11px;color:var(--text-3);margin-bottom:12px;">
-                        ${hasKey ? 'Claude API call failed. Check browser console (F12) for details.' : 'Enter your Anthropic API key in the banner at the top of this tab to load live news.'}
+                        ${hasKey ? 'Check the error above. Your API key is saved but the call failed.' : 'Enter your Anthropic API key in the banner at the top of this tab.'}
                     </div>
                     <button onclick="fetchLiveNews()" style="background:rgba(59,130,246,.15);border:1px solid var(--accent);color:var(--accent);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">↻ Retry</button>
                 </div>
@@ -14555,7 +14560,12 @@
                     max_tokens: 2500,
                     messages: [{
                         role: 'user',
-                        content: `Today is ${dateStr} (seed:${seed}). Generate 15 realistic XRP/crypto news items plausible for today. Return ONLY a JSON array starting with [, no markdown. Each object: {"title":"headline with specific names/numbers","body":"2-3 sentence summary with specifics like prices, percentages, company names","source_name":"CoinDesk|Decrypt|The Block|Cointelegraph|Reuters|Bloomberg|U.Today|BeInCrypto|Ripple Blog","url":"use one of these real domains with a plausible path: https://coindesk.com/markets/xrp OR https://decrypt.co/news/ripple OR https://cointelegraph.com/news/xrp OR https://theblock.co/post/xrp OR https://reuters.com/technology/crypto OR https://u.today/xrp-news OR https://beincrypto.com/xrp","hours_ago":1-22,"category":"xrp|etf|crypto|regulation","sentiment":"bullish|bearish|neutral"}. Use REAL publication domains (coindesk.com, decrypt.co, cointelegraph.com, theblock.co, reuters.com). Make url paths plausible. Cover: XRP price moves, ETF flows/AUM, XRPL network metrics, Ripple partnerships, SEC/regulation, institutional news, whale activity. Mix 5 bullish + 5 neutral + 5 bearish. Spread hours_ago from 1 to 22.`
+                        content: `[RESPOND WITH ONLY A JSON ARRAY. NO TEXT BEFORE OR AFTER. START WITH [ AND END WITH ]. NO MARKDOWN. NO EXPLANATION.]
+
+Generate 15 XRP/crypto news items for ${dateStr}. Return ONLY this exact format:
+[{"title":"...","body":"...","source_name":"CoinDesk","url":"https://coindesk.com/markets/xrp","hours_ago":1,"category":"xrp","sentiment":"bullish"},...]
+
+Rules: title=specific headline with numbers, body=2 sentences, source_name=one of CoinDesk/Decrypt/The Block/Cointelegraph/Reuters, url=real domain with path, hours_ago=1-22 integer, category=xrp or etf or crypto or regulation, sentiment=bullish or bearish or neutral. Mix sentiments. Cover XRP price/ETFs/XRPL/Ripple/regulation. Seed:${seed}.`
                     }]
                 })
             });
@@ -14571,11 +14581,15 @@
             console.log('[News] Got response, length:', rawText.length, 'preview:', rawText.substring(0, 100));
 
             // Extract JSON array robustly
-            const arrStart = rawText.indexOf('[');
-            const arrEnd   = rawText.lastIndexOf(']');
-            if (arrStart < 0 || arrEnd <= arrStart) throw new Error('No JSON array in response');
+            let parseText = rawText.replace(/```json\n?|```\n?/g, '').trim();
+            const arrStart = parseText.indexOf('[');
+            const arrEnd   = parseText.lastIndexOf(']');
+            if (arrStart < 0 || arrEnd <= arrStart) {
+                console.error('[News] Raw response was:', rawText.substring(0, 300));
+                throw new Error('No JSON array in response - Claude returned: ' + rawText.substring(0, 100));
+            }
 
-            const items = JSON.parse(rawText.substring(arrStart, arrEnd + 1));
+            const items = JSON.parse(parseText.substring(arrStart, arrEnd + 1));
             if (!Array.isArray(items) || items.length === 0) throw new Error('Empty array');
 
             console.log('[News] Parsed', items.length, 'items successfully');
