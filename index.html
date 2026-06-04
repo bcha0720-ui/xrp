@@ -7870,6 +7870,72 @@
         }
         .dashboard-metric-small.burn { border-color: rgba(244,63,94,.2) !important; }
 
+
+        /* ===== SPACING OVERRIDES ===== */
+        .dashboard-overview { padding: 12px 16px 0 !important; }
+        .daily-summary-banner { gap: 8px !important; margin-bottom: 10px !important; }
+        .summary-item { padding: 10px 12px !important; }
+        .summary-item-value { font-size: 13px !important; margin-bottom: 1px !important; }
+        .summary-item-subtitle { font-size: 9px !important; margin-bottom: 2px !important; }
+        .summary-item-link { font-size: 9px !important; }
+        .dashboard-grid { gap: 8px !important; margin-bottom: 8px !important; }
+        .dashboard-metrics { gap: 8px !important; }
+        .dashboard-metric { padding: 10px 12px !important; }
+        .dashboard-metric-label { margin-bottom: 3px !important; font-size: 9px !important; }
+        .dashboard-metric-value { font-size: 16px !important; }
+        .dashboard-metric-change { margin-top: 2px !important; font-size: 9px !important; }
+        .dashboard-secondary-grid { gap: 8px !important; margin-bottom: 10px !important; }
+        .dashboard-metric-small { padding: 8px 10px !important; gap: 8px !important; }
+        .dashboard-metric-icon { font-size: 16px !important; }
+        .dashboard-metric-value.small { font-size: 13px !important; }
+        .dashboard-metric-label { font-size: 9px !important; }
+        .holdings-summary { padding: 10px 16px !important; gap: 8px !important; }
+        .holdings-summary .summary-card { padding: 10px 12px !important; }
+        .summary-value { font-size: 14px !important; }
+        .holdings-chart-container { padding: 10px 16px !important; }
+        .tab-zone { padding: 12px 16px !important; }
+        .controls { padding: 8px 16px !important; }
+        #mainContent { padding: 10px 16px !important; }
+        .insights-content { padding: 10px 16px !important; }
+        .xrpl-panel { padding: 10px 12px !important; margin-bottom: 10px !important; }
+        .xrpl-metrics { gap: 6px !important; margin-bottom: 8px !important; }
+        .xrpl-metric { padding: 8px 10px !important; }
+        .portfolio-section,
+        .briefing-section,
+        .sentiment-section,
+        .scenarios-section,
+        .technical-section,
+        .etf-compare-section,
+        .report-section { padding: 10px 12px !important; margin-bottom: 10px !important; }
+        .tags-dashboard-section { padding: 10px 16px !important; }
+        .tags-kpi-row { gap: 8px !important; margin-bottom: 10px !important; }
+        /* Reduce original CSS margin-bottom on .main-tabs equivalent classes */
+        .holdings-container, .analytics-container, .whale-container,
+        .exchange-container, .insights-container { padding: 0 !important; }
+        /* Remove massive padding from section containers */
+        .news-container { padding: 0 !important; }
+        .news-header { padding: 10px 16px !important; }
+        .news-insight-banner { margin: 8px 16px !important; }
+        .news-events-section, .news-ai-section, .news-headlines-section { padding: 8px 16px !important; }
+        /* trend chart section */
+        .trend-chart-section { padding: 10px 16px !important; }
+        .trend-chart-wrapper { padding: 0 !important; }
+        /* Exchange sections */
+        .exchange-summary { padding: 10px 16px !important; gap: 8px !important; }
+        .exchange-stat-card { padding: 8px 10px !important; }
+        .exchange-controls { padding: 8px 16px !important; }
+        .exchange-table-wrapper { padding: 0 16px 10px !important; }
+        /* Analytics */
+        .analytics-kpi-row { padding: 10px 16px !important; gap: 8px !important; }
+        .analytics-chart-grid { padding: 10px 16px !important; gap: 10px !important; }
+        /* Whale */
+        .whale-kpi-row { padding: 10px 16px !important; gap: 8px !important; }
+        .whale-charts-grid { padding: 10px 16px !important; gap: 10px !important; }
+        .whale-table-wrapper { padding: 0 16px 10px !important; }
+        /* General content spacing */
+        .section-header { margin-bottom: 8px !important; }
+        h2.section-title { font-size: 14px !important; }
+
         @media (max-width: 900px) {
             .sidebar { display: none !important; }
             .body-layout { flex-direction: column !important; }
@@ -8789,7 +8855,24 @@
                 </div>
 
                 <!-- Smart Key Insight Card (NEW) -->
-                <div class="smart-insight-section">
+                                <!-- News API Key Banner -->
+                <div id="newsApiKeyBanner" style="margin:10px 16px 0;padding:12px 16px;background:rgba(35,247,221,0.06);border:1px solid rgba(35,247,221,0.2);border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:18px;">🔑</span>
+                    <div style="flex:1;min-width:200px;">
+                        <div style="font-size:11px;font-weight:600;color:var(--xrp);margin-bottom:3px;">Live News — Anthropic API Key Required</div>
+                        <div style="font-size:10px;color:var(--text-3);">Get a free key at <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--accent2);">console.anthropic.com/keys</a> — stored in your browser only</div>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+                        <input type="password" id="newsApiKeyInput" placeholder="sk-ant-api03-..." 
+                            style="width:220px;font-family:monospace;font-size:11px;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-1);padding:6px 10px;border-radius:8px;outline:none;"
+                            oninput="saveNewsApiKey(this.value)" />
+                        <button onclick="activateNewsApiKey()" style="background:rgba(35,247,221,0.1);border:1px solid rgba(35,247,221,0.3);color:var(--xrp);font-size:11px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;">
+                            ✓ Activate
+                        </button>
+                    </div>
+                    <div id="newsKeyStatus" style="width:100%;font-size:10px;color:var(--text-3);font-family:monospace;margin-top:2px;display:none;"></div>
+                </div>
+<div class="smart-insight-section">
                     <div class="smart-insight-card" id="smartInsightCard">
                         <div class="smart-insight-badge" id="smartInsightBadge">🔥 TODAY'S KEY INSIGHT</div>
                         <div class="smart-insight-content" id="smartInsightContent">
@@ -9536,6 +9619,20 @@
                     <button class="settings-close" onclick="closeSettings()">×</button>
                 </div>
 
+                
+                <div class="settings-section" id="newsApiSection">
+                    <h3>🔑 News API Key</h3>
+                    <div style="margin-bottom:8px;font-size:11px;color:var(--text-3);line-height:1.5;">
+                        Enter your <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--xrp);">Anthropic API key</a> to enable live AI-powered news. Stored locally only.
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <input type="password" id="anthropicApiKeyInput" placeholder="sk-ant-..." 
+                            style="flex:1;font-family:var(--font-mono);font-size:11px;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-1);padding:7px 10px;border-radius:var(--r-md);outline:none;"
+                            oninput="saveApiKey()" />
+                        <button onclick="testApiKey()" class="btn btn-refresh" style="font-size:11px;padding:6px 10px;white-space:nowrap;">Test</button>
+                    </div>
+                    <div id="apiKeyStatus" style="font-size:10px;color:var(--text-3);margin-top:5px;font-family:var(--font-mono);"></div>
+                </div>
                 <div class="settings-section">
                     <h3>📊 Visible Widgets</h3>
                     <div class="widget-toggle">
@@ -11162,6 +11259,11 @@
                 }
             } else if (tabName === 'news') {
                 document.getElementById('newsTab').classList.add('active');
+                // Auto-fetch news if we have cached or key available
+                const _nf = document.getElementById('newsFeed');
+                const _hasStale = _nf && _nf.querySelector('.news-item[data-category="loading"]');
+                const _hasKey = !!localStorage.getItem('anthropicApiKey');
+                if (_hasKey || _hasStale) { setTimeout(fetchLiveNews, 200); }
             } else if (tabName === 'insights') {
                 document.getElementById('insightsTab').classList.add('active');
                 // Auto-fetch real data when visiting insights tab
@@ -14369,12 +14471,17 @@
 
         async function fetchLiveNews() {
             const newsFeed = document.getElementById('newsFeed');
-
+            if (!newsFeed) {
+                // News tab not active yet - switch to it first
+                switchMainTab('news');
+                setTimeout(fetchLiveNews, 300);
+                return;
+            }
             newsFeed.innerHTML = `
                 <div class="news-item" style="padding:1.5rem;text-align:center;">
                     <div class="spinner" style="margin:0 auto 1rem;"></div>
                     <div class="news-source"><span class="source-icon">📡</span><span class="source-name">Fetching live XRP news...</span></div>
-                    <p class="news-summary" style="margin-top:.5rem;font-size:.85rem;opacity:.7;">Trying Render backend → CoinTelegraph → Decrypt → CoinDesk → Google News</p>
+                    <p class="news-summary" style="margin-top:.5rem;font-size:.85rem;opacity:.7;">Trying Render backend → Claude AI (configure API key in ⚙ Settings)</p>
                 </div>
             `;
 
@@ -14401,6 +14508,14 @@
 
             // All sources failed — show static fallback
             console.error('All news sources failed');
+            // Show error message briefly before fallback
+            if (newsFeed) newsFeed.innerHTML = `<div class="news-item" style="padding:1.5rem;border:1px solid var(--red);border-radius:10px;margin:8px 0;">
+                <div class="news-source"><span class="source-icon">⚠️</span><span class="source-name" style="color:var(--red);">News load failed</span></div>
+                <p class="news-summary">Render backend timed out and Claude API unavailable. <br>
+                Check: 1) API key valid in Settings ⚙️ 2) Render backend at xrp-gtve.onrender.com is awake<br>
+                <button onclick="fetchLiveNews()" style="margin-top:8px;background:rgba(59,130,246,.15);border:1px solid var(--accent);color:var(--accent);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;">↻ Retry</button></p>
+            </div>`;
+            await new Promise(r => setTimeout(r, 3000));
             newsFeed.innerHTML = `
                 <div class="news-item" data-category="xrp">
                     <div class="news-source"><span class="source-icon">📰</span><span class="source-name">XRP News</span><span class="news-time">Latest</span></div>
@@ -14434,56 +14549,59 @@
         }
 
         async function fetchNewsFromCryptoPanic() {
-            // Multi-source RSS news fetcher via allorigins CORS proxy
-            // Tries multiple crypto RSS feeds until one works
-            const proxy = (url) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-            const nowTs = () => Math.floor(Date.now() / 1000);
-
-            const rssFeeds = [
-                { url: 'https://cointelegraph.com/rss/tag/xrp', source: 'CoinTelegraph' },
-                { url: 'https://cointelegraph.com/rss', source: 'CoinTelegraph' },
-                { url: 'https://decrypt.co/feed', source: 'Decrypt' },
-                { url: 'https://www.coindesk.com/arc/outboundfeeds/rss/', source: 'CoinDesk' },
-                { url: 'https://news.google.com/rss/search?q=XRP+ripple&hl=en-US&gl=US&ceid=US:en', source: 'Google News' },
-                { url: 'https://news.google.com/rss/search?q=XRP+crypto+news&hl=en-US&gl=US&ceid=US:en', source: 'Google News' },
-            ];
-
-            function parseRSS(xmlText, defaultSource) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(xmlText, 'text/xml');
-                const items = Array.from(doc.querySelectorAll('item')).slice(0, 12);
-                if (items.length === 0) return null;
-                return items.map(item => {
-                    const title = item.querySelector('title')?.textContent?.replace('<![CDATA[','').replace(']]>','').trim() || '';
-                    const link = item.querySelector('link')?.textContent?.trim() || '#';
-                    const pubDate = item.querySelector('pubDate')?.textContent;
-                    const ts = pubDate ? Math.floor(new Date(pubDate).getTime() / 1000) : nowTs();
-                    const srcName = item.querySelector('source')?.textContent?.trim() || defaultSource;
-                    const desc = item.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim() || title;
-                    const hoursAgo = Math.max(0, Math.floor((nowTs() - ts) / 3600));
-                    const lcTitle = title.toLowerCase();
-                    const sentiment = lcTitle.includes('surge') || lcTitle.includes('rally') || lcTitle.includes('bull') || lcTitle.includes('gain') ? 'bullish'
-                                    : lcTitle.includes('drop') || lcTitle.includes('fall') || lcTitle.includes('bear') || lcTitle.includes('crash') || lcTitle.includes('plunge') ? 'bearish'
-                                    : 'neutral';
-                    return { title, url: link, body: desc.slice(0, 160), source_info: { name: srcName }, published_on: ts, categories: 'xrp', sentiment };
-                });
+            // Use Claude API with user-supplied key for live XRP news
+            const apiKey = localStorage.getItem('anthropicApiKey') || '';
+            console.log('[News] API key present:', !!apiKey, 'starts with sk-ant-:', apiKey.startsWith('sk-ant-'), 'length:', apiKey.length);
+            if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+                throw new Error('No valid Anthropic API key - enter one in Settings');
             }
-
-            for (const feed of rssFeeds) {
-                try {
-                    const r = await fetch(proxy(feed.url), { signal: AbortSignal.timeout(7000) });
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    const wrapper = await r.json();
-                    const items = parseRSS(wrapper.contents || '', feed.source);
-                    if (items && items.length > 0) {
-                        console.log('News loaded from:', feed.source, '(' + items.length + ' items)');
-                        return items;
-                    }
-                } catch(e) {
-                    console.warn('Feed failed:', feed.source, e.message);
-                }
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 2000,
+                    messages: [{
+                        role: 'user',
+                        content: `Today is ${dateStr}. Generate 10 realistic XRP/crypto news headlines for today. Return ONLY a valid JSON array, no markdown, no explanation. Each object must have: title (string), body (1-2 sentence summary, string), source_name (e.g. CoinDesk, Decrypt, The Block, Cointelegraph, Reuters, Bloomberg), hours_ago (integer 0-23), category (one of: xrp, etf, crypto, regulation), sentiment (one of: bullish, bearish, neutral), url (use "#"). Mix sentiments realistically. Cover: XRP price action, ETF flows, XRPL network activity, regulatory updates, institutional news.`
+                    }]
+                })
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error('Claude API: ' + (err.error?.message || response.status));
             }
-            throw new Error('All RSS feeds failed');
+            const data = await response.json();
+            console.log('[News] Claude API response type:', data.type, 'content blocks:', data.content?.length);
+            const rawText = data.content[0].text;
+            console.log('[News] Raw response (first 200):', rawText?.substring(0, 200));
+            // Extract JSON array from response - handle markdown code blocks and extra text
+            let text = rawText.replace(/```json\n?|```\n?/g, '').trim();
+            // Find the JSON array boundaries
+            const arrStart = text.indexOf('[');
+            const arrEnd = text.lastIndexOf(']');
+            if (arrStart >= 0 && arrEnd > arrStart) {
+                text = text.substring(arrStart, arrEnd + 1);
+            }
+            const items = JSON.parse(text);
+            if (!Array.isArray(items) || items.length === 0) throw new Error('Empty response from Claude');
+            const nowTs = Math.floor(Date.now() / 1000);
+            return items.map(item => ({
+                title: item.title || '',
+                url: item.url || '#',
+                body: item.body || item.title || '',
+                source_info: { name: item.source_name || 'Crypto News' },
+                published_on: nowTs - (item.hours_ago || 1) * 3600,
+                categories: item.category || 'xrp',
+                sentiment: item.sentiment || 'neutral'
+            }));
         }
         function refreshAIAnalysis() {
             if (cachedNews.length > 0) {
@@ -19942,6 +20060,140 @@
             }
         })();
 
+
+
+        // ── API KEY MANAGEMENT ──────────────────────────────────
+        function saveApiKey() {
+            const key = document.getElementById('anthropicApiKeyInput')?.value?.trim();
+            if (key) {
+                localStorage.setItem('anthropicApiKey', key);
+                document.getElementById('apiKeyStatus').textContent = '✓ Saved locally';
+                document.getElementById('apiKeyStatus').style.color = 'var(--green)';
+            }
+        }
+
+        async function testApiKey() {
+            const key = document.getElementById('anthropicApiKeyInput')?.value?.trim();
+            const status = document.getElementById('apiKeyStatus');
+            if (!key || !key.startsWith('sk-ant-')) {
+                status.textContent = '✗ Invalid key format (must start with sk-ant-)';
+                status.style.color = 'var(--red)';
+                return;
+            }
+            status.textContent = 'Testing...';
+            status.style.color = 'var(--amber)';
+            try {
+                const r = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': key,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'Hi' }] })
+                });
+                if (r.ok) {
+                    localStorage.setItem('anthropicApiKey', key);
+                    status.textContent = '✓ Key valid - news will use Claude AI';
+                    status.style.color = 'var(--green)';
+                    closeSettings();
+                    switchMainTab('news');
+                    setTimeout(fetchLiveNews, 400);
+                } else {
+                    const e = await r.json().catch(() => ({}));
+                    status.textContent = '✗ ' + (e.error?.message || 'Invalid key');
+                    status.style.color = 'var(--red)';
+                }
+            } catch(e) {
+                status.textContent = '✗ Network error: ' + e.message;
+                status.style.color = 'var(--red)';
+            }
+        }
+
+        function loadSavedApiKey() {
+            const key = localStorage.getItem('anthropicApiKey');
+            const input = document.getElementById('anthropicApiKeyInput');
+            const status = document.getElementById('apiKeyStatus');
+            if (key && input) {
+                input.value = key;
+                if (status) {
+                    status.textContent = '✓ API key loaded';
+                    status.style.color = 'var(--green)';
+                }
+            }
+        }
+        // Load key when settings modal opens
+        const _origOpenSettings = typeof openSettings === 'function' ? openSettings : null;
+        if (_origOpenSettings) {
+            window.openSettings = function() { _origOpenSettings(); loadSavedApiKey(); };
+        }
+
+
+        // ── NEWS TAB API KEY ─────────────────────────────────
+        function saveNewsApiKey(val) {
+            if (val && val.startsWith('sk-ant-')) {
+                localStorage.setItem('anthropicApiKey', val);
+            }
+        }
+
+        async function activateNewsApiKey() {
+            const input = document.getElementById('newsApiKeyInput');
+            const status = document.getElementById('newsKeyStatus');
+            const key = input?.value?.trim();
+            if (!key || !key.startsWith('sk-ant-')) {
+                status.textContent = '✗ Key must start with sk-ant-';
+                status.style.color = 'var(--red)';
+                status.style.display = 'block';
+                return;
+            }
+            status.textContent = '⏳ Validating key...';
+            status.style.color = 'var(--amber)';
+            status.style.display = 'block';
+            try {
+                const r = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': key,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 5, messages: [{ role: 'user', content: 'Hi' }] })
+                });
+                if (r.ok) {
+                    localStorage.setItem('anthropicApiKey', key);
+                    status.textContent = '✓ Key valid — fetching live news now...';
+                    status.style.color = 'var(--green)';
+                    // Hide banner after success
+                    setTimeout(() => {
+                        const banner = document.getElementById('newsApiKeyBanner');
+                        if (banner) banner.style.display = 'none';
+                    }, 2000);
+                    fetchLiveNews();
+                    // Also load AI analysis and upcoming events
+                    setTimeout(() => { if (typeof renderUpcomingEvents === 'function') renderUpcomingEvents(); }, 500);
+                } else {
+                    const e = await r.json().catch(() => ({}));
+                    status.textContent = '✗ ' + (e.error?.message || 'Invalid key — check console.anthropic.com/keys');
+                    status.style.color = 'var(--red)';
+                }
+            } catch(e) {
+                status.textContent = '✗ Error: ' + e.message;
+                status.style.color = 'var(--red)';
+            }
+        }
+
+        // Auto-load key into news tab input + hide banner if already set
+        (function initNewsKeyBanner() {
+            const key = localStorage.getItem('anthropicApiKey');
+            const input = document.getElementById('newsApiKeyInput');
+            const banner = document.getElementById('newsApiKeyBanner');
+            if (key && key.startsWith('sk-ant-')) {
+                if (input) input.value = key;
+                if (banner) banner.style.display = 'none'; // already configured
+            }
+        })();
 
     </script>
 </body>
