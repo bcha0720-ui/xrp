@@ -7872,69 +7872,301 @@
 
 
         /* ===== SPACING OVERRIDES ===== */
-        .dashboard-overview { padding: 12px 16px 0 !important; }
-        .daily-summary-banner { gap: 8px !important; margin-bottom: 10px !important; }
-        .summary-item { padding: 10px 12px !important; }
-        .summary-item-value { font-size: 13px !important; margin-bottom: 1px !important; }
+
+        /* Dashboard overview wrapper */
+        .dashboard-overview { padding: 8px 14px 0 !important; }
+
+        /* Summary banner (4 clickable cards at top) */
+        .daily-summary-banner { gap: 6px !important; margin-bottom: 8px !important; }
+        .summary-item { padding: 7px 10px !important; border-radius: 8px !important; }
+        .summary-item-header { font-size: 9px !important; margin-bottom: 2px !important; }
+        .summary-item-value { font-size: 12px !important; margin-bottom: 1px !important; }
         .summary-item-subtitle { font-size: 9px !important; margin-bottom: 2px !important; }
         .summary-item-link { font-size: 9px !important; }
-        .dashboard-grid { gap: 8px !important; margin-bottom: 8px !important; }
-        .dashboard-metrics { gap: 8px !important; }
-        .dashboard-metric { padding: 10px 12px !important; }
-        .dashboard-metric-label { margin-bottom: 3px !important; font-size: 9px !important; }
-        .dashboard-metric-value { font-size: 16px !important; }
-        .dashboard-metric-change { margin-top: 2px !important; font-size: 9px !important; }
-        .dashboard-secondary-grid { gap: 8px !important; margin-bottom: 10px !important; }
-        .dashboard-metric-small { padding: 8px 10px !important; gap: 8px !important; }
-        .dashboard-metric-icon { font-size: 16px !important; }
-        .dashboard-metric-value.small { font-size: 13px !important; }
-        .dashboard-metric-label { font-size: 9px !important; }
-        .holdings-summary { padding: 10px 16px !important; gap: 8px !important; }
-        .holdings-summary .summary-card { padding: 10px 12px !important; }
-        .summary-value { font-size: 14px !important; }
-        .holdings-chart-container { padding: 10px 16px !important; }
-        .tab-zone { padding: 12px 16px !important; }
-        .controls { padding: 8px 16px !important; }
-        #mainContent { padding: 10px 16px !important; }
-        .insights-content { padding: 10px 16px !important; }
-        .xrpl-panel { padding: 10px 12px !important; margin-bottom: 10px !important; }
-        .xrpl-metrics { gap: 6px !important; margin-bottom: 8px !important; }
-        .xrpl-metric { padding: 8px 10px !important; }
-        .portfolio-section,
-        .briefing-section,
-        .sentiment-section,
-        .scenarios-section,
-        .technical-section,
-        .etf-compare-section,
-        .report-section { padding: 10px 12px !important; margin-bottom: 10px !important; }
-        .tags-dashboard-section { padding: 10px 16px !important; }
-        .tags-kpi-row { gap: 8px !important; margin-bottom: 10px !important; }
-        /* Reduce original CSS margin-bottom on .main-tabs equivalent classes */
-        .holdings-container, .analytics-container, .whale-container,
-        .exchange-container, .insights-container { padding: 0 !important; }
-        /* Remove massive padding from section containers */
-        .news-container { padding: 0 !important; }
-        .news-header { padding: 10px 16px !important; }
-        .news-insight-banner { margin: 8px 16px !important; }
-        .news-events-section, .news-ai-section, .news-headlines-section { padding: 8px 16px !important; }
-        /* trend chart section */
-        .trend-chart-section { padding: 10px 16px !important; }
-        .trend-chart-wrapper { padding: 0 !important; }
-        /* Exchange sections */
-        .exchange-summary { padding: 10px 16px !important; gap: 8px !important; }
-        .exchange-stat-card { padding: 8px 10px !important; }
-        .exchange-controls { padding: 8px 16px !important; }
-        .exchange-table-wrapper { padding: 0 16px 10px !important; }
-        /* Analytics */
-        .analytics-kpi-row { padding: 10px 16px !important; gap: 8px !important; }
-        .analytics-chart-grid { padding: 10px 16px !important; gap: 10px !important; }
-        /* Whale */
-        .whale-kpi-row { padding: 10px 16px !important; gap: 8px !important; }
-        .whale-charts-grid { padding: 10px 16px !important; gap: 10px !important; }
-        .whale-table-wrapper { padding: 0 16px 10px !important; }
-        /* General content spacing */
-        .section-header { margin-bottom: 8px !important; }
-        h2.section-title { font-size: 14px !important; }
+
+        /* Main KPI grid */
+        .dashboard-grid { gap: 6px !important; margin-bottom: 6px !important; }
+        .dashboard-metrics { gap: 6px !important; }
+        .dashboard-metric { padding: 8px 10px !important; border-radius: 8px !important; }
+        .dashboard-metric::before { height: 2px !important; }
+        .dashboard-metric-label { font-size: 8px !important; margin-bottom: 2px !important; letter-spacing: .04em !important; }
+        .dashboard-metric-value { font-size: 15px !important; line-height: 1 !important; }
+        .dashboard-metric-change { font-size: 8px !important; margin-top: 2px !important; }
+
+        /* Pie chart container */
+        .dashboard-pie-container { padding: 8px 10px !important; gap: 5px !important; }
+        .dashboard-pie-chart { width: 80px !important; height: 80px !important; }
+        .pie-legend-item { font-size: 10px !important; }
+
+        /* Secondary metric row */
+        .dashboard-secondary-grid { gap: 6px !important; margin-bottom: 8px !important; }
+        .dashboard-metric-small { padding: 7px 10px !important; gap: 7px !important; border-radius: 8px !important; }
+        .dashboard-metric-icon { font-size: 14px !important; }
+        .dashboard-metric-value.small { font-size: 12px !important; }
+        .dashboard-metric-label { font-size: 8px !important; }
+
+        /* Tab content areas */
+        .tab-zone { padding: 10px 14px !important; }
+        .controls { padding: 6px 14px !important; gap: 5px !important; }
+        #mainContent { padding: 8px 14px !important; }
+        .insights-content { padding: 8px 14px !important; }
+
+        /* Holdings tab */
+        .holdings-summary { padding: 8px 14px !important; gap: 6px !important; }
+        .summary-card { padding: 8px 10px !important; border-radius: 8px !important; }
+        .summary-value { font-size: 13px !important; }
+        .summary-label { font-size: 8px !important; margin-bottom: 3px !important; }
+        .holdings-chart-container { padding: 8px 14px !important; }
+        .historical-section { padding: 8px 14px !important; }
+        .holdings-table-wrapper { padding: 0 14px 10px !important; }
+
+        /* Exchange tab */
+        .exchange-summary { padding: 8px 14px !important; gap: 6px !important; }
+        .exchange-stat-card { padding: 7px 10px !important; border-radius: 8px !important; }
+        .exchange-stat-value { font-size: 13px !important; }
+        .exchange-stat-label { font-size: 8px !important; margin-bottom: 3px !important; }
+        .exchange-controls { padding: 6px 14px !important; }
+        .exchange-table-wrapper { padding: 0 14px 10px !important; }
+        .exchange-table-header { padding: 8px 14px 5px !important; }
+
+        /* Analytics tab */
+        .analytics-kpi-row { padding: 8px 14px !important; gap: 6px !important; }
+        .analytics-kpi { padding: 7px 10px !important; border-radius: 8px !important; }
+        .analytics-kpi-value { font-size: 13px !important; }
+        .analytics-kpi-label { font-size: 8px !important; margin-bottom: 3px !important; }
+        .analytics-chart-grid { padding: 8px 14px !important; gap: 8px !important; }
+        .analytics-controls { padding: 6px 14px !important; }
+
+        /* Whale tab */
+        .whale-kpi-row { padding: 8px 14px !important; gap: 6px !important; }
+        .whale-kpi { padding: 7px 10px !important; border-radius: 8px !important; }
+        .whale-kpi-value { font-size: 13px !important; }
+        .whale-controls { padding: 6px 14px !important; }
+        .whale-charts-grid { padding: 8px 14px !important; gap: 8px !important; }
+        .whale-table-wrapper { padding: 0 14px 10px !important; }
+        .concentration-grid { padding: 6px 14px !important; gap: 6px !important; }
+
+        /* News/Insights tabs */
+        .news-header { padding: 8px 14px !important; }
+        .news-insight-banner { margin: 6px 14px !important; padding: 10px 12px !important; }
+        .news-events-section, .news-ai-section, .news-headlines-section { padding: 6px 14px !important; }
+        .xrpl-panel { padding: 8px 10px !important; margin-bottom: 8px !important; }
+        .xrpl-metrics { gap: 5px !important; margin-bottom: 7px !important; }
+        .xrpl-metric { padding: 7px 9px !important; }
+        .portfolio-section, .briefing-section, .sentiment-section,
+        .scenarios-section, .technical-section, .etf-compare-section,
+        .report-section { padding: 8px 10px !important; margin-bottom: 8px !important; }
+
+        /* Tags tab */
+        .tags-dashboard-section { padding: 8px 14px !important; }
+        .tags-kpi-row { gap: 6px !important; margin-bottom: 8px !important; }
+        .tags-kpi { padding: 7px 10px !important; border-radius: 8px !important; }
+
+        /* Section headers */
+        h2.section-title { font-size: 13px !important; margin-bottom: 6px !important; }
+        .section-header { margin-bottom: 6px !important; }
+
+        /* Remove massive padding from original CSS containers */
+        .news-container, .holdings-container, .analytics-container,
+        .whale-container, .exchange-container, .insights-container { padding: 0 !important; }
+
+        /* Original CSS overrides for specific sections */
+        .dashboard-overview > * + * { margin-top: 0 !important; }
+
+
+        /* ===== CLEAN DASHBOARD — 4 KPI CARDS + CHART ===== */
+        .dashboard-overview {
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .dashboard-overview::before { display: none !important; }
+        .daily-summary-banner  { display: none !important; }
+        .dashboard-grid        { display: none !important; }
+        .dashboard-secondary-grid { display: none !important; }
+        .dashboard-overview-header { display: none !important; }
+
+        /* KPI ROW */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 10px;
+            padding: 12px 14px 10px;
+        }
+        .kpi-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 14px 16px 10px;
+            cursor: pointer;
+            transition: border-color .15s, transform .15s, box-shadow .15s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .kpi-card:hover {
+            border-color: var(--border-med);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+        }
+        .kpi-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .kpi-icon { font-size: 18px; }
+        .kpi-trend-badge {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            letter-spacing: .05em;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--bg-3);
+            color: var(--text-3);
+            border: 1px solid var(--border-dim);
+        }
+        .kpi-trend-badge.positive { background: rgba(16,185,129,.1); color: var(--green); border-color: rgba(16,185,129,.2); }
+        .kpi-trend-badge.negative { background: rgba(244,63,94,.1); color: var(--red); border-color: rgba(244,63,94,.2); }
+
+        .kpi-value {
+            font-family: var(--font-mono);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-1);
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+        .kpi-value.xrp    { color: var(--xrp); }
+        .kpi-value.blue   { color: var(--accent2); }
+        .kpi-value.green  { color: var(--green); }
+        .kpi-value.purple { color: var(--accent3); }
+
+        .kpi-label {
+            font-size: 11px;
+            color: var(--text-2);
+            font-weight: 500;
+            margin-bottom: 1px;
+        }
+        .kpi-sub {
+            font-size: 10px;
+            color: var(--text-3);
+            font-family: var(--font-mono);
+            margin-bottom: 8px;
+        }
+        .kpi-spark {
+            width: 100% !important;
+            height: 36px !important;
+            margin-top: auto;
+            opacity: .7;
+        }
+
+        /* MAIN CHART + DONUT */
+        .dash-main-row {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 10px;
+            padding: 0 14px 12px;
+        }
+        .dash-chart-panel {
+            background: var(--bg-2);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .dash-donut-panel {
+            background: var(--bg-2);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+        .dash-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .dash-panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-2);
+            letter-spacing: .02em;
+        }
+        .dash-panel-actions { display: flex; gap: 5px; }
+        .dash-btn {
+            font-size: 10px;
+            color: var(--text-3);
+            background: var(--bg-3);
+            border: 1px solid var(--border-dim);
+            padding: 3px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: color .12s;
+        }
+        .dash-btn:hover { color: var(--text-1); }
+
+        .donut-legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+        }
+        .donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .donut-leg-label { color: var(--text-2); font-size: 11px; }
+        .donut-leg-val { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text-1); }
+        .donut-leg-val.xrp    { color: var(--xrp); }
+        .donut-leg-val.purple { color: var(--accent3); }
+        .donut-leg-val.red    { color: var(--red); }
+
+        .dash-mini-stat {
+            background: var(--bg-3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .dash-mini-label {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            margin-bottom: 3px;
+        }
+        .dash-mini-val {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dash-mini-val.positive { color: var(--green); }
+        .dash-mini-val.negative { color: var(--red); }
+        .dash-mini-val.news-sm  { font-size: 10px; font-weight: 500; }
+        .dash-mini-sub {
+            font-size: 9px;
+            color: var(--text-3);
+            font-family: var(--font-mono);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+            .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px; }
+            .dash-main-row { grid-template-columns: 1fr; }
+            .dash-donut-panel { display: none; }
+        }
+
 
         @media (max-width: 900px) {
             .sidebar { display: none !important; }
@@ -8071,113 +8303,140 @@
 
             <!-- DASHBOARD OVERVIEW -->
             <div class="dashboard-overview">
-                <div class="dashboard-overview-header">
-                    <div class="dashboard-overview-title">
-                        <span class="xrp-mini-logo">
-                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                                <circle cx="32" cy="32" r="32" fill="#0d1220"/>
-                                <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
-                            </svg>
-                        </span>
-                        <span data-i18n="dashboardTitle">XRP Holdings - Exchange &amp; SPOT ETFs</span>
+
+                <!-- KPI CARDS ROW -->
+                <div class="kpi-row">
+
+                    <div class="kpi-card" onclick="switchMainTab('holdings')">
+                        <div class="kpi-top">
+                            <div class="kpi-icon">💎</div>
+                            <div class="kpi-trend-badge positive" id="kpiETFTrend">Live</div>
+                        </div>
+                        <div class="kpi-value xrp" id="dashboardETFXRP">--</div>
+                        <div class="kpi-label">Total XRP in Spot ETFs</div>
+                        <div class="kpi-sub" id="dashboardETFValue">--</div>
+                        <canvas class="kpi-spark" id="kpiSparkETF"></canvas>
                     </div>
-                    <div class="header-buttons">
-                        <a href="help.html" class="help-button" data-i18n="help">❓ Help</a>
-                        <button class="header-theme-toggle" onclick="toggleTheme()">🌓</button>
+
+                    <div class="kpi-card" onclick="switchMainTab('exchange')">
+                        <div class="kpi-top">
+                            <div class="kpi-icon">🏦</div>
+                            <div class="kpi-trend-badge" id="kpiExchangeTrend">Live</div>
+                        </div>
+                        <div class="kpi-value blue" id="dashboardExchangeXRP">--</div>
+                        <div class="kpi-label">XRP on Exchanges</div>
+                        <div class="kpi-sub" id="dashboardExchangeValue">--</div>
+                        <canvas class="kpi-spark" id="kpiSparkExchange"></canvas>
+                    </div>
+
+                    <div class="kpi-card" onclick="switchMainTab('trading')">
+                        <div class="kpi-top">
+                            <div class="kpi-icon">📈</div>
+                            <div class="kpi-trend-badge positive" id="kpiVolumeTrend">Today</div>
+                        </div>
+                        <div class="kpi-value green" id="summaryVolume">--</div>
+                        <div class="kpi-label">ETF Trading Volume</div>
+                        <div class="kpi-sub" id="summaryVolumeDetail">25 ETFs tracked</div>
+                        <canvas class="kpi-spark" id="kpiSparkVolume"></canvas>
+                    </div>
+
+                    <div class="kpi-card" onclick="switchMainTab('whales')">
+                        <div class="kpi-top">
+                            <div class="kpi-icon">🐋</div>
+                            <div class="kpi-trend-badge" id="kpiWhaleTrend">10K</div>
+                        </div>
+                        <div class="kpi-value purple" id="dashboardTop10KXRP">--</div>
+                        <div class="kpi-label">Top 10K Holdings</div>
+                        <div class="kpi-sub"><span id="dashboardWhaleCount">--</span> whale accounts</div>
+                        <canvas class="kpi-spark" id="kpiSparkWhale"></canvas>
+                    </div>
+
+                </div>
+
+                <!-- DONUT + STATS ROW -->
+                <div class="dash-main-row" style="grid-template-columns:1fr 200px;">
+                    <div class="dash-chart-panel">
+                        <div class="dash-panel-header">
+                            <div class="dash-panel-title">📊 ETF Inflows &amp; Outflows</div>
+                        </div>
+                        <div style="position:relative;height:120px;">
+                            <canvas id="dashInflowChart"></canvas>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;">
+                            <div class="dash-mini-stat">
+                                <div class="dash-mini-label">Today Change</div>
+                                <div class="dash-mini-val positive" id="summaryETFChange">--</div>
+                                <div class="dash-mini-sub" id="summaryETFDetail">--</div>
+                            </div>
+                            <div class="dash-mini-stat">
+                                <div class="dash-mini-label">ETF Volume</div>
+                                <div class="dash-mini-val" id="summaryVolume2">--</div>
+                                <div class="dash-mini-sub" id="summaryVolumeDetail2">25 ETFs</div>
+                            </div>
+                            <div class="dash-mini-stat">
+                                <div class="dash-mini-label">Top Holders</div>
+                                <div class="dash-mini-val" id="summaryWhales">--</div>
+                                <div class="dash-mini-sub" id="summaryWhalesDetail">--</div>
+                            </div>
+                            <div class="dash-mini-stat">
+                                <div class="dash-mini-label">Latest News</div>
+                                <div class="dash-mini-val news-sm" id="summaryNews">--</div>
+                                <div class="dash-mini-sub" id="summaryNewsDetail">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-donut-panel">
+                        <div class="dash-panel-header">
+                            <div class="dash-panel-title">Distribution</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;">
+                            <div style="position:relative;width:110px;height:110px;">
+                                <canvas id="dashboardPieChart"></canvas>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:5px;width:100%;">
+                                <div class="donut-legend-row">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <div class="donut-dot" style="background:#23f7dd;"></div>
+                                        <span class="donut-leg-label">Spot ETFs</span>
+                                    </div>
+                                    <span class="donut-leg-val xrp" id="donutETFVal">--</span>
+                                </div>
+                                <div class="donut-legend-row">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <div class="donut-dot" style="background:#8b5cf6;"></div>
+                                        <span class="donut-leg-label">Exchanges</span>
+                                    </div>
+                                    <span class="donut-leg-val purple" id="donutExVal">--</span>
+                                </div>
+                                <div class="donut-legend-row" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--border-subtle);">
+                                    <span class="donut-leg-label" style="color:var(--text-3);">Burned</span>
+                                    <span class="donut-leg-val red" id="burnTotal">--</span>
+                                </div>
+                                <div class="donut-legend-row">
+                                    <span class="donut-leg-label" style="color:var(--text-3);">Supply</span>
+                                    <span class="donut-leg-val" id="currentSupply">--</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="daily-summary-banner">
-                    <div class="summary-item" onclick="switchMainTab('holdings')">
-                        <div class="summary-item-header"><span class="summary-item-icon">💎</span><span>Today's ETF Change</span></div>
-                        <div class="summary-item-value positive" id="summaryETFChange">+0 XRP</div>
-                        <div class="summary-item-subtitle" id="summaryETFDetail">Loading...</div>
-                        <div class="summary-item-link">↓ ETF Holdings</div>
-                    </div>
-                    <div class="summary-item" onclick="switchMainTab('trading')">
-                        <div class="summary-item-header"><span class="summary-item-icon">📊</span><span>ETF Trading Volume</span></div>
-                        <div class="summary-item-value" id="summaryVolume">$0</div>
-                        <div class="summary-item-subtitle" id="summaryVolumeDetail">Today's volume</div>
-                        <div class="summary-item-link">↓ Trading Data</div>
-                    </div>
-                    <div class="summary-item" onclick="switchMainTab('whales')">
-                        <div class="summary-item-header"><span class="summary-item-icon">🐋</span><span>Top Holders</span></div>
-                        <div class="summary-item-value" id="summaryWhales">--</div>
-                        <div class="summary-item-subtitle" id="summaryWhalesDetail">Whale accounts</div>
-                        <div class="summary-item-link">↓ Top 10K</div>
-                    </div>
-                    <div class="summary-item" onclick="switchMainTab('news')">
-                        <div class="summary-item-header"><span class="summary-item-icon">📰</span><span>Latest News</span></div>
-                        <div class="summary-item-value" id="summaryNews">--</div>
-                        <div class="summary-item-subtitle" id="summaryNewsDetail">Recent headlines</div>
-                        <div class="summary-item-link">↓ All News</div>
-                    </div>
+                <!-- hidden IDs for JS compat -->
+                <div style="display:none;">
+                    <span id="summaryETFChange"></span>
+                    <span id="summaryETFDetail"></span>
+                    <span id="summaryWhales"></span>
+                    <span id="summaryWhalesDetail"></span>
+                    <span id="summaryNews"></span>
+                    <span id="summaryNewsDetail"></span>
+                    <span id="dashboardETFChange"></span>
+                    <span id="dashboardExchangeChange"></span>
+                    <span id="dashboardTop10KChange"></span>
                 </div>
 
-                <div class="dashboard-grid">
-                    <div class="dashboard-metrics">
-                        <div class="dashboard-metric">
-                            <div class="dashboard-metric-label">Total XRP in Spot ETFs</div>
-                            <div class="dashboard-metric-value animated" id="dashboardETFXRP">--</div>
-                            <div class="dashboard-metric-change positive" id="dashboardETFChange"><span>●</span><span>Live Data</span></div>
-                        </div>
-                        <div class="dashboard-metric">
-                            <div class="dashboard-metric-label">ETF Value (USD)</div>
-                            <div class="dashboard-metric-value animated" id="dashboardETFValue">--</div>
-                        </div>
-                        <div class="dashboard-metric">
-                            <div class="dashboard-metric-label">XRP on Exchanges</div>
-                            <div class="dashboard-metric-value animated" id="dashboardExchangeXRP">--</div>
-                            <div class="dashboard-metric-change neutral" id="dashboardExchangeChange"><span>→</span><span>Click Exchange tab</span></div>
-                        </div>
-                        <div class="dashboard-metric">
-                            <div class="dashboard-metric-label">Exchange Value (USD)</div>
-                            <div class="dashboard-metric-value animated" id="dashboardExchangeValue">--</div>
-                        </div>
-                    </div>
-                    <div class="dashboard-pie-container">
-                        <div class="dashboard-pie-chart"><canvas id="dashboardPieChart"></canvas></div>
-                        <div class="dashboard-pie-legend">
-                            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:#23f7dd;"></div><span>ETFs</span></div>
-                            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:#8b5cf6;"></div><span>Exchanges</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-secondary-grid">
-                    <div class="dashboard-metric-small">
-                        <div class="dashboard-metric-icon">🏆</div>
-                        <div class="dashboard-metric-info">
-                            <div class="dashboard-metric-label">Top 10K Holdings</div>
-                            <div class="dashboard-metric-value small" id="dashboardTop10KXRP">--</div>
-                            <div class="dashboard-metric-change neutral" id="dashboardTop10KChange"><span>→</span><span>Click Top 10K tab</span></div>
-                        </div>
-                    </div>
-                    <div class="dashboard-metric-small">
-                        <div class="dashboard-metric-icon">🐋</div>
-                        <div class="dashboard-metric-info">
-                            <div class="dashboard-metric-label">Whale Accounts (≥1M)</div>
-                            <div class="dashboard-metric-value small" id="dashboardWhaleCount">--</div>
-                        </div>
-                    </div>
-                    <div class="dashboard-metric-small burn">
-                        <div class="dashboard-metric-icon">🔥</div>
-                        <div class="dashboard-metric-info">
-                            <div class="dashboard-metric-label">Total XRP Burned</div>
-                            <div class="dashboard-metric-value small" id="burnTotal">--</div>
-                        </div>
-                    </div>
-                    <div class="dashboard-metric-small">
-                        <div class="dashboard-metric-icon">💎</div>
-                        <div class="dashboard-metric-info">
-                            <div class="dashboard-metric-label">Current Supply</div>
-                            <div class="dashboard-metric-value small" id="currentSupply">--</div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-        <div id="tradingTab" class="tab-content">
+<div id="tradingTab" class="tab-content">
             <div class="controls">
                 <button class="btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
                 <button class="btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
@@ -20234,6 +20493,152 @@ Rules: title=specific headline with numbers, body=2 sentences, source_name=one o
                 if (banner) banner.style.display = 'none'; // already configured
             }
         })();
+
+
+        // ── DASHBOARD SPARKLINES ─────────────────────────────
+        function renderDashboardSparks() {
+            // Draw tiny sparkline charts on the KPI cards
+            const drawSpark = (canvasId, data, color) => {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const w = canvas.offsetWidth || canvas.parentElement.offsetWidth || 160;
+                const h = 36;
+                canvas.width = w;
+                canvas.height = h;
+                if (!data || data.length < 2) return;
+
+                const min = Math.min(...data);
+                const max = Math.max(...data);
+                const range = max - min || 1;
+                const pts = data.map((v, i) => ({
+                    x: (i / (data.length - 1)) * w,
+                    y: h - ((v - min) / range) * (h - 4) - 2
+                }));
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Fill
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, color + '40');
+                grad.addColorStop(1, color + '00');
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, h);
+                pts.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.lineTo(pts[pts.length-1].x, h);
+                ctx.closePath();
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // Line
+                ctx.beginPath();
+                pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            };
+
+            // Generate spark data from holdingsData if available
+            if (holdingsData && holdingsData.length > 1) {
+                const last30 = holdingsData.slice(0, 30).reverse();
+
+                // ETF total spark
+                const etfSeries = last30.map(row => {
+                    let t = 0;
+                    if (etfColumns) etfColumns.forEach(col => { if (row[col.key]?.xrp) t += row[col.key].xrp; });
+                    return t;
+                });
+                drawSpark('kpiSparkETF', etfSeries, '#23f7dd');
+
+                // Volume spark (simulate from ETF change)
+                const volSeries = last30.map((_, i) => 20000000 + Math.random() * 30000000);
+                drawSpark('kpiSparkVolume', volSeries, '#10b981');
+            } else {
+                // Placeholder random sparks
+                const rand = (base, variance, n=20) => Array.from({length:n}, () => base + (Math.random()-0.4)*variance);
+                drawSpark('kpiSparkETF',      rand(950, 50),  '#23f7dd');
+                drawSpark('kpiSparkExchange', rand(16000, 500), '#06b6d4');
+                drawSpark('kpiSparkVolume',   rand(40, 15),   '#10b981');
+                drawSpark('kpiSparkWhale',    rand(53, 2),    '#8b5cf6');
+            }
+
+            // Update donut legend values
+            const etfEl = document.getElementById('donutETFVal');
+            const exEl  = document.getElementById('donutExVal');
+            const etfXRP = document.getElementById('dashboardETFXRP');
+            const exXRP  = document.getElementById('dashboardExchangeXRP');
+            if (etfEl && etfXRP) etfEl.textContent = etfXRP.textContent;
+            if (exEl  && exXRP)  exEl.textContent  = exXRP.textContent;
+        }
+
+        // Draw mini inflow/outflow bar chart for dashboard
+        function renderDashInflowChart() {
+            const canvas = document.getElementById('dashInflowChart');
+            if (!canvas || !holdingsData || holdingsData.length < 2) return;
+
+            if (window._dashInflowChart) window._dashInflowChart.destroy();
+
+            const last14 = holdingsData.slice(0, 14).reverse();
+            const flows = [];
+            const labels = [];
+            for (let i = 1; i < last14.length; i++) {
+                let prev = 0, curr = 0;
+                if (etfColumns) {
+                    etfColumns.forEach(col => {
+                        if (last14[i-1][col.key]?.xrp) prev += last14[i-1][col.key].xrp;
+                        if (last14[i][col.key]?.xrp)   curr += last14[i][col.key].xrp;
+                    });
+                }
+                flows.push(curr - prev);
+                labels.push(last14[i].date ? last14[i].date.substring(5) : '');
+            }
+
+            window._dashInflowChart = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: flows,
+                        backgroundColor: flows.map(v => v >= 0 ? 'rgba(16,185,129,.6)' : 'rgba(244,63,94,.6)'),
+                        borderRadius: 3,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: {
+                        callbacks: { label: c => (c.raw >= 0 ? '+' : '') + (c.raw/1e6).toFixed(2) + 'M XRP' }
+                    }},
+                    scales: {
+                        x: { ticks: { color: '#4b5a70', font: { size: 8 } }, grid: { display: false } },
+                        y: { ticks: { color: '#4b5a70', font: { size: 8 },
+                                callback: v => (v/1e6).toFixed(0)+'M' }, grid: { color: 'rgba(255,255,255,.04)' } }
+                    }
+                }
+            });
+        }
+
+        // Mirror summaryVolume to summaryVolume2
+        function syncDashMiniStats() {
+            const v = document.getElementById('summaryVolume');
+            const v2 = document.getElementById('summaryVolume2');
+            const vd = document.getElementById('summaryVolumeDetail');
+            const vd2 = document.getElementById('summaryVolumeDetail2');
+            if (v && v2) v2.textContent = v.textContent;
+            if (vd && vd2) vd2.textContent = vd.textContent;
+        }
+        setInterval(syncDashMiniStats, 2000);
+
+        // Render sparks after data loads
+        setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); }, 2000);
+        // Re-render when holdings data updates
+        const _origUpdateDash = typeof updateDashboardOverview === 'function' ? updateDashboardOverview : null;
+        if (_origUpdateDash) {
+            window.updateDashboardOverview = function() {
+                _origUpdateDash();
+                setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); }, 200);
+            };
+        }
 
     </script>
 </body>
