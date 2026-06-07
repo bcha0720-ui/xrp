@@ -8416,6 +8416,10 @@
                                     <span class="donut-leg-label" style="color:var(--text-3);">Supply</span>
                                     <span class="donut-leg-val" id="currentSupply">--</span>
                                 </div>
+                                <div class="donut-legend-row" style="margin-top:2px;">
+                                    <span class="donut-leg-label" style="color:var(--text-3);">Circulating</span>
+                                    <span class="donut-leg-val" id="circulatingSupply" style="color:var(--accent2);">67.22B</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -20628,6 +20632,29 @@ Rules: title=specific headline with numbers, body=2 sentences, source_name=one o
             if (vd && vd2) vd2.textContent = vd.textContent;
         }
         setInterval(syncDashMiniStats, 2000);
+
+        // Fetch circulating supply from XRPScan
+        async function fetchCirculatingSupply() {
+            try {
+                const r = await fetch('https://api.xrpscan.com/api/v1/metrics', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                const circ = d.circulating_supply || d.circulatingSupply || d.circulation;
+                if (circ) {
+                    const el = document.getElementById('circulatingSupply');
+                    if (el) {
+                        const val = parseFloat(circ);
+                        el.textContent = val >= 1e9 ? (val/1e9).toFixed(2)+'B' : (val/1e6).toFixed(1)+'M';
+                    }
+                }
+            } catch(e) {
+                // Keep static fallback value
+                console.warn('XRPScan metrics:', e.message);
+            }
+        }
+        fetchCirculatingSupply();
 
         // Render sparks after data loads
         setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); }, 2000);
