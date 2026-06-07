@@ -75,10 +75,9 @@ descriptions = {
 
 @app.route('/api/news')
 def get_news_compat():
-    """News endpoint: CryptoPanic (real news) → Claude AI fallback (server-side, no CORS)"""
+    """News: CryptoCompare (real articles, no key) → Claude AI fallback"""
     try:
         now = datetime.now()
-        # Serve from cache if fresh
         if news_cache['data'] and news_cache['timestamp']:
             age = (now - news_cache['timestamp']).total_seconds()
             if age < news_cache['cache_duration']:
@@ -86,92 +85,77 @@ def get_news_compat():
 
         news_items = []
 
-        # ── 1. Try CryptoPanic free API ──────────────────────────
+        # ── 1. CryptoCompare (free, no auth, real article URLs) ──────
         try:
-            cp_response = requests.get(
-                f"{CRYPTOPANIC_BASE_URL}/posts/",
-                params={'currencies': 'XRP', 'kind': 'news', 'public': 'true'},
+            cc = requests.get(
+                'https://min-api.cryptocompare.com/data/v2/news/',
+                params={'lang': 'EN', 'categories': 'XRP,Ripple,ETF,BTC,Regulation', 'excludeCategories': 'Sponsored'},
+                headers={'User-Agent': 'XRPInsights/1.0'},
                 timeout=10
             )
-            if cp_response.status_code == 200:
-                data = cp_response.json()
-                results = data.get('results', [])
-                for item in results[:20]:
-                    votes = item.get('votes', {})
-                    pos = votes.get('positive', 0)
-                    neg = votes.get('negative', 0)
-                    sentiment = 'bullish' if pos > neg else ('bearish' if neg > pos else 'neutral')
+            if cc.status_code == 200:
+                data = cc.json()
+                for item in (data.get('Data') or [])[:20]:
+                    tags = item.get('tags', '') or ''
+                    cats = item.get('categories', '') or ''
+                    combined = (tags + cats).lower()
+                    sentiment = 'bullish' if any(w in combined for w in ['bull','surge','rise','gain','adoption','inflow'])                                else 'bearish' if any(w in combined for w in ['bear','drop','fall','hack','ban','loss'])                                else 'neutral'
                     news_items.append({
                         'title':        item.get('title', ''),
                         'url':          item.get('url', ''),
-                        'body':         item.get('title', ''),
-                        'source':       {'name': item.get('source', {}).get('title', 'CryptoPanic')},
-                        'source_info':  {'name': item.get('source', {}).get('title', 'CryptoPanic')},
-                        'published_on': item.get('published_at', ''),
-                        'votes':        {'positive': pos, 'negative': neg},
-                        'sentiment':    sentiment
+                        'body':         item.get('body', '')[:300] if item.get('body') else item.get('title', ''),
+                        'source':       {'name': item.get('source_info', {}).get('name', item.get('source', 'CryptoCompare'))},
+                        'source_info':  {'name': item.get('source_info', {}).get('name', item.get('source', 'CryptoCompare'))},
+                        'published_on': item.get('published_on', 0),
+                        'sentiment':    sentiment,
+                        'categories':   cats
                     })
-                logging.info(f"CryptoPanic returned {len(news_items)} items")
-        except Exception as cp_err:
-            logging.warning(f"CryptoPanic failed: {cp_err}")
+                logging.info(f"CryptoCompare returned {len(news_items)} items")
+        except Exception as e:
+            logging.warning(f"CryptoCompare failed: {e}")
 
-        # ── 2. Claude AI fallback (server-side — no CORS issues) ──
+        # ── 2. Claude AI fallback (server-side, uses ANTHROPIC_API_KEY) ──
         if not news_items and anthropic_client:
             try:
-                from datetime import datetime as dt
-                date_str = dt.now().strftime('%A, %B %d, %Y')
-                # Fetch current XRP price
+                import time as _time
+                date_str = datetime.now().strftime('%A, %B %d, %Y')
                 xrp_price = '?'
                 try:
-                    price_r = requests.get(
-                        'https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd',
-                        timeout=5
-                    )
-                    if price_r.status_code == 200:
-                        xrp_price = str(price_r.json().get('ripple', {}).get('usd', '?'))
-                except:
-                    pass
+                    pr = requests.get('https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd', timeout=5)
+                    if pr.status_code == 200:
+                        xrp_price = str(pr.json().get('ripple', {}).get('usd', '?'))
+                except: pass
 
-                message = anthropic_client.messages.create(
+                msg = anthropic_client.messages.create(
                     model='claude-haiku-4-5-20251001',
                     max_tokens=2500,
-                    system='You are a JSON data API. Output ONLY raw JSON. No markdown, no backticks, no explanation. Start with [ and end with ].',
-                    messages=[{
-                        'role': 'user',
-                        'content': f'Generate 15 XRP crypto news items for {date_str}. Current XRP price: ${xrp_price}. Output ONLY a JSON array starting with [. Each object: {{"title":"headline","body":"2 sentence summary","source_name":"CoinDesk or Decrypt or The Block or Cointelegraph or Reuters or Bloomberg or U.Today","url":"https://coindesk.com/markets/xrp","hours_ago":2,"category":"xrp","sentiment":"bullish"}}. Use real publication domains. Mix 5 bullish+5 neutral+5 bearish. Use actual price ${xrp_price} in price headlines.'
-                    }]
+                    system='You are a JSON API. Output ONLY a raw JSON array. No markdown, no explanation. Start with [ end with ].',
+                    messages=[{'role': 'user', 'content': f'Generate 15 XRP news for {date_str}. XRP price: ${xrp_price}. JSON array: [{{"title":"...","body":"2 sentences","source_name":"CoinDesk","url":"https://coindesk.com/markets/xrp","hours_ago":2,"category":"xrp","sentiment":"bullish"}}]. Mix sentiments. Use real price ${xrp_price}.'}]
                 )
-                raw = message.content[0].text
-                arr_start = raw.index('[')
-                arr_end   = raw.rindex(']') + 1
                 import json as _json
-                items = _json.loads(raw[arr_start:arr_end])
-                import time as _time
+                raw = msg.content[0].text
+                items = _json.loads(raw[raw.index('['):raw.rindex(']')+1])
                 now_ts = int(_time.time())
                 for item in items:
                     news_items.append({
-                        'title':        item.get('title', ''),
-                        'url':          item.get('url', '#'),
-                        'body':         item.get('body', item.get('title', '')),
-                        'source':       {'name': item.get('source_name', 'AI News')},
-                        'source_info':  {'name': item.get('source_name', 'AI News')},
-                        'published_on': now_ts - item.get('hours_ago', 1) * 3600,
-                        'sentiment':    item.get('sentiment', 'neutral'),
-                        'ai_generated': True
+                        'title': item.get('title',''), 'url': item.get('url','#'),
+                        'body': item.get('body', item.get('title','')),
+                        'source': {'name': item.get('source_name','AI News')},
+                        'source_info': {'name': item.get('source_name','AI News')},
+                        'published_on': now_ts - item.get('hours_ago',1)*3600,
+                        'sentiment': item.get('sentiment','neutral'), 'ai_generated': True
                     })
-                logging.info(f"Claude AI generated {len(news_items)} news items")
-            except Exception as ai_err:
-                logging.error(f"Claude AI news failed: {ai_err}")
+                logging.info(f"Claude AI generated {len(news_items)} items")
+            except Exception as e:
+                logging.error(f"Claude news fallback failed: {e}")
 
         if news_items:
             news_cache['data'] = news_items
             news_cache['timestamp'] = now
-            return jsonify({'Data': news_items, 'cached': False})
+            return jsonify({'Data': news_items, 'cached': False, 'count': len(news_items)})
 
-        # Return stale cache if all sources fail
         if news_cache['data']:
             return jsonify({'Data': news_cache['data'], 'cached': True, 'stale': True})
-
         return jsonify({'Data': [], 'error': 'All news sources failed'}), 500
 
     except Exception as e:
