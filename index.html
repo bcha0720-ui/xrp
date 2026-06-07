@@ -14750,14 +14750,14 @@
             newsFeed.innerHTML = `
                 <div style="padding:2rem;text-align:center;">
                     <div class="spinner" style="margin:0 auto 1rem;width:28px;height:28px;border:2px solid var(--border-dim);border-top-color:var(--xrp);border-radius:50%;animation:spin .7s linear infinite;"></div>
-                    <div style="font-size:12px;color:var(--text-2);margin-top:8px;">${hasKey ? '🤖 Generating live XRP news via Claude AI...' : '📡 Loading news...'}</div>
+                    <div style="font-size:12px;color:var(--text-2);margin-top:8px;">${hasKey ? '📡 Fetching live XRP news...' : '📡 Loading XRP news from CryptoPanic...'}</div>
                 </div>
             `;
 
-            // Use Claude API directly (Render backend returns stale static data)
+            // Try Render backend (real CryptoPanic news) first, then Claude AI fallback
             const sources = hasKey
-                ? [() => fetchNewsFromCryptoPanic()]
-                : [];
+                ? [() => fetchNewsFromBackend(), () => fetchNewsFromCryptoPanic()]
+                : [() => fetchNewsFromBackend()];
 
             let lastError = 'Unknown error';
             for (const source of sources) {
@@ -14795,8 +14795,49 @@
         }
 
         async function fetchNewsFromBackend() {
-            // Render backend returns stale static data - disabled
-            throw new Error('Backend disabled - using Claude API');
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+            try {
+                const response = await fetch('https://xrp-gtve.onrender.com/api/news', {
+                    signal: controller.signal,
+                    headers: { 'Accept': 'application/json' }
+                });
+                clearTimeout(timeout);
+                if (!response.ok) throw new Error('Backend HTTP ' + response.status);
+                const data = await response.json();
+                const items = data.Data || data.data || [];
+                if (!items.length) throw new Error('No news items from backend');
+                // Validate items have real titles (not the old static fallback)
+                const staticTitles = ['XRP ETFs Continue Trading', 'Ripple Expands Global', 'Crypto Market Shows'];
+                const hasStatic = items.some(i => staticTitles.some(s => (i.title||'').includes(s)));
+                if (hasStatic) throw new Error('Backend returned static fallback data');
+                // Map to standard format
+                const nowTs = Math.floor(Date.now() / 1000);
+                return items.map(item => {
+                    // published_on can be ISO string or unix timestamp
+                    let ts = nowTs;
+                    if (item.published_on) {
+                        ts = typeof item.published_on === 'number'
+                            ? item.published_on
+                            : Math.floor(new Date(item.published_on).getTime() / 1000);
+                    }
+                    const votes = item.votes || {};
+                    const sentiment = (item.sentiment === 'positive' || votes.positive > votes.negative)
+                        ? 'bullish' : (votes.negative > votes.positive) ? 'bearish' : 'neutral';
+                    return {
+                        title:        item.title || '',
+                        url:          item.url || '#',
+                        body:         item.body || item.title || '',
+                        source_info:  { name: item.source?.name || item.source_title || 'CryptoPanic' },
+                        published_on: ts,
+                        categories:   'xrp',
+                        sentiment
+                    };
+                });
+            } catch(e) {
+                clearTimeout(timeout);
+                throw e;
+            }
         }
 
         async function fetchNewsFromCryptoPanic() {
@@ -14809,7 +14850,12 @@
             const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const seed = now.getHours(); // changes every hour so news refreshes
 
-            console.log('[News] Calling Claude API...');
+                        const _livePrice = (typeof currentXRPPrice !== 'undefined' && currentXRPPrice > 0) ? currentXRPPrice.toFixed(4) : null;
+            if (!_livePrice) { throw new Error('XRP price not loaded yet - retry in a moment'); }
+            const _priceNum = parseFloat(_livePrice);
+            const _priceLow  = (_priceNum * 0.95).toFixed(4);
+            const _priceHigh = (_priceNum * 1.05).toFixed(4);
+            console.log('[News] Calling Claude API with live price:', _livePrice);
             const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
@@ -14821,14 +14867,10 @@
                 body: JSON.stringify({
                     model: 'claude-haiku-4-5-20251001',
                     max_tokens: 2500,
+                    system: 'You are a JSON data API. Output ONLY raw JSON. No markdown, no backticks, no explanation, no preamble. Start your response immediately with [ and end with ].',
                     messages: [{
                         role: 'user',
-                        content: `[RESPOND WITH ONLY A JSON ARRAY. NO TEXT BEFORE OR AFTER. START WITH [ AND END WITH ]. NO MARKDOWN. NO EXPLANATION.]
-
-Generate 15 XRP/crypto news items for ${dateStr}. Return ONLY this exact format:
-[{"title":"...","body":"...","source_name":"CoinDesk","url":"https://coindesk.com/markets/xrp","hours_ago":1,"category":"xrp","sentiment":"bullish"},...]
-
-Rules: title=specific headline with numbers, body=2 sentences, source_name=one of CoinDesk/Decrypt/The Block/Cointelegraph/Reuters, url=real domain with path, hours_ago=1-22 integer, category=xrp or etf or crypto or regulation, sentiment=bullish or bearish or neutral. Mix sentiments. Cover XRP price/ETFs/XRPL/Ripple/regulation. Seed:${seed}.`
+                        content: `Generate 15 XRP crypto news items for ${dateStr} (seed:${seed}). CRITICAL: Current live XRP price is exactly $${_livePrice}. All price mentions MUST use this price or realistic percentages from it (e.g. support at $${_priceLow}, resistance at $${_priceHigh}). Output ONLY a JSON array starting with [ and ending with ]. Each object: {"title":"headline","body":"2 sentence summary","source_name":"CoinDesk or Decrypt or The Block or Cointelegraph or Reuters or Bloomberg or U.Today or BeInCrypto","url":"https://coindesk.com/markets/xrp","hours_ago":2,"category":"xrp","sentiment":"bullish"}. Rules: (1) NEVER invent prices different from $${_livePrice}. (2) Vary source_name across all listed outlets. (3) 5 bullish + 5 neutral + 5 bearish. (4) hours_ago 1-22 varied. (5) Topics: price action near $${_livePrice}, ETF flows, XRPL DEX, Ripple partnerships, SEC/regulation, whale moves, CBDC, AMM.`
                     }]
                 })
             });
@@ -15037,14 +15079,14 @@ Rules: title=specific headline with numbers, body=2 sentences, source_name=one o
                 const impactScore = Math.max(1, Math.min(3, Math.ceil(3 - hoursAgo / 8)));
 
                 return `
-                    <div class="news-item ${sentiment}" data-category="${category}" style="cursor:${item.url && item.url !== '#' ? 'pointer' : 'default'}" onclick="window.open('${item.url || '#'}', '_blank')">
+                    <div class="news-item ${sentiment}" data-category="${category}" style="cursor:${item.url && item.url !== '#' ? 'pointer' : 'default'}" onclick="(function(u){var domain=u&&u!=='#'?u.match(/^https?:\/\/[^\/]*/)?.[0]:null;window.open(domain&&u.length>domain.length+5?u:domain||'#','_blank')}('${item.url || '#'}'))">
                         <div class="news-image">
                             <span class="news-image-icon">${icon}</span>
                             <span class="news-sentiment-badge ${sentiment}">${sentimentLabel}</span>
                             <span class="news-source-badge">${item.source_info?.name || item.source}</span>
                         </div>
                         <div class="news-body">
-                            <h3 class="news-title"><a href="${item.url || '#'}" target="_blank" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='var(--xrp)'" onmouseout="this.style.color='inherit'">${item.title}</a></h3>
+                            <h3 class="news-title"><a href="javascript:void(0)" onclick="(function(u){var d=u&&u!=='#'?u.match(/^https?:\/\/[^\/]*/)?.[0]:null;window.open(u&&u.length>(d||'').length+5?u:d||'#','_blank')}('${item.url||'#'}'))" style="color:inherit;text-decoration:none;cursor:pointer;" onmouseover="this.style.color='var(--xrp)'" onmouseout="this.style.color='inherit'">${item.title}</a></h3>
                             <p class="news-summary">${item.body?.substring(0, 120) || ''}...</p>
                             <div class="news-footer">
                                 <span class="news-time-new">🕐 ${timeAgo}</span>

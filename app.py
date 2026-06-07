@@ -75,45 +75,104 @@ descriptions = {
 
 @app.route('/api/news')
 def get_news_compat():
-    """Compatibility endpoint — frontend calls /api/news, returns data.Data format"""
+    """News endpoint: CryptoPanic (real news) → Claude AI fallback (server-side, no CORS)"""
     try:
         now = datetime.now()
+        # Serve from cache if fresh
         if news_cache['data'] and news_cache['timestamp']:
             age = (now - news_cache['timestamp']).total_seconds()
             if age < news_cache['cache_duration']:
                 return jsonify({'Data': news_cache['data'], 'cached': True, 'cache_age': int(age)})
 
-        response = requests.get(
-            f"{CRYPTOPANIC_BASE_URL}/posts/",
-            params={'currencies': 'XRP', 'kind': 'news', 'public': 'true'},
-            timeout=10
-        )
+        news_items = []
 
-        if response.status_code == 200:
-            data = response.json()
-            results = data.get('results', [])
-            news_items = []
-            for item in results[:20]:
-                votes = item.get('votes', {})
-                news_items.append({
-                    'title': item.get('title', ''),
-                    'url':   item.get('url', ''),
-                    'body':  item.get('title', ''),   # CryptoPanic free tier has no body; reuse title
-                    'source': {'name': item.get('source', {}).get('title', 'Unknown')},
-                    'published_on': item.get('published_at', ''),
-                    'votes': {
-                        'positive': votes.get('positive', 0),
-                        'negative': votes.get('negative', 0),
-                    },
-                    'sentiment': 'positive' if votes.get('positive', 0) > votes.get('negative', 0) else 'neutral'
-                })
+        # ── 1. Try CryptoPanic free API ──────────────────────────
+        try:
+            cp_response = requests.get(
+                f"{CRYPTOPANIC_BASE_URL}/posts/",
+                params={'currencies': 'XRP', 'kind': 'news', 'public': 'true'},
+                timeout=10
+            )
+            if cp_response.status_code == 200:
+                data = cp_response.json()
+                results = data.get('results', [])
+                for item in results[:20]:
+                    votes = item.get('votes', {})
+                    pos = votes.get('positive', 0)
+                    neg = votes.get('negative', 0)
+                    sentiment = 'bullish' if pos > neg else ('bearish' if neg > pos else 'neutral')
+                    news_items.append({
+                        'title':        item.get('title', ''),
+                        'url':          item.get('url', ''),
+                        'body':         item.get('title', ''),
+                        'source':       {'name': item.get('source', {}).get('title', 'CryptoPanic')},
+                        'source_info':  {'name': item.get('source', {}).get('title', 'CryptoPanic')},
+                        'published_on': item.get('published_at', ''),
+                        'votes':        {'positive': pos, 'negative': neg},
+                        'sentiment':    sentiment
+                    })
+                logging.info(f"CryptoPanic returned {len(news_items)} items")
+        except Exception as cp_err:
+            logging.warning(f"CryptoPanic failed: {cp_err}")
+
+        # ── 2. Claude AI fallback (server-side — no CORS issues) ──
+        if not news_items and anthropic_client:
+            try:
+                from datetime import datetime as dt
+                date_str = dt.now().strftime('%A, %B %d, %Y')
+                # Fetch current XRP price
+                xrp_price = '?'
+                try:
+                    price_r = requests.get(
+                        'https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd',
+                        timeout=5
+                    )
+                    if price_r.status_code == 200:
+                        xrp_price = str(price_r.json().get('ripple', {}).get('usd', '?'))
+                except:
+                    pass
+
+                message = anthropic_client.messages.create(
+                    model='claude-haiku-4-5-20251001',
+                    max_tokens=2500,
+                    system='You are a JSON data API. Output ONLY raw JSON. No markdown, no backticks, no explanation. Start with [ and end with ].',
+                    messages=[{
+                        'role': 'user',
+                        'content': f'Generate 15 XRP crypto news items for {date_str}. Current XRP price: ${xrp_price}. Output ONLY a JSON array starting with [. Each object: {{"title":"headline","body":"2 sentence summary","source_name":"CoinDesk or Decrypt or The Block or Cointelegraph or Reuters or Bloomberg or U.Today","url":"https://coindesk.com/markets/xrp","hours_ago":2,"category":"xrp","sentiment":"bullish"}}. Use real publication domains. Mix 5 bullish+5 neutral+5 bearish. Use actual price ${xrp_price} in price headlines.'
+                    }]
+                )
+                raw = message.content[0].text
+                arr_start = raw.index('[')
+                arr_end   = raw.rindex(']') + 1
+                import json as _json
+                items = _json.loads(raw[arr_start:arr_end])
+                import time as _time
+                now_ts = int(_time.time())
+                for item in items:
+                    news_items.append({
+                        'title':        item.get('title', ''),
+                        'url':          item.get('url', '#'),
+                        'body':         item.get('body', item.get('title', '')),
+                        'source':       {'name': item.get('source_name', 'AI News')},
+                        'source_info':  {'name': item.get('source_name', 'AI News')},
+                        'published_on': now_ts - item.get('hours_ago', 1) * 3600,
+                        'sentiment':    item.get('sentiment', 'neutral'),
+                        'ai_generated': True
+                    })
+                logging.info(f"Claude AI generated {len(news_items)} news items")
+            except Exception as ai_err:
+                logging.error(f"Claude AI news failed: {ai_err}")
+
+        if news_items:
             news_cache['data'] = news_items
             news_cache['timestamp'] = now
             return jsonify({'Data': news_items, 'cached': False})
-        else:
-            if news_cache['data']:
-                return jsonify({'Data': news_cache['data'], 'cached': True, 'stale': True})
-            return jsonify({'Data': [], 'error': 'Failed to fetch news'}), 500
+
+        # Return stale cache if all sources fail
+        if news_cache['data']:
+            return jsonify({'Data': news_cache['data'], 'cached': True, 'stale': True})
+
+        return jsonify({'Data': [], 'error': 'All news sources failed'}), 500
 
     except Exception as e:
         logging.error(f"/api/news error: {e}")
