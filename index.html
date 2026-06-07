@@ -15079,14 +15079,14 @@
                 const impactScore = Math.max(1, Math.min(3, Math.ceil(3 - hoursAgo / 8)));
 
                 return `
-                    <div class="news-item ${sentiment}" data-category="${category}" style="cursor:${item.url && item.url !== '#' ? 'pointer' : 'default'}" onclick="(function(u){var domain=u&&u!=='#'?u.match(/^https?:\/\/[^\/]*/)?.[0]:null;window.open(domain&&u.length>domain.length+5?u:domain||'#','_blank')}('${item.url || '#'}'))">
+                    <div class="news-item ${sentiment}" data-category="${category}" style="cursor:${item.url && item.url !== '#' ? 'pointer' : 'default'}" onclick="if(this.dataset.url&&this.dataset.url!=='#')window.open(this.dataset.url,'_blank')" data-url="${item.url || '#'}">
                         <div class="news-image">
                             <span class="news-image-icon">${icon}</span>
                             <span class="news-sentiment-badge ${sentiment}">${sentimentLabel}</span>
                             <span class="news-source-badge">${item.source_info?.name || item.source}</span>
                         </div>
                         <div class="news-body">
-                            <h3 class="news-title"><a href="javascript:void(0)" onclick="(function(u){var d=u&&u!=='#'?u.match(/^https?:\/\/[^\/]*/)?.[0]:null;window.open(u&&u.length>(d||'').length+5?u:d||'#','_blank')}('${item.url||'#'}'))" style="color:inherit;text-decoration:none;cursor:pointer;" onmouseover="this.style.color='var(--xrp)'" onmouseout="this.style.color='inherit'">${item.title}</a></h3>
+                            <h3 class="news-title"><a href="${item.url || '#'}" target="${item.url && item.url !== '#' ? '_blank' : '_self'}" rel="noopener" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='var(--xrp)'" onmouseout="this.style.color='inherit'">${item.title}</a></h3>
                             <p class="news-summary">${item.body?.substring(0, 120) || ''}...</p>
                             <div class="news-footer">
                                 <span class="news-time-new">🕐 ${timeAgo}</span>
