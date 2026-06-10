@@ -8160,6 +8160,34 @@
             text-overflow: ellipsis;
         }
 
+        .kpi-delta-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 2px;
+            margin-bottom: 4px;
+        }
+        .kpi-delta-label {
+            font-size: 9px;
+            color: var(--text-3);
+            font-family: var(--font-mono);
+        }
+        .kpi-delta-val {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .kpi-delta-val.positive { color: var(--green); }
+        .kpi-delta-val.negative { color: var(--red); }
+        .kpi-delta-pct {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+        .kpi-delta-pct.positive { background: rgba(16,185,129,.12); color: var(--green); }
+        .kpi-delta-pct.negative { background: rgba(244,63,94,.12); color: var(--red); }
+
         /* Mobile */
         @media (max-width: 700px) {
             .kpi-row { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 10px; }
@@ -8315,6 +8343,11 @@
                         <div class="kpi-value xrp" id="dashboardETFXRP">--</div>
                         <div class="kpi-label">Total XRP in Spot ETFs</div>
                         <div class="kpi-sub" id="dashboardETFValue">--</div>
+                        <div class="kpi-delta-row" id="kpiETFDeltaRow" style="display:none;">
+                            <span class="kpi-delta-label">vs yesterday</span>
+                            <span class="kpi-delta-val" id="kpiETFDelta">--</span>
+                            <span class="kpi-delta-pct" id="kpiETFDeltaPct">--</span>
+                        </div>
                         <canvas class="kpi-spark" id="kpiSparkETF"></canvas>
                     </div>
 
@@ -15028,12 +15061,16 @@
         }
 
         function isRealUrl(url) {
+            // Only treat as real if it has a date pattern (YYYY) in path
+            // OR 3+ path segments — rules out AI-generated short slugs
             if (!url || url === '#') return false;
             try {
                 const u = new URL(url);
-                // Real articles have paths with 3+ segments or contain numbers (dates)
-                const segs = u.pathname.split('/').filter(s => s.length > 0);
-                return segs.length >= 3 || /\d{4}/.test(u.pathname) || segs.some(s => s.length > 30);
+                const path = u.pathname;
+                const segs = path.split('/').filter(s => s.length > 0);
+                const hasDate = /\/20\d{2}\//.test(path);  // e.g. /2026/06/07/
+                const hasDeepPath = segs.length >= 3;
+                return hasDate || hasDeepPath;
             } catch(e) { return false; }
         }
 
@@ -20712,14 +20749,101 @@
         }
         fetchCirculatingSupply();
 
+        // Compute ETF delta vs previous day from holdingsData
+        function updateETFDelta() {
+            if (!holdingsData || holdingsData.length < 2) return;
+
+            // Find the two most recent dates that have data
+            const etfKeys = ['canary','bitwise','franklin','grayscale','shares21','rex','nciq','bitw','gdlc','ezpz','btgo'];
+
+            function rowTotal(row) {
+                return etfKeys.reduce((sum, k) => sum + (row[k]?.xrp || 0), 0);
+            }
+
+            // Find today and yesterday rows with actual data
+            let todayRow = null, yestRow = null;
+            for (let i = 0; i < holdingsData.length; i++) {
+                const t = rowTotal(holdingsData[i]);
+                if (t > 0) { todayRow = holdingsData[i]; break; }
+            }
+            for (let i = (todayRow ? holdingsData.indexOf(todayRow) + 1 : 1); i < holdingsData.length; i++) {
+                const t = rowTotal(holdingsData[i]);
+                if (t > 0) { yestRow = holdingsData[i]; break; }
+            }
+
+            if (!todayRow || !yestRow) return;
+
+            const todayTotal = rowTotal(todayRow);
+            const yestTotal  = rowTotal(yestRow);
+            if (yestTotal === 0) return;
+
+            const delta    = todayTotal - yestTotal;
+            const deltaPct = (delta / yestTotal) * 100;
+            const positive = delta >= 0;
+
+            // Format delta
+            const absDelta = Math.abs(delta);
+            const fmtDelta = (positive ? '+' : '-') + (absDelta >= 1e9
+                ? (absDelta/1e9).toFixed(2)+'B'
+                : absDelta >= 1e6
+                ? (absDelta/1e6).toFixed(2)+'M'
+                : (absDelta/1e3).toFixed(1)+'K') + ' XRP';
+            const fmtPct = (positive ? '+' : '') + deltaPct.toFixed(2) + '%';
+
+            // Per-ETF breakdown for tooltip
+            const changes = etfKeys
+                .map(k => {
+                    const d = (todayRow[k]?.xrp||0) - (yestRow[k]?.xrp||0);
+                    return d !== 0 ? { key: k, delta: d } : null;
+                })
+                .filter(Boolean)
+                .sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta))
+                .slice(0, 3);
+
+            const row   = document.getElementById('kpiETFDeltaRow');
+            const valEl = document.getElementById('kpiETFDelta');
+            const pctEl = document.getElementById('kpiETFDeltaPct');
+            const badge = document.getElementById('kpiETFTrend');
+
+            if (row)   { row.style.display = 'flex'; }
+            if (valEl) {
+                valEl.textContent = fmtDelta;
+                valEl.className = 'kpi-delta-val ' + (positive ? 'positive' : 'negative');
+                // Tooltip with per-ETF breakdown
+                const tip = changes.map(c => {
+                    const name = {canary:'XRPC',bitwise:'XRP',franklin:'XRPZ',grayscale:'GXRP',
+                                  shares21:'TOXR',rex:'XRPR',nciq:'NCIQ',bitw:'BITW',
+                                  gdlc:'GDLC',ezpz:'EZPZ',btgo:'BTGO'}[c.key] || c.key;
+                    const sign = c.delta >= 0 ? '+' : '';
+                    const val  = Math.abs(c.delta) >= 1e6
+                        ? sign+(c.delta/1e6).toFixed(2)+'M'
+                        : sign+(c.delta/1e3).toFixed(1)+'K';
+                    return name + ': ' + val;
+                }).join(' | ');
+                if (tip) valEl.title = 'Changes: ' + tip + ' (vs ' + (yestRow.date||'prev day') + ')';
+            }
+            if (pctEl) {
+                pctEl.textContent = fmtPct;
+                pctEl.className = 'kpi-delta-pct ' + (positive ? 'positive' : 'negative');
+            }
+            if (badge) {
+                badge.textContent = (positive ? '▲ ' : '▼ ') + fmtPct;
+                badge.className = 'kpi-trend-badge ' + (positive ? 'positive' : 'negative');
+            }
+
+            console.log('[Delta] Today:', todayRow.date, 'total:', todayTotal.toFixed(0),
+                        '| Yesterday:', yestRow.date, 'total:', yestTotal.toFixed(0),
+                        '| Delta:', fmtDelta, fmtPct);
+        }
+
         // Render sparks after data loads
-        setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); }, 2000);
+        setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); updateETFDelta(); }, 2000);
         // Re-render when holdings data updates
         const _origUpdateDash = typeof updateDashboardOverview === 'function' ? updateDashboardOverview : null;
         if (_origUpdateDash) {
             window.updateDashboardOverview = function() {
                 _origUpdateDash();
-                setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); }, 200);
+                setTimeout(() => { renderDashboardSparks(); renderDashInflowChart(); updateETFDelta(); }, 200);
             };
         }
 
