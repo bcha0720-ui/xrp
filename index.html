@@ -11294,7 +11294,8 @@
             19: { key: 'ezpz', field: 'xrp' },
             20: { key: 'ezpz', field: 'value' },
             21: { key: 'btgo', field: 'xrp' },
-            22: { key: 'btgo', field: 'value' }
+            22: { key: 'btgo', field: 'value' },
+            23: { key: 'tknz', field: 'xrp' }
         };
 
         // Function to try fetching with multiple CORS proxies
@@ -11370,6 +11371,7 @@
                     // 15: Grayscale GDLC (single column)
                     // 16: Franklin EZPZ, 17: EZPZ Value
                     // 18: Bitgo
+                    // 19: T Rowe Price TKNZ (single column)
 
                     const entry = {
                         date: values[0] || '',
@@ -11383,7 +11385,8 @@
                         bitw: { xrp: parseNum(values[14]), value: null },
                         gdlc: { xrp: parseNum(values[15]), value: null },
                         ezpz: { xrp: parseNum(values[16]), value: parseNum(values[17]) },
-                        btgo: { xrp: parseNum(values[18]), value: null }
+                        btgo: { xrp: parseNum(values[18]), value: null },
+                        tknz: { xrp: parseNum(values[19]), value: null }
                     };
 
                     // Debug log first entry
@@ -11464,7 +11467,8 @@
                 bitw: { xrp: null, value: null },
                 gdlc: { xrp: null, value: null },
                 ezpz: { xrp: null, value: null },
-                btgo: { xrp: null, value: null }
+                btgo: { xrp: null, value: null },
+                tknz: { xrp: null, value: null }
             }
         ];
 
@@ -11492,7 +11496,8 @@
             { key: 'bitw', name: 'BITW', ticker: 'BITW' },
             { key: 'gdlc', name: 'Grayscale GDLC', ticker: 'GDLC' },
             { key: 'ezpz', name: 'Franklin EZPZ', ticker: 'EZPZ' },
-            { key: 'btgo', name: 'Bitgo Exchange', ticker: 'BTGO' }
+            { key: 'btgo', name: 'Bitgo Exchange', ticker: 'BTGO' },
+            { key: 'tknz', name: 'T Rowe Price TKNZ', ticker: 'TKNZ' }
 
         ];
 
@@ -19450,7 +19455,7 @@
 
         function calculateDayTotal(dayData) {
             let total = 0;
-            const etfs = ['canary', 'bitwise', 'franklin', 'grayscale', 'shares21', 'rex', 'nciq', 'bitw', 'gdlc', 'ezpz', 'btgo'];
+            const etfs = ['canary', 'bitwise', 'franklin', 'grayscale', 'shares21', 'rex', 'nciq', 'bitw', 'gdlc', 'ezpz', 'btgo', 'tknz'];
             etfs.forEach(etf => {
                 if (dayData[etf]?.xrp) {
                     total += dayData[etf].xrp;
@@ -20757,7 +20762,7 @@
             if (!holdingsData || holdingsData.length < 2) return;
 
             // Find the two most recent dates that have data
-            const etfKeys = ['canary','bitwise','franklin','grayscale','shares21','rex','nciq','bitw','gdlc','ezpz','btgo'];
+            const etfKeys = ['canary','bitwise','franklin','grayscale','shares21','rex','nciq','bitw','gdlc','ezpz','btgo','tknz'];
 
             function rowTotal(row) {
                 return etfKeys.reduce((sum, k) => sum + (row[k]?.xrp || 0), 0);
@@ -20816,7 +20821,7 @@
                 const tip = changes.map(c => {
                     const name = {canary:'XRPC',bitwise:'XRP',franklin:'XRPZ',grayscale:'GXRP',
                                   shares21:'TOXR',rex:'XRPR',nciq:'NCIQ',bitw:'BITW',
-                                  gdlc:'GDLC',ezpz:'EZPZ',btgo:'BTGO'}[c.key] || c.key;
+                                  gdlc:'GDLC',ezpz:'EZPZ',btgo:'BTGO',tknz:'TKNZ'}[c.key] || c.key;
                     const sign = c.delta >= 0 ? '+' : '';
                     const val  = Math.abs(c.delta) >= 1e6
                         ? sign+(c.delta/1e6).toFixed(2)+'M'
