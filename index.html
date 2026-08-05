@@ -12905,10 +12905,13 @@
 
         async function fetchSingleBalance(address) {
             for (const url of RIPPLED_URLS) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
                         body: JSON.stringify({
                             method: 'account_info',
                             params: [{
@@ -12918,6 +12921,7 @@
                             }]
                         })
                     });
+                    clearTimeout(timeoutId);
 
                     if (response.ok) {
                         const data = await response.json();
@@ -12926,6 +12930,7 @@
                         }
                     }
                 } catch (error) {
+                    clearTimeout(timeoutId);
                     continue;
                 }
             }
