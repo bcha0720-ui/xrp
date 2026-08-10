@@ -8554,44 +8554,6 @@
                 </div>
             </div>
 
-            <!-- Historical Inflows/Outflows Chart -->
-            <div class="historical-section" id="historicalChartWidget">
-                <div class="historical-header">
-                    <h3><span>📊</span> ETF Inflows & Outflows</h3>
-                    <div class="historical-controls">
-                        <button class="historical-btn active" data-period="7d"
-                            onclick="setHistoricalPeriod('7d')">7D</button>
-                        <button class="historical-btn" data-period="30d"
-                            onclick="setHistoricalPeriod('30d')">30D</button>
-                        <button class="historical-btn" data-period="90d"
-                            onclick="setHistoricalPeriod('90d')">90D</button>
-                        <button class="historical-btn" data-period="all"
-                            onclick="setHistoricalPeriod('all')">All</button>
-                    </div>
-                </div>
-                <div class="historical-chart-container">
-                    <canvas id="inflowOutflowChart"></canvas>
-                </div>
-                <div class="flow-summary">
-                    <div class="flow-stat">
-                        <div class="flow-stat-value positive" id="totalInflows">+12.5M</div>
-                        <div class="flow-stat-label">Total Inflows</div>
-                    </div>
-                    <div class="flow-stat">
-                        <div class="flow-stat-value negative" id="totalOutflows">-2.1M</div>
-                        <div class="flow-stat-label">Total Outflows</div>
-                    </div>
-                    <div class="flow-stat">
-                        <div class="flow-stat-value positive" id="netFlow">+10.4M</div>
-                        <div class="flow-stat-label">Net Flow</div>
-                    </div>
-                    <div class="flow-stat">
-                        <div class="flow-stat-value" id="avgDailyFlow">+1.5M</div>
-                        <div class="flow-stat-label">Avg Daily Flow</div>
-                    </div>
-                </div>
-            </div>
-
             <div class="holdings-table-container">
                 <div class="holdings-table-header">
                     <div class="holdings-table-title">
@@ -9843,15 +9805,6 @@
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" checked data-widget="pieChart" onchange="toggleWidget(this)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div class="widget-toggle">
-                        <div class="widget-toggle-label">
-                            <span>📊</span> Historical Flow Chart
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked data-widget="historicalChart" onchange="toggleWidget(this)">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
@@ -11257,6 +11210,7 @@
                 if (typeof renderHoldingsChart === 'function') setTimeout(renderHoldingsChart, 100);
                 if (typeof renderHoldingsTrendChart === 'function') setTimeout(renderHoldingsTrendChart, 100);
                 if (typeof updateDashboardOverview === 'function') setTimeout(updateDashboardOverview, 100);
+                if (typeof renderInflowOutflowChart === 'function') setTimeout(renderInflowOutflowChart, 100);
 
                 return holdingsData;
 
@@ -11377,6 +11331,7 @@
                     renderHoldingsChart();
                     renderHoldingsTrendChart();
                     updateDashboardOverview();
+                    if (typeof renderInflowOutflowChart === 'function') renderInflowOutflowChart();
                 }, 100);
             } else if (tabName === 'exchange') {
                 document.getElementById('exchangeTab').classList.add('active');
@@ -18496,8 +18451,7 @@
                 topHolders: true,
                 latestNews: true,
                 burnStats: true,
-                pieChart: true,
-                historicalChart: true
+                pieChart: true
             },
             priceAlerts: false,
             whaleAlerts: false,
@@ -18543,8 +18497,7 @@
                 'topHolders': '.dashboard-card:has(#dashboardTop10KXRP)',
                 'latestNews': '.news-card',
                 'burnStats': '.dashboard-metric-small.burn',
-                'pieChart': '.dashboard-chart-area',
-                'historicalChart': '#historicalChartWidget'
+                'pieChart': '.dashboard-chart-area'
             };
 
             const selector = widgetMap[widget];
@@ -18615,7 +18568,7 @@
         }
 
         function calculateFlowData() {
-            if (!holdingsData || holdingsData.length < 2) return null;
+            if (!holdingsData || holdingsData.length < 2 || !etfColumns) return null;
 
             const periodDays = {
                 '7d': 7,
@@ -18624,24 +18577,43 @@
                 'all': holdingsData.length
             };
 
-            const days = Math.min(periodDays[currentHistoricalPeriod], holdingsData.length);
-            const data = holdingsData.slice(0, days).reverse();
+            const days = Math.min(periodDays[currentHistoricalPeriod] || holdingsData.length, holdingsData.length);
+            const rows = holdingsData.slice(0, days); // newest-first
 
             const flows = [];
             const labels = [];
             let totalInflows = 0;
             let totalOutflows = 0;
 
-            for (let i = 1; i < data.length; i++) {
-                const prevTotal = calculateDayTotal(data[i - 1]);
-                const currTotal = calculateDayTotal(data[i]);
-                const flow = currTotal - prevTotal;
+            // For each date, sum each ETF's own change vs. its own most recent PRIOR
+            // reported value (searched across full history, not just this window). This
+            // avoids phantom swings from ETFs that simply didn't report on adjacent rows —
+            // the same method used for the "Today Change" stat and the KPI delta badge.
+            for (let w = rows.length - 1; w >= 0; w--) {
+                const row = rows[w];
+                const fullIdx = holdingsData.indexOf(row);
+                let dayTotal = 0;
+                let reportedAny = false;
 
-                flows.push(flow);
-                labels.push(data[i].date);
+                etfColumns.forEach(col => {
+                    const val = row[col.key]?.xrp;
+                    if (!(val && val > 0)) return; // this ETF didn't report on this date
 
-                if (flow > 0) totalInflows += flow;
-                else totalOutflows += Math.abs(flow);
+                    let prevVal = 0;
+                    for (let j = fullIdx + 1; j < holdingsData.length; j++) {
+                        const v = holdingsData[j][col.key]?.xrp;
+                        if (v && v > 0) { prevVal = v; break; }
+                    }
+                    dayTotal += prevVal > 0 ? (val - prevVal) : val; // new ETF = count full amount
+                    reportedAny = true;
+                });
+
+                if (reportedAny) {
+                    flows.push(dayTotal);
+                    labels.push(row.date);
+                    if (dayTotal > 0) totalInflows += dayTotal;
+                    else totalOutflows += Math.abs(dayTotal);
+                }
             }
 
             return {
@@ -18650,19 +18622,8 @@
                 totalInflows,
                 totalOutflows,
                 netFlow: totalInflows - totalOutflows,
-                avgDailyFlow: (totalInflows - totalOutflows) / flows.length
+                avgDailyFlow: flows.length ? (totalInflows - totalOutflows) / flows.length : 0
             };
-        }
-
-        function calculateDayTotal(dayData) {
-            let total = 0;
-            const etfs = ['canary', 'bitwise', 'franklin', 'grayscale', 'shares21', 'rex', 'nciq', 'bitw', 'gdlc', 'ezpz', 'btgo', 'tknz'];
-            etfs.forEach(etf => {
-                if (dayData[etf]?.xrp) {
-                    total += dayData[etf].xrp;
-                }
-            });
-            return total;
         }
 
         function renderInflowOutflowChart() {
