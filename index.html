@@ -8451,12 +8451,8 @@
                     </div>
                 </div>
 
-                <!-- hidden IDs for JS compat -->
+                <!-- hidden IDs for JS compat (duplicates of the visible dash-mini-stat elements removed to avoid invalid duplicate DOM ids) -->
                 <div style="display:none;">
-                    <span id="summaryETFChange"></span>
-                    <span id="summaryETFDetail"></span>
-                    <span id="summaryWhales"></span>
-                    <span id="summaryWhalesDetail"></span>
                     <span id="dashboardETFChange"></span>
                     <span id="dashboardExchangeChange"></span>
                     <span id="dashboardTop10KChange"></span>
@@ -19747,25 +19743,55 @@
         }
 
         // Draw mini inflow/outflow bar chart for dashboard
+        function formatDashChartDateLabel(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr; // fall back to raw string if unparseable
+            return (d.getMonth() + 1) + '/' + d.getDate();
+        }
+
         function renderDashInflowChart() {
             const canvas = document.getElementById('dashInflowChart');
             if (!canvas || !holdingsData || holdingsData.length < 2) return;
 
             if (window._dashInflowChart) window._dashInflowChart.destroy();
 
-            const last14 = holdingsData.slice(0, 14).reverse();
+            // For each date, compute the sum of each ETF's own change vs. its own most
+            // recent PRIOR reported value (searched across the full history, not just the
+            // display window). This avoids phantom swings from ETFs that simply didn't
+            // report on adjacent calendar rows — the same method used for "Today Change"
+            // and the KPI delta badge, so all three stay consistent with each other.
+            const windowSize = 14;
+            const rows = holdingsData.slice(0, windowSize); // newest-first
             const flows = [];
             const labels = [];
-            for (let i = 1; i < last14.length; i++) {
-                let prev = 0, curr = 0;
+
+            // Walk oldest -> newest within the window so the chart reads left-to-right
+            for (let w = rows.length - 1; w >= 0; w--) {
+                const row = rows[w];
+                const fullIdx = holdingsData.indexOf(row);
+                let dayTotal = 0;
+                let reportedAny = false;
+
                 if (etfColumns) {
                     etfColumns.forEach(col => {
-                        if (last14[i-1][col.key]?.xrp) prev += last14[i-1][col.key].xrp;
-                        if (last14[i][col.key]?.xrp)   curr += last14[i][col.key].xrp;
+                        const val = row[col.key]?.xrp;
+                        if (!(val && val > 0)) return; // this ETF didn't report on this date
+
+                        let prevVal = 0;
+                        for (let j = fullIdx + 1; j < holdingsData.length; j++) {
+                            const v = holdingsData[j][col.key]?.xrp;
+                            if (v && v > 0) { prevVal = v; break; }
+                        }
+                        dayTotal += prevVal > 0 ? (val - prevVal) : val; // new ETF = count full amount
+                        reportedAny = true;
                     });
                 }
-                flows.push(curr - prev);
-                labels.push(last14[i].date ? last14[i].date.substring(5) : '');
+
+                if (reportedAny) {
+                    flows.push(dayTotal);
+                    labels.push(formatDashChartDateLabel(row.date));
+                }
             }
 
             window._dashInflowChart = new Chart(canvas.getContext('2d'), {
@@ -19828,39 +19854,50 @@
         fetchCirculatingSupply();
 
         // Compute ETF delta vs previous day from holdingsData
+        // Uses the SAME per-ETF "latest known value vs. that ETF's own previous value" method
+        // as updateSummaryBanner()'s "Today Change" stat, so the two numbers always agree.
         function updateETFDelta() {
-            if (!holdingsData || holdingsData.length < 2) return;
+            if (!holdingsData || holdingsData.length < 1 || !etfColumns) return;
 
-            // Find the two most recent dates that have data
-            const etfKeys = ['canary','bitwise','franklin','grayscale','shares21','rex','nciq','bitw','gdlc','ezpz','btgo','tknz'];
+            const latestRow = holdingsData[0];
+            let totalDailyChange = 0;
+            const changes = [];
 
-            function rowTotal(row) {
-                return etfKeys.reduce((sum, k) => sum + (row[k]?.xrp || 0), 0);
-            }
+            etfColumns.forEach(col => {
+                const latestVal = latestRow[col.key]?.xrp;
+                if (!(latestVal && latestVal > 0)) return; // this ETF has no data on the latest date
 
-            // Find today and yesterday rows with actual data
-            let todayRow = null, yestRow = null;
-            for (let i = 0; i < holdingsData.length; i++) {
-                const t = rowTotal(holdingsData[i]);
-                if (t > 0) { todayRow = holdingsData[i]; break; }
-            }
-            for (let i = (todayRow ? holdingsData.indexOf(todayRow) + 1 : 1); i < holdingsData.length; i++) {
-                const t = rowTotal(holdingsData[i]);
-                if (t > 0) { yestRow = holdingsData[i]; break; }
-            }
+                // Find this ETF's own previous non-zero value (skips days it didn't report)
+                let prevVal = 0;
+                for (let i = 1; i < holdingsData.length; i++) {
+                    const v = holdingsData[i][col.key]?.xrp;
+                    if (v && v > 0) { prevVal = v; break; }
+                }
 
-            if (!todayRow || !yestRow) return;
+                const change = prevVal > 0 ? (latestVal - prevVal) : latestVal; // new ETF = count full amount
+                if (change !== 0) {
+                    changes.push({ key: col.key, name: col.name, ticker: col.ticker, delta: change, isNew: prevVal === 0 });
+                    totalDailyChange += change;
+                }
+            });
 
-            const todayTotal = rowTotal(todayRow);
-            const yestTotal  = rowTotal(yestRow);
-            if (yestTotal === 0) return;
+            if (changes.length === 0) return; // nothing changed on the latest date — leave badge as-is
 
-            const delta    = todayTotal - yestTotal;
-            const deltaPct = (delta / yestTotal) * 100;
-            const positive = delta >= 0;
+            // Current total XRP across all ETFs (each ETF's latest known value, any date)
+            let currentTotalXRP = 0;
+            etfColumns.forEach(col => {
+                for (const row of holdingsData) {
+                    const v = row[col.key]?.xrp;
+                    if (v && v > 0) { currentTotalXRP += v; break; }
+                }
+            });
+
+            const prevTotalEquivalent = currentTotalXRP - totalDailyChange;
+            const deltaPct = prevTotalEquivalent > 0 ? (totalDailyChange / prevTotalEquivalent) * 100 : 0;
+            const positive = totalDailyChange >= 0;
 
             // Format delta
-            const absDelta = Math.abs(delta);
+            const absDelta = Math.abs(totalDailyChange);
             const fmtDelta = (positive ? '+' : '-') + (absDelta >= 1e9
                 ? (absDelta/1e9).toFixed(2)+'B'
                 : absDelta >= 1e6
@@ -19869,14 +19906,7 @@
             const fmtPct = (positive ? '+' : '') + deltaPct.toFixed(2) + '%';
 
             // Per-ETF breakdown for tooltip
-            const changes = etfKeys
-                .map(k => {
-                    const d = (todayRow[k]?.xrp||0) - (yestRow[k]?.xrp||0);
-                    return d !== 0 ? { key: k, delta: d } : null;
-                })
-                .filter(Boolean)
-                .sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta))
-                .slice(0, 3);
+            const top3 = [...changes].sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 3);
 
             const row   = document.getElementById('kpiETFDeltaRow');
             const valEl = document.getElementById('kpiETFDelta');
@@ -19888,17 +19918,14 @@
                 valEl.textContent = fmtDelta;
                 valEl.className = 'kpi-delta-val ' + (positive ? 'positive' : 'negative');
                 // Tooltip with per-ETF breakdown
-                const tip = changes.map(c => {
-                    const name = {canary:'XRPC',bitwise:'XRP',franklin:'XRPZ',grayscale:'GXRP',
-                                  shares21:'TOXR',rex:'XRPR',nciq:'NCIQ',bitw:'BITW',
-                                  gdlc:'GDLC',ezpz:'EZPZ',btgo:'BTGO',tknz:'TKNZ'}[c.key] || c.key;
+                const tip = top3.map(c => {
                     const sign = c.delta >= 0 ? '+' : '';
                     const val  = Math.abs(c.delta) >= 1e6
                         ? sign+(c.delta/1e6).toFixed(2)+'M'
                         : sign+(c.delta/1e3).toFixed(1)+'K';
-                    return name + ': ' + val;
+                    return (c.ticker || c.name) + ': ' + val + (c.isNew ? ' (NEW)' : '');
                 }).join(' | ');
-                if (tip) valEl.title = 'Changes: ' + tip + ' (vs ' + (yestRow.date||'prev day') + ')';
+                if (tip) valEl.title = 'Changes: ' + tip + ' (as of ' + (latestRow.date || 'latest') + ')';
             }
             if (pctEl) {
                 pctEl.textContent = fmtPct;
@@ -19909,9 +19936,8 @@
                 badge.className = 'kpi-trend-badge ' + (positive ? 'positive' : 'negative');
             }
 
-            console.log('[Delta] Today:', todayRow.date, 'total:', todayTotal.toFixed(0),
-                        '| Yesterday:', yestRow.date, 'total:', yestTotal.toFixed(0),
-                        '| Delta:', fmtDelta, fmtPct);
+            console.log('[Delta] Latest:', latestRow.date, '| Today change:', fmtDelta, fmtPct,
+                        '| Changed ETFs:', changes.map(c => c.ticker || c.name).join(', '));
         }
 
         // Render sparks after data loads
