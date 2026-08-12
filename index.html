@@ -19353,7 +19353,7 @@
                 const change = last - first;
                 const pct = ((change / first) * 100).toFixed(2);
                 const arrow = change >= 0 ? '↑' : '↓';
-                const colorClass = change >= 0 ? 'red' : 'green';  // More XRP on exchanges = bearish
+                const colorClass = change >= 0 ? 'green' : 'red';
 
                 document.getElementById('xrpChartSummary').innerHTML =
                     `<span class="highlight">${(last / 1e9).toFixed(2)}B</span> XRP on exchanges | ` +
