@@ -36,43 +36,46 @@
 
     <style>
         :root {
-            --bg-0:#080c14; --bg-1:#0d1220; --bg-2:#111827; --bg-3:#1a2235; --bg-4:#1e2d42;
-            --border-subtle:rgba(99,179,237,.08); --border-dim:rgba(99,179,237,.14);
-            --border-med:rgba(99,179,237,.22); --border-hi:rgba(99,179,237,.35);
-            --accent:#3b82f6; --accent2:#06b6d4; --accent3:#8b5cf6;
-            --green:#10b981; --red:#f43f5e; --amber:#f59e0b; --xrp:#23f7dd;
-            --text-1:#e2e8f0; --text-2:#94a3b8; --text-3:#4b5a70; --text-4:#2d3a4f;
+            /* Refined dark palette — neutral slate surfaces instead of blue-washed,
+               a calmer signature teal instead of neon cyan, richer functional colors. */
+            --bg-0:#0A0D13; --bg-1:#0E121A; --bg-2:#141922; --bg-3:#1B212C; --bg-4:#232A38;
+            --border-subtle:rgba(148,163,184,.07); --border-dim:rgba(148,163,184,.13);
+            --border-med:rgba(148,163,184,.20); --border-hi:rgba(148,163,184,.32);
+            --accent:#4F7DF9; --accent2:#22B8CF; --accent3:#A374F7;
+            --green:#22C58B; --red:#F0465F; --amber:#F5A623; --xrp:#2DE3CB;
+            --text-1:#EDF1F7; --text-2:#95A1B3; --text-3:#5C6675; --text-4:#333B48;
             /* Legacy JS compat aliases */
-            --bg-primary:#080c14; --bg-secondary:#0d1220; --bg-card:#111827;
-            --bg-card-hover:#1a2235; --border:#1e2d42;
-            --text-primary:#e2e8f0; --text-secondary:#94a3b8; --text-muted:#4b5a70;
-            --accent-xrp:#23f7dd; --accent-xrp-dim:rgba(35,247,221,.12);
-            --accent-green:#10b981; --accent-red:#f43f5e; --accent-blue:#3b82f6;
-            --accent-purple:#8b5cf6; --accent-orange:#f97316; --accent-yellow:#f59e0b;
-            --status-loading:#f97316; --status-success:#10b981; --status-error:#f43f5e;
-            --glass-bg:rgba(13,18,32,.7); --glass-bg-light:rgba(13,18,32,.4);
-            --glass-border:rgba(99,179,237,.1); --glass-shadow:0 8px 32px rgba(0,0,0,.5);
-            --glass-blur:12px;
+            --bg-primary:#0A0D13; --bg-secondary:#0E121A; --bg-card:#141922;
+            --bg-card-hover:#1B212C; --border:#232A38;
+            --text-primary:#EDF1F7; --text-secondary:#95A1B3; --text-muted:#5C6675;
+            --accent-xrp:#2DE3CB; --accent-xrp-dim:rgba(45,227,203,.12);
+            --accent-green:#22C58B; --accent-red:#F0465F; --accent-blue:#4F7DF9;
+            --accent-purple:#A374F7; --accent-orange:#F5A623; --accent-yellow:#F5A623;
+            --status-loading:#F5A623; --status-success:#22C58B; --status-error:#F0465F;
+            --glass-bg:rgba(14,18,26,.75); --glass-bg-light:rgba(14,18,26,.45);
+            --glass-border:rgba(148,163,184,.10); --glass-shadow:0 12px 32px rgba(0,0,0,.45);
+            --glass-blur:14px;
             --font-sans:'Space Grotesk',system-ui,sans-serif;
             --font-mono:'Space Mono','Courier New',monospace;
-            --r-sm:6px; --r-md:8px; --r-lg:12px; --r-xl:16px;
+            --r-sm:7px; --r-md:10px; --r-lg:14px; --r-xl:18px;
+            --shadow-card:0 1px 2px rgba(0,0,0,.2), 0 6px 20px rgba(0,0,0,.18);
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
         html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
         body{font-family:var(--font-sans);background:var(--bg-0);color:var(--text-1);min-height:100vh;overflow-x:hidden;touch-action:manipulation;overscroll-behavior-y:contain;}
         .glass{background:var(--bg-1);border:1px solid var(--border-dim);}
         .glass-light{background:rgba(13,18,32,.5);border:1px solid var(--border-subtle);}
-        .glass-accent{background:linear-gradient(135deg,rgba(35,247,221,.07),rgba(139,92,246,.07));border:1px solid rgba(35,247,221,.18);}
+        .glass-accent{background:linear-gradient(135deg,rgba(45,227,203,.07),rgba(163,116,247,.07));border:1px solid rgba(45,227,203,.18);}
 
         /* APP SHELL */
         .app-layout{display:flex;flex-direction:column;min-height:100vh;}
 
         /* TOPBAR */
-        .topbar{position:sticky;top:0;z-index:200;height:56px;background:var(--bg-1);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:0;padding:0 16px;}
+        .topbar{position:sticky;top:0;z-index:310;background:var(--bg-1);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:0;padding:0 16px;height:56px;}
         .topbar-logo{display:flex;align-items:center;gap:10px;margin-right:20px;text-decoration:none;flex-shrink:0;}
         .topbar-logo-icon{width:28px;height:28px;flex-shrink:0;}
         .topbar-logo-text{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--xrp);letter-spacing:.04em;white-space:nowrap;}
-        .topbar-price{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-md);padding:5px 12px;margin-right:12px;flex-shrink:0;}
+        .topbar-price{display:flex;align-items:center;gap:6px;background:rgba(34,197,139,.08);border:1px solid rgba(34,197,139,.2);border-radius:var(--r-md);padding:5px 12px;margin-right:12px;flex-shrink:0;}
         .topbar-price-label{font-size:10px;color:var(--text-2);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
         .topbar-price-value{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--green);}
         .ticker-strip{flex:1;overflow:hidden;height:100%;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent 0%,black 6%,black 94%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,black 6%,black 94%,transparent 100%);}
@@ -83,13 +86,13 @@
         .ticker-symbol{font-weight:700;color:var(--xrp);}
         .ticker-price{color:var(--text-1);}
         .ticker-change{padding:1px 5px;border-radius:4px;font-size:10px;font-weight:500;}
-        .ticker-change.positive{background:rgba(16,185,129,.15);color:var(--green);}
-        .ticker-change.negative{background:rgba(244,63,94,.15);color:var(--red);}
+        .ticker-change.positive{background:rgba(34,197,139,.15);color:var(--green);}
+        .ticker-change.negative{background:rgba(240,70,95,.15);color:var(--red);}
         .ticker-divider{color:var(--border-med);}
         .topbar-actions{display:flex;align-items:center;gap:8px;margin-left:12px;flex-shrink:0;}
         .topbar-btn{display:flex;align-items:center;gap:5px;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-2);font-family:var(--font-sans);font-size:11px;font-weight:500;padding:6px 10px;border-radius:var(--r-md);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s;text-decoration:none;}
         .topbar-btn:hover{border-color:var(--border-med);color:var(--text-1);}
-        .topbar-btn.accent{background:rgba(35,247,221,.07);border-color:rgba(35,247,221,.2);color:var(--xrp);}
+        .topbar-btn.accent{background:rgba(45,227,203,.07);border-color:rgba(45,227,203,.2);color:var(--xrp);}
 
         /* BODY LAYOUT */
         .body-layout{display:flex;flex:1;min-height:0;}
@@ -99,15 +102,15 @@
         .sidebar-section-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:12px 8px 5px;}
         .sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-md);font-size:12.5px;font-weight:400;color:var(--text-2);cursor:pointer;border:1px solid transparent;transition:all .15s;background:transparent;text-align:left;width:100%;}
         .sidebar-item:hover{background:var(--bg-2);color:var(--text-1);}
-        .sidebar-item.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.18);color:var(--accent);font-weight:500;}
+        .sidebar-item.active{background:rgba(79,125,249,.08);border-color:rgba(79,125,249,.18);color:var(--accent);font-weight:500;}
         .sidebar-item-icon{font-size:14px;width:18px;text-align:center;opacity:.8;flex-shrink:0;}
         .sidebar-item-label{flex:1;}
-        .sidebar-badge{font-size:9px;font-family:var(--font-mono);padding:2px 5px;border-radius:4px;background:rgba(59,130,246,.12);color:var(--accent);}
-        .sidebar-badge.live{background:rgba(16,185,129,.12);color:var(--green);}
-        .sidebar-badge.amber{background:rgba(245,158,11,.12);color:var(--amber);}
+        .sidebar-badge{font-size:9px;font-family:var(--font-mono);padding:2px 5px;border-radius:4px;background:rgba(79,125,249,.12);color:var(--accent);}
+        .sidebar-badge.live{background:rgba(34,197,139,.12);color:var(--green);}
+        .sidebar-badge.amber{background:rgba(245,166,35,.12);color:var(--amber);}
         .sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);}
-        .sidebar-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-md);background:rgba(35,247,221,.05);border:1px solid rgba(35,247,221,.12);color:var(--xrp);font-size:11px;text-decoration:none;margin-bottom:6px;transition:border-color .15s;}
-        .sidebar-link:hover{border-color:rgba(35,247,221,.25);}
+        .sidebar-link{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-md);background:rgba(45,227,203,.05);border:1px solid rgba(45,227,203,.12);color:var(--xrp);font-size:11px;text-decoration:none;margin-bottom:6px;transition:border-color .15s;}
+        .sidebar-link:hover{border-color:rgba(45,227,203,.25);}
         .settings-trigger{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-md);font-size:12.5px;font-weight:400;color:var(--text-2);cursor:pointer;border:1px solid transparent;transition:all .15s;background:transparent;width:100%;text-align:left;}
         .settings-trigger:hover{background:var(--bg-2);color:var(--text-1);}
 
@@ -155,7 +158,7 @@
         .pie-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
         .dashboard-secondary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
         .dashboard-metric-small{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:12px 14px;display:flex;align-items:center;gap:10px;}
-        .dashboard-metric-small.burn{border-color:rgba(244,63,94,.2);}
+        .dashboard-metric-small.burn{border-color:rgba(240,70,95,.2);}
         .dashboard-metric-icon{font-size:18px;flex-shrink:0;}
         .dashboard-metric-info{min-width:0;}
         .dashboard-metric-value.small{font-family:var(--font-mono);font-size:14px;font-weight:700;}
@@ -176,10 +179,10 @@
         .controls{display:flex;align-items:center;gap:6px;padding:12px 20px;border-bottom:1px solid var(--border-subtle);background:var(--bg-1);flex-wrap:wrap;}
         .btn{font-family:var(--font-sans);font-size:12px;font-weight:500;color:var(--text-2);background:var(--bg-2);border:1px solid var(--border-dim);padding:6px 12px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
         .btn:hover{background:var(--bg-3);border-color:var(--border-med);color:var(--text-1);}
-        .btn.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
-        .btn-refresh{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:var(--accent);}
-        .btn-refresh:hover{background:rgba(59,130,246,.15);}
-        .btn-chart{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);color:var(--accent3);}
+        .btn.active{background:rgba(34,184,207,.1);border-color:rgba(34,184,207,.25);color:var(--accent2);}
+        .btn-refresh{background:rgba(79,125,249,.08);border-color:rgba(79,125,249,.2);color:var(--accent);}
+        .btn-refresh:hover{background:rgba(79,125,249,.15);}
+        .btn-chart{background:rgba(163,116,247,.08);border-color:rgba(163,116,247,.2);color:var(--accent3);}
 
         /* MAIN CONTENT */
         #mainContent{padding:16px 20px;}
@@ -197,8 +200,8 @@
         .etf-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
         .etf-symbol{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--xrp);}
         .etf-change-badge{font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:5px;font-weight:700;}
-        .etf-change-badge.positive{background:rgba(16,185,129,.12);color:var(--green);}
-        .etf-change-badge.negative{background:rgba(244,63,94,.12);color:var(--red);}
+        .etf-change-badge.positive{background:rgba(34,197,139,.12);color:var(--green);}
+        .etf-change-badge.negative{background:rgba(240,70,95,.12);color:var(--red);}
         .etf-name{font-size:11px;color:var(--text-2);margin-bottom:10px;}
         .etf-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
         .etf-stat-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;}
@@ -207,13 +210,43 @@
         /* HOLDINGS TAB */
         .holdings-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:16px 20px;border-bottom:1px solid var(--border-subtle);}
         .summary-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;}
-        .summary-card.highlight{border-color:rgba(35,247,221,.2);background:rgba(35,247,221,.04);}
+        .summary-card.highlight{border-color:rgba(45,227,203,.2);background:rgba(45,227,203,.04);}
         .summary-label{font-size:10px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
         .summary-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-1);}
         .summary-value.accent{color:var(--xrp);}
         .summary-value.positive{color:var(--green);}
         .summary-value.negative{color:var(--red);}
         .holdings-chart-container{padding:16px 20px;border-bottom:1px solid var(--border-subtle);}
+
+        /* MARKET SUMMARY BLURB */
+        .market-summary-card{margin:16px 20px 0;padding:14px 18px;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);}
+        .market-summary-label{display:flex;align-items:center;gap:6px;font-size:10px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+        .market-summary-text{font-size:13px;line-height:1.6;color:var(--text-2);}
+        .market-summary-text strong{color:var(--text-1);font-weight:600;}
+
+        /* MILESTONE PROGRESS */
+        .milestone-card{margin:12px 20px 0;padding:14px 18px;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);}
+        .milestone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+        .milestone-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text-1);}
+        .milestone-value{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--xrp);}
+        .milestone-progress-track{height:8px;border-radius:4px;background:var(--bg-3);overflow:hidden;}
+        .milestone-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--xrp),var(--accent));transition:width .4s ease;}
+        .milestone-labels{display:flex;justify-content:space-between;font-size:10px;font-family:var(--font-mono);color:var(--text-3);margin-top:6px;}
+
+        /* ETF CARDS */
+        .etf-cards-section{margin-top:16px;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);}
+        .etf-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:0 20px;}
+        .etf-card2{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px;transition:border-color .15s,transform .15s;}
+        .etf-card2:hover{border-color:var(--border-med);transform:translateY(-2px);}
+        .etf-card2-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+        .etf-card2-ticker{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--xrp);}
+        .etf-card2-change{font-family:var(--font-mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;}
+        .etf-card2-change.positive{color:var(--green);background:rgba(34,197,139,.12);}
+        .etf-card2-change.negative{color:var(--red);background:rgba(240,70,95,.12);}
+        .etf-card2-change.flat{color:var(--text-3);background:var(--bg-3);}
+        .etf-card2-issuer{font-size:11px;color:var(--text-2);margin-bottom:8px;}
+        .etf-card2-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-1);}
+        .etf-card2-sub{font-size:10px;color:var(--text-3);font-family:var(--font-mono);margin-top:2px;}
         .chart-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
         .chart-section-title{font-size:12px;font-weight:600;color:var(--text-2);font-family:var(--font-mono);letter-spacing:.04em;text-transform:uppercase;}
         .chart-type-btns{display:flex;gap:2px;background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:2px;}
@@ -301,8 +334,8 @@
         .news-subtitle{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
         .news-filter-tabs{display:flex;gap:4px;}
         .news-filter-btn{font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:4px 10px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
-        .news-filter-btn.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
-        .news-insight-banner{margin:12px 20px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:var(--r-lg);padding:14px 16px;}
+        .news-filter-btn.active{background:rgba(34,184,207,.1);border-color:rgba(34,184,207,.25);color:var(--accent2);}
+        .news-insight-banner{margin:12px 20px;background:rgba(163,116,247,.06);border:1px solid rgba(163,116,247,.15);border-radius:var(--r-lg);padding:14px 16px;}
         .news-insight-label{font-size:9px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent3);margin-bottom:6px;}
         .news-insight-value{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:4px;}
         .news-insight-sub{font-size:11px;color:var(--text-2);}
@@ -355,17 +388,17 @@
         .sentiment-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
         .sentiment-scale{display:flex;gap:4px;margin-bottom:6px;}
         .sentiment-btn{flex:1;font-size:10px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-dim);padding:5px;border-radius:var(--r-sm);cursor:pointer;text-align:center;transition:all .15s;}
-        .sentiment-btn.bullish.active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:var(--green);}
-        .sentiment-btn.neutral.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:var(--amber);}
-        .sentiment-btn.bearish.active{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.25);color:var(--red);}
+        .sentiment-btn.bullish.active{background:rgba(34,197,139,.12);border-color:rgba(34,197,139,.25);color:var(--green);}
+        .sentiment-btn.neutral.active{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.25);color:var(--amber);}
+        .sentiment-btn.bearish.active{background:rgba(240,70,95,.12);border-color:rgba(240,70,95,.25);color:var(--red);}
         .scenarios-section{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px;}
         .scenarios-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
         .scenarios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
         .scenario-card{background:var(--bg-3);border:1px solid var(--border-dim);border-radius:var(--r-md);padding:12px;}
         .scenario-badge{font-size:9px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
-        .scenario-badge.bull{background:rgba(16,185,129,.12);color:var(--green);}
-        .scenario-badge.base{background:rgba(6,182,212,.12);color:var(--accent2);}
-        .scenario-badge.bear{background:rgba(244,63,94,.12);color:var(--red);}
+        .scenario-badge.bull{background:rgba(34,197,139,.12);color:var(--green);}
+        .scenario-badge.base{background:rgba(34,184,207,.12);color:var(--accent2);}
+        .scenario-badge.bear{background:rgba(240,70,95,.12);color:var(--red);}
         .scenario-range{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text-1);margin:4px 0;}
         .scenario-desc{font-size:10px;color:var(--text-3);line-height:1.4;}
         .scenario-prob{font-size:9px;color:var(--text-3);font-family:var(--font-mono);margin-top:5px;}
@@ -392,7 +425,7 @@
         .key-metric-sub{font-size:9px;color:var(--text-3);margin-top:2px;}
         .etf-rec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
         .etf-rec-card{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px 16px;}
-        .etf-rec-badge{display:inline-block;font-size:9px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:rgba(6,182,212,.1);color:var(--accent2);margin-bottom:6px;}
+        .etf-rec-badge{display:inline-block;font-size:9px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:rgba(34,184,207,.1);color:var(--accent2);margin-bottom:6px;}
         .etf-rec-ticker{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--xrp);}
         .etf-rec-name{font-size:11px;color:var(--text-2);margin-bottom:5px;}
         .etf-rec-desc{font-size:11px;color:var(--text-3);line-height:1.5;}
@@ -400,7 +433,7 @@
         .etf-compare-title{font-size:12px;font-family:var(--font-mono);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
         .compare-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
         .compare-tab{font-size:10px;color:var(--text-3);background:var(--bg-3);border:1px solid var(--border-dim);padding:4px 8px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;}
-        .compare-tab.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .compare-tab.active{background:rgba(34,184,207,.1);border-color:rgba(34,184,207,.25);color:var(--accent2);}
         .compare-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
         .compare-metric{background:var(--bg-3);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;}
         .compare-metric-label{font-size:9px;color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em;}
@@ -446,7 +479,7 @@
         /* CHAT WIDGET */
         .chat-toggle-btn{position:fixed;bottom:24px;right:24px;width:46px;height:46px;background:var(--bg-2);border:1px solid var(--border-med);border-radius:50%;font-size:18px;cursor:pointer;z-index:300;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .15s,border-color .15s;}
         .chat-toggle-btn:hover{transform:scale(1.08);border-color:var(--border-hi);}
-        .chat-toggle-btn.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);}
+        .chat-toggle-btn.active{background:rgba(79,125,249,.15);border-color:rgba(79,125,249,.4);}
         .chat-widget{position:fixed;bottom:78px;right:24px;width:320px;max-height:480px;background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:300;display:none;flex-direction:column;overflow:hidden;}
         .chat-widget.open{display:flex;}
         .chat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-dim);background:var(--bg-2);}
@@ -458,7 +491,7 @@
         .chat-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
         .chat-message{font-size:12px;line-height:1.6;max-width:88%;}
         .chat-message.assistant{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:8px 8px 8px 2px;padding:8px 10px;color:var(--text-2);}
-        .chat-message.user{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:8px 8px 2px 8px;padding:8px 10px;color:var(--text-1);align-self:flex-end;}
+        .chat-message.user{background:rgba(79,125,249,.1);border:1px solid rgba(79,125,249,.2);border-radius:8px 8px 2px 8px;padding:8px 10px;color:var(--text-1);align-self:flex-end;}
         .chat-message.typing{opacity:.6;}
         .chat-suggestions{display:flex;gap:4px;padding:6px 12px;flex-wrap:wrap;border-top:1px solid var(--border-subtle);}
         .chat-suggestion{font-size:10px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:4px 8px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
@@ -466,8 +499,8 @@
         .chat-input-area{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border-dim);background:var(--bg-2);}
         .chat-input{flex:1;background:var(--bg-3);border:1px solid var(--border-dim);color:var(--text-1);font-family:var(--font-sans);font-size:12px;padding:7px 10px;border-radius:var(--r-md);outline:none;}
         .chat-input:focus{border-color:var(--border-med);}
-        .chat-send-btn{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--accent);padding:7px 12px;border-radius:var(--r-md);font-size:13px;cursor:pointer;transition:background .15s;}
-        .chat-send-btn:hover{background:rgba(59,130,246,.2);}
+        .chat-send-btn{background:rgba(79,125,249,.12);border:1px solid rgba(79,125,249,.25);color:var(--accent);padding:7px 12px;border-radius:var(--r-md);font-size:13px;cursor:pointer;transition:background .15s;}
+        .chat-send-btn:hover{background:rgba(79,125,249,.2);}
 
         /* MODALS */
         .settings-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center;}
@@ -486,7 +519,7 @@
         .toggle-switch input{display:none;}
         .toggle-slider{position:absolute;inset:0;background:var(--bg-3);border:1px solid var(--border-dim);border-radius:10px;cursor:pointer;transition:background .2s;}
         .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;top:2px;left:2px;background:var(--text-3);border-radius:50%;transition:transform .2s,background .2s;}
-        .toggle-switch input:checked+.toggle-slider{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.4);}
+        .toggle-switch input:checked+.toggle-slider{background:rgba(34,197,139,.2);border-color:rgba(34,197,139,.4);}
         .toggle-switch input:checked+.toggle-slider::before{transform:translateX(16px);background:var(--green);}
         .chart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;}
         .chart-overlay.active{display:flex;}
@@ -497,7 +530,7 @@
         .chart-close:hover{color:var(--text-1);}
         .chart-controls,.chart-period-controls{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
         .chart-tab,.chart-period{font-size:11px;color:var(--text-3);background:var(--bg-2);border:1px solid var(--border-dim);padding:5px 10px;border-radius:var(--r-md);cursor:pointer;transition:all .15s;}
-        .chart-tab.active,.chart-period.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.25);color:var(--accent2);}
+        .chart-tab.active,.chart-period.active{background:rgba(34,184,207,.1);border-color:rgba(34,184,207,.25);color:var(--accent2);}
         .chart-loading{display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px;}
         .chart-container{position:relative;height:320px;}
         .chart-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text-2);}
@@ -508,8 +541,8 @@
         .popup-icon{font-size:32px;margin-bottom:8px;}
         .popup-title{font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:6px;}
         .popup-text{font-size:12px;color:var(--text-2);margin-bottom:14px;}
-        .popup-follow-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(35,247,221,.08);border:1px solid rgba(35,247,221,.25);color:var(--xrp);font-size:13px;font-weight:600;padding:10px 16px;border-radius:var(--r-lg);text-decoration:none;margin-bottom:8px;transition:background .15s;}
-        .popup-follow-btn:hover{background:rgba(35,247,221,.15);}
+        .popup-follow-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(45,227,203,.08);border:1px solid rgba(45,227,203,.25);color:var(--xrp);font-size:13px;font-weight:600;padding:10px 16px;border-radius:var(--r-lg);text-decoration:none;margin-bottom:8px;transition:background .15s;}
+        .popup-follow-btn:hover{background:rgba(45,227,203,.15);}
         .popup-x-icon{font-size:16px;}
         .popup-later{background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer;}
         .fullscreen-chart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;}
@@ -526,7 +559,7 @@
         .install-banner-icon{font-size:20px;}
         .install-banner-text h4{font-size:12px;font-weight:600;color:var(--text-1);}
         .install-banner-text p{font-size:10px;color:var(--text-3);}
-        .install-banner-btn{background:rgba(35,247,221,.08);border:1px solid rgba(35,247,221,.2);color:var(--xrp);font-size:11px;font-weight:500;padding:6px 12px;border-radius:var(--r-md);cursor:pointer;}
+        .install-banner-btn{background:rgba(45,227,203,.08);border:1px solid rgba(45,227,203,.2);color:var(--xrp);font-size:11px;font-weight:500;padding:6px 12px;border-radius:var(--r-md);cursor:pointer;}
         .install-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;}
         .install-modal-overlay.active{display:flex;}
         .install-modal{background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-xl);padding:20px;width:360px;}
@@ -537,7 +570,7 @@
         .install-platform h4{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:8px;}
         .install-steps{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
         .install-steps li{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--text-2);}
-        .step-number{width:18px;height:18px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);color:var(--accent);border-radius:50%;font-size:9px;font-family:var(--font-mono);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .step-number{width:18px;height:18px;background:rgba(79,125,249,.12);border:1px solid rgba(79,125,249,.2);color:var(--accent);border-radius:50%;font-size:9px;font-family:var(--font-mono);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
         .bg-grid{display:none;}
         .bg-glow{display:none;}
         .container{flex:1;display:flex;flex-direction:column;min-height:0;}
@@ -552,9 +585,9 @@
         .last-updated{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
         .auto-refresh-info{font-size:10px;color:var(--text-3);font-family:var(--font-mono);}
         .wallet-details-table{overflow-x:auto;margin-top:8px;}
-        .install-mini{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--xrp);cursor:pointer;background:rgba(35,247,221,.06);border:1px solid rgba(35,247,221,.15);padding:4px 8px;border-radius:var(--r-md);}
-        .twitter-handle,.site-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--xrp);text-decoration:none;background:rgba(35,247,221,.05);border:1px solid rgba(35,247,221,.12);padding:5px 10px;border-radius:var(--r-md);transition:border-color .15s;}
-        .twitter-handle:hover,.site-link:hover{border-color:rgba(35,247,221,.25);}
+        .install-mini{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--xrp);cursor:pointer;background:rgba(45,227,203,.06);border:1px solid rgba(45,227,203,.15);padding:4px 8px;border-radius:var(--r-md);}
+        .twitter-handle,.site-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--xrp);text-decoration:none;background:rgba(45,227,203,.05);border:1px solid rgba(45,227,203,.12);padding:5px 10px;border-radius:var(--r-md);transition:border-color .15s;}
+        .twitter-handle:hover,.site-link:hover{border-color:rgba(45,227,203,.25);}
         .twitter-icon,.site-link-icon{font-size:14px;}
         .twitter-name,.twitter-user,.site-link-name,.site-link-desc{font-size:10px;}
         ::-webkit-scrollbar{width:5px;height:5px;}
@@ -562,9 +595,41 @@
         ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:3px;}
         ::-webkit-scrollbar-thumb:hover{background:var(--border-med);}
 
+        /* MOBILE NAV — hamburger toggle + slide-in drawer + backdrop */
+        .mobile-nav-toggle{
+            display:none;
+            flex-direction:column;
+            justify-content:center;
+            gap:4px;
+            width:34px;height:34px;
+            background:transparent;border:1px solid var(--border-dim);border-radius:var(--r-sm);
+            cursor:pointer;margin-right:10px;flex-shrink:0;padding:0;
+        }
+        .mobile-nav-toggle span{display:block;width:16px;height:2px;background:var(--text-1);margin:0 auto;border-radius:2px;transition:transform .2s,opacity .2s;}
+        .mobile-nav-toggle.open span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+        .mobile-nav-toggle.open span:nth-child(2){opacity:0;}
+        .mobile-nav-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+        .mobile-nav-backdrop{
+            display:none;
+            position:fixed;inset:0;
+            background:rgba(0,0,0,.55);
+            z-index:290;
+            opacity:0;transition:opacity .2s;
+        }
+        .mobile-nav-backdrop.open{display:block;opacity:1;}
+
         /* RESPONSIVE */
         @media(max-width:900px){
-            .sidebar{display:none;}
+            .mobile-nav-toggle{display:flex;}
+            .sidebar{
+                position:fixed;top:0;left:0;bottom:0;z-index:300;
+                width:270px;
+                transform:translateX(-100%);
+                transition:transform .25s ease;
+                box-shadow:var(--shadow-card);
+                top:56px;height:calc(100vh - 56px);
+            }
+            .sidebar.mobile-open{transform:translateX(0);}
             .body-layout{flex-direction:column;}
             .dashboard-metrics{grid-template-columns:repeat(2,1fr);}
             .daily-summary-banner{grid-template-columns:repeat(2,1fr);}
@@ -605,11 +670,11 @@
         }
 
         .glass-accent {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(35, 247, 221, 0.2);
-            box-shadow: var(--glass-shadow), 0 0 40px rgba(35, 247, 221, 0.05);
+            border: 1px solid rgba(45,227,203, 0.2);
+            box-shadow: var(--glass-shadow), 0 0 40px rgba(45,227,203, 0.05);
         }
 
         /* Animated Price Ticker */
@@ -619,7 +684,7 @@
             left: 0;
             right: 0;
             height: 36px;
-            background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a);
+            background: linear-gradient(90deg, #0E121A, #1B212C, #0E121A);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
             overflow: hidden;
@@ -673,12 +738,12 @@
         }
 
         .ticker-change.positive {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34,197,139, 0.2);
             color: var(--accent-green);
         }
 
         .ticker-change.negative {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(240,70,95, 0.2);
             color: var(--accent-red);
         }
 
@@ -702,8 +767,8 @@
             right: 0;
             bottom: 0;
             background-image:
-                linear-gradient(rgba(35, 247, 221, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(35, 247, 221, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(45,227,203, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45,227,203, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
             z-index: 0;
@@ -715,8 +780,8 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(35, 247, 221, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 20%, rgba(45,227,203, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(163,116,247, 0.05) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
             animation: glowPulse 15s ease-in-out infinite;
@@ -768,8 +833,8 @@
             align-items: center;
             justify-content: center;
             padding: 8px;
-            box-shadow: 0 4px 15px rgba(35, 247, 221, 0.3);
-            border: 2px solid rgba(35, 247, 221, 0.3);
+            box-shadow: 0 4px 15px rgba(45,227,203, 0.3);
+            border: 2px solid rgba(45,227,203, 0.3);
         }
 
         .logo-icon svg {
@@ -795,7 +860,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.2), rgba(35, 247, 221, 0.05));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.2), rgba(45,227,203, 0.05));
             border: 1px solid var(--accent-xrp);
             border-radius: 8px;
             padding: 0.4rem 0.75rem;
@@ -805,9 +870,9 @@
         }
 
         .install-mini:hover {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.3), rgba(35, 247, 221, 0.1));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.3), rgba(45,227,203, 0.1));
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(35, 247, 221, 0.3);
+            box-shadow: 0 4px 12px rgba(45,227,203, 0.3);
         }
 
         .install-mini-icon {
@@ -829,19 +894,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.15), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.15), rgba(163,116,247, 0.1));
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid rgba(35, 247, 221, 0.4);
+            border: 1px solid rgba(45,227,203, 0.4);
             border-radius: 16px;
             padding: 0.75rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.15);
+            box-shadow: 0 4px 20px rgba(45,227,203, 0.15);
             transition: all 0.3s ease;
         }
 
         .xrp-price:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(35, 247, 221, 0.25);
+            box-shadow: 0 6px 25px rgba(45,227,203, 0.25);
         }
 
         .xrp-label {
@@ -1049,7 +1114,7 @@
 
         .btn-refresh {
             margin-left: auto;
-            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            background: linear-gradient(135deg, var(--accent-xrp), #5AA8FF);
             border: none;
             color: var(--bg-primary);
             font-weight: 600;
@@ -1057,7 +1122,7 @@
 
         .btn-refresh:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.3);
+            box-shadow: 0 4px 20px rgba(45,227,203, 0.3);
         }
 
         .btn-refresh:disabled {
@@ -1138,8 +1203,8 @@
         }
 
         .etf-group:hover {
-            border-color: rgba(35, 247, 221, 0.2);
-            box-shadow: var(--glass-shadow), 0 0 30px rgba(35, 247, 221, 0.05);
+            border-color: rgba(45,227,203, 0.2);
+            box-shadow: var(--glass-shadow), 0 0 30px rgba(45,227,203, 0.05);
         }
 
         .etf-group:nth-child(1) {
@@ -1215,19 +1280,19 @@
         }
 
         .group-icon.index {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(79,125,249, 0.2);
         }
 
         .group-icon.spot {
-            background: rgba(35, 247, 221, 0.2);
+            background: rgba(45,227,203, 0.2);
         }
 
         .group-icon.futures {
-            background: rgba(249, 115, 22, 0.2);
+            background: rgba(245,166,35, 0.2);
         }
 
         .group-icon.canada {
-            background: rgba(168, 85, 247, 0.2);
+            background: rgba(163,116,247, 0.2);
         }
 
         .group-name {
@@ -1784,7 +1849,7 @@
             position: relative;
             transform: scale(0.8);
             transition: transform 0.3s ease;
-            box-shadow: 0 20px 60px rgba(35, 247, 221, 0.2);
+            box-shadow: 0 20px 60px rgba(45,227,203, 0.2);
         }
 
         .popup-overlay.active .popup-modal {
@@ -1844,7 +1909,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            background: linear-gradient(135deg, var(--accent-xrp), #5AA8FF);
             color: var(--bg-primary);
             font-size: 1.1rem;
             font-weight: 700;
@@ -1858,7 +1923,7 @@
 
         .popup-follow-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(35, 247, 221, 0.4);
+            box-shadow: 0 10px 30px rgba(45,227,203, 0.4);
         }
 
         .popup-x-icon {
@@ -1889,7 +1954,7 @@
 
         .btn-chart:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+            box-shadow: 0 4px 20px rgba(163,116,247, 0.3);
             color: white;
         }
 
@@ -2097,7 +2162,7 @@
         }
 
         .main-tab.active {
-            background: linear-gradient(135deg, var(--accent-xrp), #1ed9c0);
+            background: linear-gradient(135deg, var(--accent-xrp), #5AA8FF);
             color: var(--bg-primary);
         }
 
@@ -2135,13 +2200,13 @@
 
         .summary-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(35, 247, 221, 0.3);
-            box-shadow: var(--glass-shadow), 0 0 20px rgba(35, 247, 221, 0.1);
+            border-color: rgba(45,227,203, 0.3);
+            box-shadow: var(--glass-shadow), 0 0 20px rgba(45,227,203, 0.1);
         }
 
         .summary-card.highlight {
-            border-color: rgba(35, 247, 221, 0.4);
-            background: linear-gradient(135deg, var(--glass-bg), rgba(35, 247, 221, 0.15));
+            border-color: rgba(45,227,203, 0.4);
+            background: linear-gradient(135deg, var(--glass-bg), rgba(45,227,203, 0.15));
         }
 
         .summary-label {
@@ -2551,7 +2616,7 @@
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(35, 247, 221, 0.1);
+            box-shadow: 0 10px 30px rgba(45,227,203, 0.1);
         }
 
         .dashboard-overview::before {
@@ -2561,14 +2626,14 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(35, 247, 221, 0.1) 0%, transparent 50%);
+            background: radial-gradient(circle at 20% 50%, rgba(45,227,203, 0.1) 0%, transparent 50%);
             pointer-events: none;
         }
 
         /* Daily Summary Banner */
         .daily-summary-banner {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(35, 247, 221, 0.3);
+            background: linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
+            border: 1px solid rgba(45,227,203, 0.3);
             border-radius: 12px;
             padding: 1rem 1.25rem;
             margin-bottom: 1.25rem;
@@ -2591,7 +2656,7 @@
         }
 
         .summary-item:hover {
-            background: rgba(35, 247, 221, 0.15);
+            background: rgba(45,227,203, 0.15);
             transform: translateY(-2px);
         }
 
@@ -2737,12 +2802,12 @@
         }
 
         .dashboard-metric-change.positive {
-            background: rgba(34, 197, 94, 0.15);
+            background: rgba(34,197,139, 0.15);
             color: var(--accent-green);
         }
 
         .dashboard-metric-change.negative {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(240,70,95, 0.15);
             color: var(--accent-red);
         }
 
@@ -2903,12 +2968,12 @@
         }
 
         .change-indicator.positive {
-            background: rgba(34, 197, 94, 0.15);
+            background: rgba(34,197,139, 0.15);
             color: var(--accent-green);
         }
 
         .change-indicator.negative {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(240,70,95, 0.15);
             color: var(--accent-red);
         }
 
@@ -3149,7 +3214,7 @@
         }
 
         .comparison-toggle.active {
-            background: rgba(168, 85, 247, 0.15);
+            background: rgba(163,116,247, 0.15);
             border-color: var(--accent-purple);
             color: var(--accent-purple);
         }
@@ -3420,7 +3485,7 @@
 
         .calendar-event:hover {
             transform: translateX(5px);
-            border-color: rgba(35, 247, 221, 0.3);
+            border-color: rgba(45,227,203, 0.3);
         }
 
         .event-date {
@@ -3464,17 +3529,17 @@
         }
 
         .tag-important {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(240,70,95, 0.2);
             color: var(--accent-red);
         }
 
         .tag-report {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(79,125,249, 0.2);
             color: var(--accent-blue);
         }
 
         .tag-market {
-            background: rgba(168, 85, 247, 0.2);
+            background: rgba(163,116,247, 0.2);
             color: var(--accent-purple);
         }
 
@@ -3500,9 +3565,9 @@
         }
 
         .news-item:hover {
-            border-color: rgba(35, 247, 221, 0.4);
+            border-color: rgba(45,227,203, 0.4);
             transform: translateY(-8px) scale(1.02);
-            box-shadow: var(--glass-shadow), 0 20px 40px rgba(35, 247, 221, 0.15);
+            box-shadow: var(--glass-shadow), 0 20px 40px rgba(45,227,203, 0.15);
         }
 
         .news-image {
@@ -3523,7 +3588,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(45deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
         }
 
         .news-image-icon {
@@ -3547,20 +3612,20 @@
         }
 
         .news-sentiment-badge.bullish {
-            background: rgba(34, 197, 94, 0.9);
+            background: rgba(34,197,139, 0.9);
             color: white;
-            box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 2px 10px rgba(34,197,139, 0.4);
         }
 
         .news-sentiment-badge.bearish {
-            background: rgba(239, 68, 68, 0.9);
+            background: rgba(240,70,95, 0.9);
             color: white;
-            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 2px 10px rgba(240,70,95, 0.4);
         }
 
         .news-sentiment-badge.neutral {
             background: rgba(234, 179, 8, 0.9);
-            color: #1e293b;
+            color: #1B212C;
             box-shadow: 0 2px 10px rgba(234, 179, 8, 0.4);
         }
 
@@ -3782,7 +3847,7 @@
         }
 
         .xrpl-stat-card:hover {
-            border-color: rgba(35, 247, 221, 0.3);
+            border-color: rgba(45,227,203, 0.3);
             transform: translateY(-3px);
         }
 
@@ -3848,8 +3913,8 @@
         }
 
         .xrpl-tx-item:hover {
-            border-color: rgba(35, 247, 221, 0.3);
-            background: rgba(35, 247, 221, 0.05);
+            border-color: rgba(45,227,203, 0.3);
+            background: rgba(45,227,203, 0.05);
         }
 
         .xrpl-tx-type {
@@ -3862,22 +3927,22 @@
         }
 
         .xrpl-tx-type.payment {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34,197,139, 0.2);
             color: var(--accent-green);
         }
 
         .xrpl-tx-type.offer {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(79,125,249, 0.2);
             color: var(--accent-blue);
         }
 
         .xrpl-tx-type.trust {
-            background: rgba(168, 85, 247, 0.2);
+            background: rgba(163,116,247, 0.2);
             color: var(--accent-purple);
         }
 
         .xrpl-tx-type.escrow {
-            background: rgba(249, 115, 22, 0.2);
+            background: rgba(245,166,35, 0.2);
             color: var(--accent-orange);
         }
 
@@ -3994,12 +4059,12 @@
         }
 
         .candlestick-change.positive {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34,197,139, 0.2);
             color: var(--accent-green);
         }
 
         .candlestick-change.negative {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(240,70,95, 0.2);
             color: var(--accent-red);
         }
 
@@ -4141,7 +4206,7 @@
 
         /* Heat map color classes */
         .heatmap-cell.very-bullish {
-            background: linear-gradient(135deg, #15803d, #22c55e);
+            background: linear-gradient(135deg, #15803d, #22C58B);
         }
 
         .heatmap-cell.bullish {
@@ -4153,15 +4218,15 @@
         }
 
         .heatmap-cell.neutral {
-            background: linear-gradient(135deg, #ca8a04, #eab308);
+            background: linear-gradient(135deg, #ca8a04, #F5A623);
         }
 
         .heatmap-cell.slightly-bearish {
-            background: linear-gradient(135deg, #ea580c, #f97316);
+            background: linear-gradient(135deg, #ea580c, #F5A623);
         }
 
         .heatmap-cell.bearish {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
+            background: linear-gradient(135deg, #dc2626, #F0465F);
         }
 
         .heatmap-cell.very-bearish {
@@ -4251,13 +4316,13 @@
 
         .portfolio-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(35, 247, 221, 0.3);
-            box-shadow: var(--glass-shadow), 0 0 20px rgba(35, 247, 221, 0.1);
+            border-color: rgba(45,227,203, 0.3);
+            box-shadow: var(--glass-shadow), 0 0 20px rgba(45,227,203, 0.1);
         }
 
         .portfolio-card.highlight {
-            border-color: rgba(35, 247, 221, 0.4);
-            background: linear-gradient(135deg, var(--glass-bg), rgba(35, 247, 221, 0.15));
+            border-color: rgba(45,227,203, 0.4);
+            background: linear-gradient(135deg, var(--glass-bg), rgba(45,227,203, 0.15));
         }
 
         .portfolio-card-label {
@@ -4596,7 +4661,7 @@
 
         /* Daily Briefing Card */
         .briefing-card {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
             border: 1px solid var(--accent-xrp);
             border-radius: 16px;
             padding: 1.5rem;
@@ -4672,18 +4737,18 @@
         }
 
         .scenario-card.bullish {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: linear-gradient(135deg, rgba(34,197,139, 0.15), rgba(34,197,139, 0.05));
+            border: 1px solid rgba(34,197,139, 0.3);
         }
 
         .scenario-card.base {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: linear-gradient(135deg, rgba(79,125,249, 0.15), rgba(79,125,249, 0.05));
+            border: 1px solid rgba(79,125,249, 0.3);
         }
 
         .scenario-card.bearish {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, rgba(240,70,95, 0.15), rgba(240,70,95, 0.05));
+            border: 1px solid rgba(240,70,95, 0.3);
         }
 
         .scenario-header {
@@ -4769,17 +4834,17 @@
         }
 
         .ta-signal-badge.bullish {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34,197,139, 0.2);
             color: var(--accent-green);
         }
 
         .ta-signal-badge.bearish {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(240,70,95, 0.2);
             color: var(--accent-red);
         }
 
         .ta-signal-badge.neutral {
-            background: rgba(249, 115, 22, 0.2);
+            background: rgba(245,166,35, 0.2);
             color: var(--accent-orange);
         }
 
@@ -4969,7 +5034,7 @@
             color: var(--text-muted);
             margin-top: 1rem;
             padding: 0.75rem;
-            background: rgba(249, 115, 22, 0.1);
+            background: rgba(245,166,35, 0.1);
             border-radius: 8px;
         }
 
@@ -5147,7 +5212,7 @@
         }
 
         .smart-insight-card {
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(239, 68, 68, 0.1));
+            background: linear-gradient(135deg, rgba(245,166,35, 0.15), rgba(240,70,95, 0.1));
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 2px solid var(--accent-orange);
@@ -5155,7 +5220,7 @@
             padding: 1.5rem;
             position: relative;
             overflow: hidden;
-            box-shadow: var(--glass-shadow), 0 0 30px rgba(249, 115, 22, 0.1);
+            box-shadow: var(--glass-shadow), 0 0 30px rgba(245,166,35, 0.1);
         }
 
         .smart-insight-card::before {
@@ -5165,7 +5230,7 @@
             right: -50%;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(245,166,35, 0.1) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -5261,7 +5326,7 @@
 
         .ai-news-item:hover {
             transform: translateY(-3px);
-            box-shadow: var(--glass-shadow), 0 0 15px rgba(35, 247, 221, 0.08);
+            box-shadow: var(--glass-shadow), 0 0 15px rgba(45,227,203, 0.08);
         }
 
         .ai-news-item.bullish {
@@ -5291,17 +5356,17 @@
         }
 
         .ai-sentiment-badge.bullish {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34,197,139, 0.2);
             color: var(--accent-green);
         }
 
         .ai-sentiment-badge.bearish {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(240,70,95, 0.2);
             color: var(--accent-red);
         }
 
         .ai-sentiment-badge.neutral {
-            background: rgba(249, 115, 22, 0.2);
+            background: rgba(245,166,35, 0.2);
             color: var(--accent-orange);
         }
 
@@ -5327,7 +5392,7 @@
         }
 
         .ai-news-analysis {
-            background: rgba(35, 247, 221, 0.05);
+            background: rgba(45,227,203, 0.05);
             border-radius: 8px;
             padding: 0.75rem;
             margin-bottom: 0.75rem;
@@ -5561,7 +5626,7 @@
             background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.4);
+            box-shadow: 0 4px 20px rgba(45,227,203, 0.4);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -5572,7 +5637,7 @@
 
         .chat-toggle-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(35, 247, 221, 0.6);
+            box-shadow: 0 6px 30px rgba(45,227,203, 0.6);
         }
 
         .chat-toggle-btn.active {
@@ -5852,7 +5917,7 @@
         }
 
         .analytics-card.highlight {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
             border-color: var(--accent-xrp);
         }
 
@@ -5896,8 +5961,8 @@
         }
 
         .benchmark-notice {
-            background: rgba(249, 115, 22, 0.1);
-            border: 1px solid rgba(249, 115, 22, 0.3);
+            background: rgba(245,166,35, 0.1);
+            border: 1px solid rgba(245,166,35, 0.3);
             border-radius: 8px;
             padding: 0.75rem 1rem;
             margin-bottom: 1.5rem;
@@ -6285,8 +6350,8 @@
         }
 
         .whale-notice {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(240,70,95, 0.1);
+            border: 1px solid rgba(240,70,95, 0.3);
             border-radius: 8px;
             padding: 0.75rem 1rem;
             margin-bottom: 1.5rem;
@@ -6340,7 +6405,7 @@
         .whale-badge {
             font-size: 0.7rem;
             padding: 0.25rem 0.75rem;
-            background: rgba(35, 247, 221, 0.15);
+            background: rgba(45,227,203, 0.15);
             color: var(--accent-xrp);
             border-radius: 20px;
             font-weight: 600;
@@ -6396,7 +6461,7 @@
         }
 
         .whale-table tr:hover td {
-            background: rgba(35, 247, 221, 0.05);
+            background: rgba(45,227,203, 0.05);
         }
 
         .whale-table .rank {
@@ -6441,12 +6506,12 @@
         }
 
         .whale-table .status-badge.whale {
-            background: rgba(168, 85, 247, 0.2);
+            background: rgba(163,116,247, 0.2);
             color: var(--accent-purple);
         }
 
         .whale-table .status-badge.exchange {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(79,125,249, 0.2);
             color: var(--accent-blue);
         }
 
@@ -6663,7 +6728,7 @@
 
         .btn-generate-report:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(35, 247, 221, 0.4);
+            box-shadow: 0 4px 15px rgba(45,227,203, 0.4);
         }
 
         .btn-generate-report:disabled {
@@ -6682,8 +6747,8 @@
 
         /* Install App Banner */
         .install-banner {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid rgba(35, 247, 221, 0.3);
+            background: linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1));
+            border: 1px solid rgba(45,227,203, 0.3);
             border-radius: 12px;
             padding: 0.75rem 1rem;
             margin-bottom: 1rem;
@@ -6696,7 +6761,7 @@
         }
 
         .install-banner:hover {
-            background: linear-gradient(135deg, rgba(35, 247, 221, 0.15), rgba(168, 85, 247, 0.15));
+            background: linear-gradient(135deg, rgba(45,227,203, 0.15), rgba(163,116,247, 0.15));
             transform: translateY(-2px);
         }
 
@@ -6961,7 +7026,7 @@
         }
 
         .topic-tag.hot {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(240,70,95, 0.15);
             color: var(--accent-red);
         }
 
@@ -7279,7 +7344,7 @@
         }
 
         .tags-table tr:hover {
-            background: rgba(35, 247, 221, 0.05);
+            background: rgba(45,227,203, 0.05);
         }
 
         .tags-exchange-badge {
@@ -7432,7 +7497,7 @@
             border: none;
             cursor: pointer;
             font-size: 1.5rem;
-            box-shadow: 0 4px 20px rgba(35, 247, 221, 0.3);
+            box-shadow: 0 4px 20px rgba(45,227,203, 0.3);
             z-index: 100;
             transition: transform 0.3s;
         }
@@ -7845,7 +7910,7 @@
             border: 1px solid var(--border-dim) !important;
             border-radius: var(--r-lg) !important;
         }
-        .dashboard-metric-small.burn { border-color: rgba(244,63,94,.2) !important; }
+        .dashboard-metric-small.burn { border-color: rgba(240,70,95,.2) !important; }
 
 
         /* ===== SPACING OVERRIDES ===== */
@@ -8007,8 +8072,8 @@
             color: var(--text-3);
             border: 1px solid var(--border-dim);
         }
-        .kpi-trend-badge.positive { background: rgba(16,185,129,.1); color: var(--green); border-color: rgba(16,185,129,.2); }
-        .kpi-trend-badge.negative { background: rgba(244,63,94,.1); color: var(--red); border-color: rgba(244,63,94,.2); }
+        .kpi-trend-badge.positive { background: rgba(34,197,139,.1); color: var(--green); border-color: rgba(34,197,139,.2); }
+        .kpi-trend-badge.negative { background: rgba(240,70,95,.1); color: var(--red); border-color: rgba(240,70,95,.2); }
 
         .kpi-value {
             font-family: var(--font-mono);
@@ -8162,8 +8227,8 @@
             padding: 1px 5px;
             border-radius: 4px;
         }
-        .kpi-delta-pct.positive { background: rgba(16,185,129,.12); color: var(--green); }
-        .kpi-delta-pct.negative { background: rgba(244,63,94,.12); color: var(--red); }
+        .kpi-delta-pct.positive { background: rgba(34,197,139,.12); color: var(--green); }
+        .kpi-delta-pct.negative { background: rgba(240,70,95,.12); color: var(--red); }
 
         /* Mobile */
         @media (max-width: 700px) {
@@ -8174,7 +8239,6 @@
 
 
         @media (max-width: 900px) {
-            .sidebar { display: none !important; }
             .body-layout { flex-direction: column !important; }
         }
     </style>
@@ -8185,10 +8249,13 @@
 
     <!-- TOPBAR -->
     <div class="topbar">
+        <button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleMobileNav()" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
         <div class="topbar-logo">
             <svg class="topbar-logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="32" cy="32" r="32" fill="#0d1220"/>
-                <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#23f7dd"/>
+                <circle cx="32" cy="32" r="32" fill="#0E121A"/>
+                <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#2DE3CB"/>
             </svg>
             <span class="topbar-logo-text">XRP_INSIGHTS</span>
         </div>
@@ -8204,11 +8271,14 @@
         </div>
     </div>
 
+    <!-- Mobile nav backdrop -->
+    <div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="closeMobileNav()"></div>
+
     <!-- BODY -->
     <div class="body-layout">
 
         <!-- SIDEBAR -->
-        <nav class="sidebar">
+        <nav class="sidebar" id="mainSidebar">
             <div class="sidebar-section-label">Overview</div>
             <button class="sidebar-item active" onclick="switchMainTab('holdings')">
                 <span class="sidebar-item-icon">💎</span>
@@ -8393,14 +8463,14 @@
                             <div style="display:flex;flex-direction:column;gap:5px;width:100%;">
                                 <div class="donut-legend-row">
                                     <div style="display:flex;align-items:center;gap:6px;">
-                                        <div class="donut-dot" style="background:#23f7dd;"></div>
+                                        <div class="donut-dot" style="background:#2DE3CB;"></div>
                                         <span class="donut-leg-label">Spot ETFs</span>
                                     </div>
                                     <span class="donut-leg-val xrp" id="donutETFVal">--</span>
                                 </div>
                                 <div class="donut-legend-row">
                                     <div style="display:flex;align-items:center;gap:6px;">
-                                        <div class="donut-dot" style="background:#8b5cf6;"></div>
+                                        <div class="donut-dot" style="background:#A374F7;"></div>
                                         <span class="donut-leg-label">Exchanges</span>
                                     </div>
                                     <span class="donut-leg-val purple" id="donutExVal">--</span>
@@ -8475,6 +8545,37 @@
                 <div class="summary-card">
                     <div class="summary-label">Last Updated</div>
                     <div class="summary-value" id="holdingsLastUpdated" style="font-size: 1rem;">--</div>
+                </div>
+            </div>
+
+            <!-- Daily Market Summary -->
+            <div class="market-summary-card" id="marketSummaryCard">
+                <div class="market-summary-label"><span>📝</span> Daily Market Summary</div>
+                <p class="market-summary-text" id="marketSummaryText">Loading summary…</p>
+            </div>
+
+            <!-- XRP Locked Milestone -->
+            <div class="milestone-card" id="milestoneCard">
+                <div class="milestone-header">
+                    <div class="milestone-title"><span>🎯</span> XRP Locked in ETF Vaults</div>
+                    <div class="milestone-value" id="milestoneValue">--</div>
+                </div>
+                <div class="milestone-progress-track">
+                    <div class="milestone-progress-fill" id="milestoneProgressFill" style="width:0%"></div>
+                </div>
+                <div class="milestone-labels">
+                    <span>0</span>
+                    <span id="milestoneTarget">Target: --</span>
+                </div>
+            </div>
+
+            <!-- Per-ETF Cards -->
+            <div class="etf-cards-section">
+                <div class="holdings-table-title" style="padding: 0 20px; margin-bottom: 10px;">
+                    <span>💳</span> ETF Breakdown
+                </div>
+                <div class="etf-cards-grid" id="etfCardsGrid">
+                    <!-- Populated by renderETFCards() -->
                 </div>
             </div>
 
@@ -11275,6 +11376,9 @@
 
         // Tab switching function
         function switchMainTab(tabName) {
+            // Close the mobile nav drawer if it's open (no-op on desktop)
+            if (typeof closeMobileNav === 'function') closeMobileNav();
+
             // Update tab buttons
             document.querySelectorAll('.main-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -11403,6 +11507,105 @@
                 document.getElementById('totalValue').textContent = 'Loading...';
                 document.getElementById('holdingsXRPPrice').textContent = 'Loading...';
             }
+
+            renderMarketSummary(totalXRP, activeCount, latestDate);
+            renderMilestoneProgress(totalXRP);
+            renderETFCards(totalXRP);
+        }
+
+        // Per-ETF "latest value vs. its own previous value" — same method used
+        // elsewhere (Today Change stat, KPI delta badge) so every number on the
+        // page stays consistent with every other number on the page.
+        function getPerETFLatestAndDelta() {
+            if (!holdingsData || !holdingsData.length || !etfColumns) return [];
+            return etfColumns.map(col => {
+                let latestVal = null, latestDate = null;
+                for (const row of holdingsData) {
+                    const v = row[col.key]?.xrp;
+                    if (v && v > 0) { latestVal = v; latestDate = row.date; break; }
+                }
+                if (latestVal === null) return null;
+
+                let prevVal = 0;
+                let passedLatest = false;
+                for (const row of holdingsData) {
+                    if (!passedLatest) { if (row.date === latestDate) passedLatest = true; continue; }
+                    const v = row[col.key]?.xrp;
+                    if (v && v > 0) { prevVal = v; break; }
+                }
+                const delta = prevVal > 0 ? (latestVal - prevVal) : 0;
+                const deltaPct = prevVal > 0 ? (delta / prevVal) * 100 : 0;
+                return { ...col, value: latestVal, date: latestDate, delta, deltaPct, isNew: prevVal === 0 };
+            }).filter(Boolean);
+        }
+
+        function renderMarketSummary(totalXRP, activeCount, latestDate) {
+            const el = document.getElementById('marketSummaryText');
+            if (!el) return;
+            if (!totalXRP) { el.textContent = 'Loading summary…'; return; }
+
+            const perETF = getPerETFLatestAndDelta();
+            const totalValue = currentXRPPrice ? totalXRP * currentXRPPrice : null;
+            const movers = perETF.filter(e => e.delta !== 0).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+            const top = movers[0];
+
+            let sentence = `As of <strong>${latestDate}</strong>, <strong>${activeCount} XRP ETFs</strong> are tracked, holding a combined <strong>${formatHoldingsNumber(totalXRP)} XRP</strong>`;
+            if (totalValue) sentence += ` (about <strong>${formatHoldingsCurrency(totalValue)}</strong>)`;
+            sentence += '.';
+
+            if (top) {
+                const sign = top.delta >= 0 ? 'added' : 'removed';
+                sentence += ` <strong>${top.ticker}</strong> ${sign} ${formatHoldingsNumber(Math.abs(top.delta))} XRP on its latest reported date (${top.date}).`;
+            } else {
+                sentence += ` No changes reported on the latest update.`;
+            }
+
+            el.innerHTML = sentence;
+        }
+
+        function renderMilestoneProgress(totalXRP) {
+            const fill = document.getElementById('milestoneProgressFill');
+            const valueEl = document.getElementById('milestoneValue');
+            const targetEl = document.getElementById('milestoneTarget');
+            if (!fill || !totalXRP) return;
+
+            // Next round milestone above current total (steps of 100M once past 1B, else steps of 100M from 0)
+            const step = 100_000_000;
+            const target = Math.ceil((totalXRP + 1) / step) * step;
+            const pct = Math.min(100, (totalXRP / target) * 100);
+
+            fill.style.width = pct.toFixed(1) + '%';
+            valueEl.textContent = formatHoldingsNumber(totalXRP) + ' XRP';
+            targetEl.textContent = 'Target: ' + formatHoldingsNumber(target) + ' XRP';
+        }
+
+        function renderETFCards(totalXRP) {
+            const grid = document.getElementById('etfCardsGrid');
+            if (!grid) return;
+
+            const perETF = getPerETFLatestAndDelta().sort((a, b) => b.value - a.value);
+            if (!perETF.length) { grid.innerHTML = '<div class="table-empty-state" style="grid-column:1/-1;">No ETF data loaded yet.</div>'; return; }
+
+            grid.innerHTML = perETF.map(etf => {
+                const changeClass = etf.isNew ? 'positive' : (etf.delta > 0 ? 'positive' : etf.delta < 0 ? 'negative' : 'flat');
+                const changeLabel = etf.isNew
+                    ? 'NEW'
+                    : etf.delta === 0
+                    ? '—'
+                    : (etf.delta > 0 ? '+' : '') + etf.deltaPct.toFixed(2) + '%';
+                const pctOfTotal = totalXRP > 0 ? (etf.value / totalXRP * 100) : 0;
+                return `
+                    <div class="etf-card2">
+                        <div class="etf-card2-top">
+                            <span class="etf-card2-ticker">${etf.ticker}</span>
+                            <span class="etf-card2-change ${changeClass}">${changeLabel}</span>
+                        </div>
+                        <div class="etf-card2-issuer">${etf.name}</div>
+                        <div class="etf-card2-value">${formatHoldingsNumber(etf.value)}</div>
+                        <div class="etf-card2-sub">${pctOfTotal.toFixed(1)}% of total · as of ${etf.date}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // Render the holdings table
@@ -11507,8 +11710,8 @@
             const labels = holdings.map(h => h.ticker);
             const data = holdings.map(h => h.xrp);
             const colors = [
-                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+                '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+                '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7'
             ];
 
             const chartConfig = {
@@ -11533,17 +11736,17 @@
                             display: currentHoldingsChartType !== 'bar',
                             position: 'right',
                             labels: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 font: { size: 11 },
                                 padding: 15
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             titleColor: '#ffffff',
-                            bodyColor: '#8888a0',
+                            bodyColor: '#95A1B3',
                             padding: 12,
                             callbacks: {
                                 label: function (context) {
@@ -11562,19 +11765,19 @@
                     scales: currentHoldingsChartType === 'bar' ? {
                         x: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 font: { size: 11 }
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         },
                         y: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 callback: function (value) {
                                     return formatHoldingsNumber(value);
                                 }
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         }
                     } : {}
                 }
@@ -11838,8 +12041,8 @@
                     labels: ['ETFs', 'Exchanges'],
                     datasets: [{
                         data: data,
-                        backgroundColor: ['#23f7dd', '#a855f7'],
-                        borderColor: ['#23f7dd', '#a855f7'],
+                        backgroundColor: ['#2DE3CB', '#A374F7'],
+                        borderColor: ['#2DE3CB', '#A374F7'],
                         borderWidth: 2
                     }]
                 },
@@ -11850,8 +12053,8 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             callbacks: {
                                 label: function (context) {
@@ -11895,8 +12098,8 @@
             // Get data for each ETF
             const datasets = [];
             const colors = [
-                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+                '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+                '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7'
             ];
 
             etfColumns.forEach((col, index) => {
@@ -11939,18 +12142,18 @@
                             display: true,
                             position: 'top',
                             labels: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 font: { size: 10 },
                                 boxWidth: 12,
                                 padding: 10
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             titleColor: '#ffffff',
-                            bodyColor: '#8888a0',
+                            bodyColor: '#95A1B3',
                             padding: 12,
                             callbacks: {
                                 label: function (context) {
@@ -11962,15 +12165,15 @@
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#8888a0', font: { size: 10 } },
-                            grid: { color: '#2a2a3a' }
+                            ticks: { color: '#95A1B3', font: { size: 10 } },
+                            grid: { color: '#232A38' }
                         },
                         y: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 callback: (value) => formatHoldingsNumber(value)
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         }
                     }
                 }
@@ -12006,8 +12209,8 @@
             const labels = sorted.map(([name]) => name);
             const data = sorted.map(([_, d]) => d.total);
             const colors = [
-                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+                '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+                '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7'
             ];
 
             const ctx = canvas.getContext('2d');
@@ -12031,8 +12234,8 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             callbacks: {
                                 label: (ctx) => formatHoldingsNumber(ctx.raw) + ' XRP'
@@ -12042,13 +12245,13 @@
                     scales: {
                         x: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 callback: (v) => formatHoldingsNumber(v)
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         },
                         y: {
-                            ticks: { color: '#8888a0', font: { size: 11 } },
+                            ticks: { color: '#95A1B3', font: { size: 11 } },
                             grid: { display: false }
                         }
                     }
@@ -12072,7 +12275,7 @@
 
             const labels = [...top5.map(([name]) => name), 'Others'];
             const data = [...top5.map(([_, d]) => d.total), othersTotal];
-            const colors = ['#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6', '#64748b'];
+            const colors = ['#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9', '#95A1B3'];
 
             const ctx = canvas.getContext('2d');
             exchangeDominanceChart = new Chart(ctx, {
@@ -12082,7 +12285,7 @@
                     datasets: [{
                         data: data,
                         backgroundColor: colors,
-                        borderColor: '#16161f',
+                        borderColor: '#141922',
                         borderWidth: 2
                     }]
                 },
@@ -12095,15 +12298,15 @@
                             display: true,
                             position: 'right',
                             labels: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 font: { size: 10 },
                                 padding: 8,
                                 boxWidth: 12
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             callbacks: {
                                 label: (ctx) => {
@@ -12128,9 +12331,9 @@
 
             const total = sorted.reduce((sum, [_, d]) => sum + d.total, 0);
             const colors = [
-                '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-                '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
-                '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981'
+                '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+                '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7',
+                '#22B8CF', '#F0465F', '#84cc16', '#6366f1', '#22C58B'
             ];
 
             let html = '';
@@ -12161,7 +12364,7 @@
                 .slice(0, 5);
 
             const total = Object.values(exchangeData).reduce((sum, d) => sum + d.total, 0);
-            const colors = ['#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6'];
+            const colors = ['#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9'];
 
             let html = '';
             sorted.forEach(([name, data], index) => {
@@ -12231,8 +12434,8 @@
                 const reversedData = [...holdingsData].reverse();
                 const labels = reversedData.map(row => row.date);
                 const colors = [
-                    '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-                    '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6'
+                    '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+                    '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7'
                 ];
 
                 const datasets = [];
@@ -12264,11 +12467,11 @@
                             legend: {
                                 display: true,
                                 position: 'top',
-                                labels: { color: '#8888a0', font: { size: 12 } }
+                                labels: { color: '#95A1B3', font: { size: 12 } }
                             },
                             tooltip: {
-                                backgroundColor: '#16161f',
-                                borderColor: '#23f7dd',
+                                backgroundColor: '#141922',
+                                borderColor: '#2DE3CB',
                                 borderWidth: 1,
                                 titleFont: { size: 14 },
                                 bodyFont: { size: 12 },
@@ -12276,13 +12479,13 @@
                             }
                         },
                         scales: {
-                            x: { ticks: { color: '#8888a0' }, grid: { color: '#2a2a3a' } },
+                            x: { ticks: { color: '#95A1B3' }, grid: { color: '#232A38' } },
                             y: {
                                 ticks: {
-                                    color: '#8888a0',
+                                    color: '#95A1B3',
                                     callback: (v) => formatHoldingsNumber(v)
                                 },
-                                grid: { color: '#2a2a3a' }
+                                grid: { color: '#232A38' }
                             }
                         }
                     }
@@ -12848,6 +13051,23 @@
             return null;
         }
 
+        // Run async tasks with a concurrency cap instead of one-at-a-time or all-at-once.
+        // Public XRPL nodes commonly rate-limit/throttle bursts, so unlimited parallelism
+        // can fail just as badly as full sequential — a small pool is the safe middle ground.
+        async function runWithConcurrency(items, worker, limit = 12) {
+            const results = new Array(items.length);
+            let nextIndex = 0;
+            async function runNext() {
+                while (nextIndex < items.length) {
+                    const i = nextIndex++;
+                    results[i] = await worker(items[i], i);
+                }
+            }
+            const runners = Array.from({ length: Math.min(limit, items.length) }, runNext);
+            await Promise.all(runners);
+            return results;
+        }
+
         async function fetchExchangeData(forceRefresh = false) {
             // Try to load from localStorage first
             if (!exchangeDataTimestamp && !forceRefresh) {
@@ -12939,48 +13159,58 @@
                 totalAddresses += Object.keys(wallets).length;
             }
 
-            // Fetch balances for each exchange
+            // Flatten to a single list of {exchangeName, address, walletName} so we can
+            // fetch with a shared concurrency pool across ALL wallets, not just within
+            // one exchange at a time — 259 wallets fetched one-at-a-time (up to 24s each
+            // in the worst case) is what was making this look permanently stuck.
+            const allWallets = [];
             for (const [exchangeName, wallets] of Object.entries(EXCHANGES)) {
-                let exchangeTotal = 0;
-                let walletCount = 0;
-                let successCount = 0;
-                const walletData = {}; // Store individual wallet data for this exchange
-
                 for (const [address, walletName] of Object.entries(wallets)) {
+                    allWallets.push({ exchangeName, address, walletName });
+                }
+            }
+
+            let fetchFailed = false;
+
+            try {
+                await runWithConcurrency(allWallets, async ({ exchangeName, address, walletName }) => {
                     const balance = await fetchSingleBalance(address);
                     fetchedAddresses++;
 
                     // Update progress
-                    const progress = (fetchedAddresses / totalAddresses) * 100;
-                    document.getElementById('exchangeProgressBar').style.width = progress + '%';
-                    document.getElementById('exchangeProgressText').textContent =
-                        `${fetchedAddresses} / ${totalAddresses} wallets`;
+                    const progressBar = document.getElementById('exchangeProgressBar');
+                    const progressText = document.getElementById('exchangeProgressText');
+                    if (progressBar) progressBar.style.width = ((fetchedAddresses / totalAddresses) * 100) + '%';
+                    if (progressText) progressText.textContent = `${fetchedAddresses} / ${totalAddresses} wallets`;
+
+                    if (!exchangeData[exchangeName]) {
+                        exchangeData[exchangeName] = { total: 0, walletCount: 0, successCount: 0, wallets: {} };
+                    }
+                    const entry = exchangeData[exchangeName];
+                    entry.walletCount++;
 
                     if (balance !== null) {
-                        exchangeTotal += balance;
-                        successCount++;
-                        walletData[address] = {
-                            name: walletName,
-                            balance: balance
-                        };
-                        // Also store in global wallet balances
+                        entry.total += balance;
+                        entry.successCount++;
+                        entry.wallets[address] = { name: walletName, balance: balance };
                         walletBalances[address] = balance;
                     } else {
-                        walletData[address] = {
-                            name: walletName,
-                            balance: null
-                        };
+                        entry.wallets[address] = { name: walletName, balance: null };
                     }
-                    walletCount++;
-                }
-
-                exchangeData[exchangeName] = {
-                    total: exchangeTotal,
-                    walletCount: walletCount,
-                    successCount: successCount,
-                    wallets: walletData // Store individual wallet data
-                };
+                }, 12);
+            } catch (error) {
+                console.error('Exchange balance fetch failed:', error);
+                fetchFailed = true;
+                statusEl.innerHTML = '<span style="color: var(--accent-red, #F0465F);">● Failed to load — see console</span>';
+                showToast('Failed to load exchange balances. XRPL nodes may be unreachable or rate-limiting.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Refresh Data';
+                isExchangeFetching = false;
+                updateStatus(fetchFailed ? 'error' : 'success', fetchFailed ? 'Exchange fetch failed' : 'Live');
             }
+
+            if (fetchFailed) return;
 
             renderExchangeTable();
 
@@ -13000,13 +13230,9 @@
             // Calculate next refresh time
             const nextRefreshMins = Math.ceil(MANUAL_REFRESH_COOLDOWN / 60000);
 
-            btn.disabled = false;
-            btn.textContent = '🔄 Refresh Data';
             statusEl.innerHTML = `<span style="color: var(--accent-green);">● Live</span> <span style="color: var(--text-muted); font-size: 0.75rem;">(cached for 1h)</span>`;
-            isExchangeFetching = false;
 
             // Update global status and dashboard
-            updateStatus('success', 'Live');
             updateDashboardOverview();
 
             // Start countdown timer for button
@@ -13164,8 +13390,8 @@
                             label: 'Total Holdings',
                             data: totals,
                             type: 'line',
-                            borderColor: '#23f7dd',
-                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            borderColor: '#2DE3CB',
+                            backgroundColor: 'rgba(45,227,203, 0.1)',
                             borderWidth: 2,
                             fill: true,
                             tension: 0.3,
@@ -13176,8 +13402,8 @@
                             label: 'Daily Change',
                             data: changes,
                             type: 'bar',
-                            backgroundColor: changes.map(c => c >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-                            borderColor: changes.map(c => c >= 0 ? '#22c55e' : '#ef4444'),
+                            backgroundColor: changes.map(c => c >= 0 ? 'rgba(34,197,139, 0.7)' : 'rgba(240,70,95, 0.7)'),
+                            borderColor: changes.map(c => c >= 0 ? '#22C58B' : '#F0465F'),
                             borderWidth: 1,
                             yAxisID: 'y1',
                             order: 2
@@ -13195,13 +13421,13 @@
                         legend: {
                             display: true,
                             position: 'top',
-                            labels: { color: '#94a3b8', font: { size: 11 } }
+                            labels: { color: '#95A1B3', font: { size: 11 } }
                         },
                         tooltip: {
                             backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1',
-                            borderColor: '#334155',
+                            titleColor: '#EDF1F7',
+                            bodyColor: '#EDF1F7',
+                            borderColor: '#5C6675',
                             borderWidth: 1,
                             callbacks: {
                                 label: function (context) {
@@ -13219,7 +13445,7 @@
                     scales: {
                         x: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                            ticks: { color: '#95A1B3', font: { size: 10 } }
                         },
                         y: {
                             type: 'linear',
@@ -13227,14 +13453,14 @@
                             position: 'left',
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: {
-                                color: '#23f7dd',
+                                color: '#2DE3CB',
                                 font: { size: 10 },
                                 callback: v => (v / 1e9).toFixed(1) + 'B'
                             },
                             title: {
                                 display: true,
                                 text: 'Total Holdings',
-                                color: '#23f7dd',
+                                color: '#2DE3CB',
                                 font: { size: 11 }
                             }
                         },
@@ -13244,14 +13470,14 @@
                             position: 'right',
                             grid: { drawOnChartArea: false },
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 font: { size: 10 },
                                 callback: v => (v / 1e6).toFixed(0) + 'M'
                             },
                             title: {
                                 display: true,
                                 text: 'Daily Change',
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 font: { size: 11 }
                             }
                         }
@@ -13626,8 +13852,8 @@
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: ${type === 'warning' ? 'rgba(249, 115, 22, 0.95)' : 'rgba(35, 247, 221, 0.95)'};
-                color: ${type === 'warning' ? 'white' : '#0f172a'};
+                background: ${type === 'warning' ? 'rgba(245,166,35, 0.95)' : type === 'error' ? 'rgba(240,70,95, 0.95)' : 'rgba(45,227,203, 0.95)'};
+                color: ${type === 'warning' || type === 'error' ? 'white' : '#0E121A'};
                 padding: 1rem 1.5rem;
                 border-radius: 12px;
                 font-size: 0.9rem;
@@ -14206,10 +14432,10 @@
         let historicalData = null;
 
         const chartColors = [
-            '#23f7dd', '#a855f7', '#22c55e', '#f97316', '#3b82f6',
-            '#ef4444', '#eab308', '#ec4899', '#14b8a6', '#8b5cf6',
-            '#06b6d4', '#f43f5e', '#84cc16', '#6366f1', '#10b981',
-            '#f59e0b', '#64748b', '#0ea5e9', '#d946ef', '#78716c'
+            '#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9',
+            '#F0465F', '#F5A623', '#ec4899', '#22B8CF', '#A374F7',
+            '#22B8CF', '#F0465F', '#84cc16', '#6366f1', '#22C58B',
+            '#F5A623', '#95A1B3', '#0ea5e9', '#d946ef', '#95A1B3'
         ];
 
         function openChartModal() {
@@ -14344,11 +14570,11 @@
                             display: false
                         },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             titleColor: '#ffffff',
-                            bodyColor: '#8888a0',
+                            bodyColor: '#95A1B3',
                             padding: 12,
                             callbacks: {
                                 label: function (context) {
@@ -14366,18 +14592,18 @@
                     scales: {
                         x: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 maxRotation: 45,
                                 minRotation: 45,
                                 maxTicksLimit: 10
                             },
                             grid: {
-                                color: '#2a2a3a'
+                                color: '#232A38'
                             }
                         },
                         y: {
                             ticks: {
-                                color: '#8888a0',
+                                color: '#95A1B3',
                                 callback: function (value) {
                                     if (currentChartType === 'price') {
                                         return '$' + value.toFixed(2);
@@ -14386,7 +14612,7 @@
                                 }
                             },
                             grid: {
-                                color: '#2a2a3a'
+                                color: '#232A38'
                             }
                         }
                     }
@@ -15198,13 +15424,13 @@
             if (briefingCard) {
                 if (sentiment >= 60) {
                     briefingCard.style.borderColor = 'var(--accent-green)';
-                    briefingCard.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05))';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(34,197,139, 0.1), rgba(34,197,139, 0.05))';
                 } else if (sentiment >= 40) {
                     briefingCard.style.borderColor = 'var(--accent-xrp)';
-                    briefingCard.style.background = 'linear-gradient(135deg, rgba(35, 247, 221, 0.1), rgba(168, 85, 247, 0.1))';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(45,227,203, 0.1), rgba(163,116,247, 0.1))';
                 } else {
                     briefingCard.style.borderColor = 'var(--accent-red)';
-                    briefingCard.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))';
+                    briefingCard.style.background = 'linear-gradient(135deg, rgba(240,70,95, 0.1), rgba(240,70,95, 0.05))';
                 }
             }
 
@@ -15400,9 +15626,9 @@
             let color = '';
 
             if (score >= 70) { sentimentLabel = 'Bullish'; color = 'var(--accent-green)'; }
-            else if (score >= 55) { sentimentLabel = 'Slightly Bullish'; color = '#22c55e99'; }
+            else if (score >= 55) { sentimentLabel = 'Slightly Bullish'; color = '#22C58B99'; }
             else if (score >= 45) { sentimentLabel = 'Neutral'; color = 'var(--accent-orange)'; }
-            else if (score >= 30) { sentimentLabel = 'Slightly Bearish'; color = '#ef444499'; }
+            else if (score >= 30) { sentimentLabel = 'Slightly Bearish'; color = '#F0465F99'; }
             else { sentimentLabel = 'Bearish'; color = 'var(--accent-red)'; }
 
             document.getElementById('sentimentGauge').style.width = (100 - score) + '%';
@@ -15488,8 +15714,8 @@
                         {
                             label: 'XRP Price',
                             data: priceData,
-                            borderColor: '#23f7dd',
-                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            borderColor: '#2DE3CB',
+                            backgroundColor: 'rgba(45,227,203, 0.1)',
                             borderWidth: 2,
                             fill: true,
                             tension: 0.4,
@@ -15498,7 +15724,7 @@
                         {
                             label: '7-Day MA',
                             data: ma7Data,
-                            borderColor: '#a855f7',
+                            borderColor: '#A374F7',
                             borderWidth: 2,
                             borderDash: [5, 5],
                             fill: false,
@@ -15508,7 +15734,7 @@
                         {
                             label: '30-Day MA',
                             data: ma30Data,
-                            borderColor: '#f97316',
+                            borderColor: '#F5A623',
                             borderWidth: 2,
                             borderDash: [10, 5],
                             fill: false,
@@ -15528,11 +15754,11 @@
                         legend: {
                             display: true,
                             position: 'top',
-                            labels: { color: '#a0a0c0' }
+                            labels: { color: '#95A1B3' }
                         },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             callbacks: {
                                 label: (ctx) => ctx.dataset.label + ': $' + ctx.raw.toFixed(4)
@@ -15540,13 +15766,13 @@
                         }
                     },
                     scales: {
-                        x: { ticks: { color: '#707085' }, grid: { color: '#2a2a3a' } },
+                        x: { ticks: { color: '#5C6675' }, grid: { color: '#232A38' } },
                         y: {
                             ticks: {
-                                color: '#707085',
+                                color: '#5C6675',
                                 callback: (v) => '$' + v.toFixed(2)
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         }
                     }
                 }
@@ -15629,9 +15855,9 @@
             };
 
             const colorMap = {
-                'XRP': { bg: '#23f7dd80', border: '#23f7dd' },
-                'BTC': { bg: '#f9731680', border: '#f97316' },
-                'ETH': { bg: '#a855f780', border: '#a855f7' }
+                'XRP': { bg: '#2DE3CB80', border: '#2DE3CB' },
+                'BTC': { bg: '#F5A62380', border: '#F5A623' },
+                'ETH': { bg: '#A374F780', border: '#A374F7' }
             };
 
             comparisonChart = new Chart(ctx, {
@@ -15653,8 +15879,8 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#16161f',
-                            borderColor: '#23f7dd',
+                            backgroundColor: '#141922',
+                            borderColor: '#2DE3CB',
                             borderWidth: 1,
                             callbacks: {
                                 label: (ctx) => 'Volume: $' + ctx.raw.toFixed(1) + 'M'
@@ -15662,13 +15888,13 @@
                         }
                     },
                     scales: {
-                        x: { ticks: { color: '#707085' }, grid: { display: false } },
+                        x: { ticks: { color: '#5C6675' }, grid: { display: false } },
                         y: {
                             ticks: {
-                                color: '#707085',
+                                color: '#5C6675',
                                 callback: (v) => '$' + v + 'M'
                             },
-                            grid: { color: '#2a2a3a' }
+                            grid: { color: '#232A38' }
                         }
                     }
                 }
@@ -16128,11 +16354,11 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' },
+                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#95A1B3' },
                                 grid: { color: 'rgba(255,255,255,0.1)' }
                             },
                             x: {
-                                ticks: { color: '#94a3b8' },
+                                ticks: { color: '#95A1B3' },
                                 grid: { display: false }
                             }
                         }
@@ -16157,11 +16383,11 @@
                         plugins: { legend: { display: false } },
                         scales: {
                             x: {
-                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' },
+                                ticks: { callback: (v) => formatHoldingsNumber(v), color: '#95A1B3' },
                                 grid: { color: 'rgba(255,255,255,0.1)' }
                             },
                             y: {
-                                ticks: { color: '#94a3b8' },
+                                ticks: { color: '#95A1B3' },
                                 grid: { display: false }
                             }
                         }
@@ -16176,14 +16402,14 @@
                             data: data,
                             backgroundColor: colors,
                             borderWidth: 2,
-                            borderColor: '#1e293b'
+                            borderColor: '#1B212C'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'right', labels: { color: '#94a3b8' } }
+                            legend: { position: 'right', labels: { color: '#95A1B3' } }
                         }
                     }
                 };
@@ -16197,13 +16423,13 @@
                             data: data,
                             backgroundColor: colors,
                             borderWidth: 2,
-                            borderColor: '#1e293b'
+                            borderColor: '#1B212C'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } }
+                        plugins: { legend: { position: 'right', labels: { color: '#95A1B3' } } }
                     }
                 };
             }
@@ -16250,7 +16476,7 @@
                     labels: labels,
                     datasets: [{
                         data: absChanges,
-                        backgroundColor: absChanges.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        backgroundColor: absChanges.map(v => v >= 0 ? 'rgba(34,197,139, 0.7)' : 'rgba(240,70,95, 0.7)'),
                         borderWidth: 0
                     }]
                 },
@@ -16260,8 +16486,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { callback: (v) => formatHoldingsNumber(v), color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                        x: { ticks: { callback: (v) => formatHoldingsNumber(v), color: '#95A1B3' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#95A1B3' }, grid: { display: false } }
                     }
                 }
             });
@@ -16276,7 +16502,7 @@
                     labels: labels,
                     datasets: [{
                         data: pctChanges,
-                        backgroundColor: pctChanges.map(v => v >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        backgroundColor: pctChanges.map(v => v >= 0 ? 'rgba(34,197,139, 0.7)' : 'rgba(240,70,95, 0.7)'),
                         borderWidth: 0
                     }]
                 },
@@ -16286,8 +16512,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { callback: (v) => v.toFixed(1) + '%', color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                        x: { ticks: { callback: (v) => v.toFixed(1) + '%', color: '#95A1B3' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#95A1B3' }, grid: { display: false } }
                     }
                 }
             });
@@ -16384,16 +16610,16 @@
 
         function generateColors(count) {
             const baseColors = [
-                'rgba(35, 247, 221, 0.8)',
-                'rgba(168, 85, 247, 0.8)',
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(34, 197, 94, 0.8)',
-                'rgba(249, 115, 22, 0.8)',
+                'rgba(45,227,203, 0.8)',
+                'rgba(163,116,247, 0.8)',
+                'rgba(79,125,249, 0.8)',
+                'rgba(34,197,139, 0.8)',
+                'rgba(245,166,35, 0.8)',
                 'rgba(236, 72, 153, 0.8)',
                 'rgba(234, 179, 8, 0.8)',
-                'rgba(139, 92, 246, 0.8)',
+                'rgba(163,116,247, 0.8)',
                 'rgba(20, 184, 166, 0.8)',
-                'rgba(244, 63, 94, 0.8)'
+                'rgba(240,70,95, 0.8)'
             ];
             const colors = [];
             for (let i = 0; i < count; i++) {
@@ -16991,10 +17217,10 @@
                     datasets: [{
                         data: ranges.map(r => r.count),
                         backgroundColor: [
-                            'rgba(168, 85, 247, 0.8)',
-                            'rgba(35, 247, 221, 0.8)',
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(163,116,247, 0.8)',
+                            'rgba(45,227,203, 0.8)',
+                            'rgba(79,125,249, 0.8)',
+                            'rgba(34,197,139, 0.8)',
                             'rgba(107, 114, 128, 0.8)'
                         ],
                         borderWidth: 0
@@ -17006,7 +17232,7 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: '#94a3b8', font: { size: 10 } }
+                            labels: { color: '#95A1B3', font: { size: 10 } }
                         }
                     }
                 }
@@ -17051,33 +17277,33 @@
                         * { margin: 0; padding: 0; box-sizing: border-box; }
                         body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0a0f; color: #ffffff; padding: 40px; }
                         .report-container { max-width: 800px; margin: 0 auto; }
-                        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #23f7dd; }
-                        .header h1 { font-size: 2.5rem; color: #23f7dd; margin-bottom: 10px; }
-                        .header .date { color: #a0a0c0; font-size: 1.1rem; }
-                        .section { background: #16161f; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-                        .section h2 { color: #23f7dd; font-size: 1.3rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+                        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #2DE3CB; }
+                        .header h1 { font-size: 2.5rem; color: #2DE3CB; margin-bottom: 10px; }
+                        .header .date { color: #95A1B3; font-size: 1.1rem; }
+                        .section { background: #141922; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+                        .section h2 { color: #2DE3CB; font-size: 1.3rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
                         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-                        .metric-box { background: #12121a; border-radius: 8px; padding: 16px; text-align: center; }
-                        .metric-label { font-size: 0.8rem; color: #707085; margin-bottom: 4px; }
+                        .metric-box { background: #1B212C; border-radius: 8px; padding: 16px; text-align: center; }
+                        .metric-label { font-size: 0.8rem; color: #5C6675; margin-bottom: 4px; }
                         .metric-value { font-size: 1.4rem; font-weight: 700; }
-                        .metric-value.green { color: #22c55e; }
-                        .metric-value.red { color: #ef4444; }
-                        .metric-value.cyan { color: #23f7dd; }
-                        .analysis-text { line-height: 1.7; color: #a0a0c0; }
+                        .metric-value.green { color: #22C58B; }
+                        .metric-value.red { color: #F0465F; }
+                        .metric-value.cyan { color: #2DE3CB; }
+                        .analysis-text { line-height: 1.7; color: #95A1B3; }
                         .levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-                        .level-box { background: #12121a; border-radius: 8px; padding: 16px; text-align: center; }
-                        .level-box.support { border-left: 3px solid #22c55e; }
-                        .level-box.current { border-left: 3px solid #23f7dd; }
-                        .level-box.resistance { border-left: 3px solid #ef4444; }
-                        .level-label { font-size: 0.8rem; color: #707085; }
+                        .level-box { background: #1B212C; border-radius: 8px; padding: 16px; text-align: center; }
+                        .level-box.support { border-left: 3px solid #22C58B; }
+                        .level-box.current { border-left: 3px solid #2DE3CB; }
+                        .level-box.resistance { border-left: 3px solid #F0465F; }
+                        .level-label { font-size: 0.8rem; color: #5C6675; }
                         .level-value { font-size: 1.2rem; font-weight: 700; }
-                        .level-box.support .level-value { color: #22c55e; }
-                        .level-box.current .level-value { color: #23f7dd; }
-                        .level-box.resistance .level-value { color: #ef4444; }
-                        .sentiment-bar { height: 12px; background: linear-gradient(90deg, #ef4444, #f97316, #22c55e); border-radius: 6px; position: relative; margin: 16px 0; }
+                        .level-box.support .level-value { color: #22C58B; }
+                        .level-box.current .level-value { color: #2DE3CB; }
+                        .level-box.resistance .level-value { color: #F0465F; }
+                        .sentiment-bar { height: 12px; background: linear-gradient(90deg, #F0465F, #F5A623, #22C58B); border-radius: 6px; position: relative; margin: 16px 0; }
                         .sentiment-marker { position: absolute; top: -4px; width: 20px; height: 20px; background: white; border-radius: 50%; transform: translateX(-50%); }
-                        .disclaimer { font-size: 0.75rem; color: #707085; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #2a2a3a; }
-                        .footer { text-align: center; margin-top: 20px; color: #23f7dd; }
+                        .disclaimer { font-size: 0.75rem; color: #5C6675; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #232A38; }
+                        .footer { text-align: center; margin-top: 20px; color: #2DE3CB; }
                         @media print { body { background: white; color: black; } .section { border: 1px solid #ddd; } }
                     </style>
                 </head>
@@ -18352,8 +18578,8 @@
                         {
                             label: 'Sentiment',
                             data: sentimentData,
-                            borderColor: '#23f7dd',
-                            backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                            borderColor: '#2DE3CB',
+                            backgroundColor: 'rgba(45,227,203, 0.1)',
                             fill: true,
                             tension: 0.4,
                             yAxisID: 'y'
@@ -18361,7 +18587,7 @@
                         {
                             label: 'Interactions',
                             data: volumeData,
-                            borderColor: '#a855f7',
+                            borderColor: '#A374F7',
                             backgroundColor: 'transparent',
                             borderDash: [5, 5],
                             tension: 0.4,
@@ -18374,12 +18600,12 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#94a3b8' }
+                            labels: { color: '#95A1B3' }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#94a3b8' },
+                            ticks: { color: '#95A1B3' },
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
@@ -18387,14 +18613,14 @@
                             position: 'left',
                             min: 0,
                             max: 100,
-                            ticks: { color: '#23f7dd' },
+                            ticks: { color: '#2DE3CB' },
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y1: {
                             type: 'linear',
                             position: 'right',
                             ticks: {
-                                color: '#a855f7',
+                                color: '#A374F7',
                                 callback: v => (v / 1000) + 'K'
                             },
                             grid: { display: false }
@@ -18491,7 +18717,40 @@
             }
         }
 
+        // ---- Mobile nav drawer ----
+        function toggleMobileNav() {
+            const sidebar = document.getElementById('mainSidebar');
+            const backdrop = document.getElementById('mobileNavBackdrop');
+            const toggleBtn = document.getElementById('mobileNavToggle');
+            if (!sidebar || !backdrop || !toggleBtn) return;
+            const isOpen = sidebar.classList.toggle('mobile-open');
+            backdrop.classList.toggle('open', isOpen);
+            toggleBtn.classList.toggle('open', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
+        function closeMobileNav() {
+            const sidebar = document.getElementById('mainSidebar');
+            const backdrop = document.getElementById('mobileNavBackdrop');
+            const toggleBtn = document.getElementById('mobileNavToggle');
+            if (!sidebar || !backdrop || !toggleBtn) return;
+            sidebar.classList.remove('mobile-open');
+            backdrop.classList.remove('open');
+            toggleBtn.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Close the drawer on Escape, and if the viewport is resized past the
+        // mobile breakpoint while it's open (e.g. rotating a tablet).
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileNav();
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) closeMobileNav();
+        });
+
         function openSettings() {
+            closeMobileNav();
             document.getElementById('settingsModal').classList.add('active');
         }
 
@@ -18599,7 +18858,7 @@
 
             // Color each bar based on positive/negative
             const barColors = flowData.flows.map(f =>
-                f >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                f >= 0 ? 'rgba(34,197,139, 0.8)' : 'rgba(240,70,95, 0.8)'
             );
 
             inflowOutflowChart = new Chart(ctx, {
@@ -18631,7 +18890,7 @@
                     scales: {
                         x: {
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 maxRotation: 45,
                                 minRotation: 45
                             },
@@ -18639,7 +18898,7 @@
                         },
                         y: {
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 callback: v => (v / 1e6).toFixed(1) + 'M'
                             },
                             grid: { color: 'rgba(255,255,255,0.05)' }
@@ -19311,8 +19570,8 @@
                     datasets: [{
                         label: 'XRP on Exchanges (B)',
                         data,
-                        borderColor: '#22c55e',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderColor: '#22C58B',
+                        backgroundColor: 'rgba(34,197,139, 0.1)',
                         fill: true,
                         tension: 0.3,
                         pointRadius: 4,
@@ -19333,12 +19592,12 @@
                     scales: {
                         x: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8' }
+                            ticks: { color: '#95A1B3' }
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 callback: (v) => v.toFixed(1) + 'B'
                             }
                         }
@@ -19385,8 +19644,8 @@
                     datasets: [{
                         label: 'Unique Tags',
                         data,
-                        borderColor: '#23f7dd',
-                        backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                        borderColor: '#2DE3CB',
+                        backgroundColor: 'rgba(45,227,203, 0.1)',
                         fill: true,
                         tension: 0.3,
                         pointRadius: 4,
@@ -19407,12 +19666,12 @@
                     scales: {
                         x: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8' }
+                            ticks: { color: '#95A1B3' }
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 callback: (v) => v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v
                             }
                         }
@@ -19469,8 +19728,8 @@
             });
 
             const colors = [
-                '#23f7dd', '#22c55e', '#3b82f6', '#a855f7',
-                '#f97316', '#eab308', '#ef4444', '#ec4899'
+                '#2DE3CB', '#22C58B', '#4F7DF9', '#A374F7',
+                '#F5A623', '#F5A623', '#F0465F', '#ec4899'
             ];
 
             const datasets = topExchanges.map((exchange, i) => ({
@@ -19492,7 +19751,7 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { color: '#94a3b8', boxWidth: 12, padding: 15 }
+                            labels: { color: '#95A1B3', boxWidth: 12, padding: 15 }
                         },
                         tooltip: {
                             callbacks: {
@@ -19503,12 +19762,12 @@
                     scales: {
                         x: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8' }
+                            ticks: { color: '#95A1B3' }
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: {
-                                color: '#94a3b8',
+                                color: '#95A1B3',
                                 callback: (v) => v.toFixed(1) + 'B'
                             }
                         }
@@ -19640,18 +19899,18 @@
                     if (etfColumns) etfColumns.forEach(col => { if (row[col.key]?.xrp) t += row[col.key].xrp; });
                     return t;
                 });
-                drawSpark('kpiSparkETF', etfSeries, '#23f7dd');
+                drawSpark('kpiSparkETF', etfSeries, '#2DE3CB');
 
                 // Volume spark (simulate from ETF change)
                 const volSeries = last30.map((_, i) => 20000000 + Math.random() * 30000000);
-                drawSpark('kpiSparkVolume', volSeries, '#10b981');
+                drawSpark('kpiSparkVolume', volSeries, '#22C58B');
             } else {
                 // Placeholder random sparks
                 const rand = (base, variance, n=20) => Array.from({length:n}, () => base + (Math.random()-0.4)*variance);
-                drawSpark('kpiSparkETF',      rand(950, 50),  '#23f7dd');
-                drawSpark('kpiSparkExchange', rand(16000, 500), '#06b6d4');
-                drawSpark('kpiSparkVolume',   rand(40, 15),   '#10b981');
-                drawSpark('kpiSparkWhale',    rand(53, 2),    '#8b5cf6');
+                drawSpark('kpiSparkETF',      rand(950, 50),  '#2DE3CB');
+                drawSpark('kpiSparkExchange', rand(16000, 500), '#22B8CF');
+                drawSpark('kpiSparkVolume',   rand(40, 15),   '#22C58B');
+                drawSpark('kpiSparkWhale',    rand(53, 2),    '#A374F7');
             }
 
             // Update donut legend values
@@ -19721,7 +19980,7 @@
                     labels,
                     datasets: [{
                         data: flows,
-                        backgroundColor: flows.map(v => v >= 0 ? 'rgba(16,185,129,.6)' : 'rgba(244,63,94,.6)'),
+                        backgroundColor: flows.map(v => v >= 0 ? 'rgba(34,197,139,.6)' : 'rgba(240,70,95,.6)'),
                         borderRadius: 3,
                         borderSkipped: false
                     }]
@@ -19732,8 +19991,8 @@
                         callbacks: { label: c => (c.raw >= 0 ? '+' : '') + (c.raw/1e6).toFixed(2) + 'M XRP' }
                     }},
                     scales: {
-                        x: { ticks: { color: '#4b5a70', font: { size: 8 } }, grid: { display: false } },
-                        y: { ticks: { color: '#4b5a70', font: { size: 8 },
+                        x: { ticks: { color: '#5C6675', font: { size: 8 } }, grid: { display: false } },
+                        y: { ticks: { color: '#5C6675', font: { size: 8 },
                                 callback: v => (v/1e6).toFixed(0)+'M' }, grid: { color: 'rgba(255,255,255,.04)' } }
                     }
                 }
