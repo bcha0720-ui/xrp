@@ -235,7 +235,11 @@
 
         /* ETF CARDS */
         .etf-cards-section{margin-top:16px;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);}
-        .etf-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:0 20px;}
+        .etf-cards-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:0 20px;}
+        @media(max-width:1400px){.etf-cards-grid{grid-template-columns:repeat(4,1fr);}}
+        @media(max-width:900px){.etf-cards-grid{grid-template-columns:repeat(3,1fr);}}
+        @media(max-width:560px){.etf-cards-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:360px){.etf-cards-grid{grid-template-columns:1fr;}}
         .etf-card2{background:var(--bg-2);border:1px solid var(--border-dim);border-radius:var(--r-lg);padding:14px;transition:border-color .15s,transform .15s;}
         .etf-card2:hover{border-color:var(--border-med);transform:translateY(-2px);}
         .etf-card2-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -11276,13 +11280,15 @@
                 if (statusDot) statusDot.classList.remove('loading');
                 if (statusText) statusText.textContent = "Live";
 
-                // Trigger UI updates
-                if (typeof renderHoldingsTable === 'function') renderHoldingsTable();
-                if (typeof updateHoldingsSummary === 'function') updateHoldingsSummary();
-                if (typeof renderHoldingsChart === 'function') setTimeout(renderHoldingsChart, 100);
-                if (typeof renderHoldingsTrendChart === 'function') setTimeout(renderHoldingsTrendChart, 100);
-                if (typeof updateDashboardOverview === 'function') setTimeout(updateDashboardOverview, 100);
-                if (typeof renderInflowOutflowChart === 'function') setTimeout(renderInflowOutflowChart, 100);
+                // Trigger UI updates — isolate each one so a single failing render
+                // step can't stop the rest of the Holdings tab from finishing init.
+                const safeCall = (fn, label) => { try { if (typeof fn === 'function') fn(); } catch (e) { console.error(label + ' failed:', e); } };
+                safeCall(renderHoldingsTable, 'renderHoldingsTable');
+                safeCall(updateHoldingsSummary, 'updateHoldingsSummary');
+                setTimeout(() => safeCall(renderHoldingsChart, 'renderHoldingsChart'), 100);
+                setTimeout(() => safeCall(renderHoldingsTrendChart, 'renderHoldingsTrendChart'), 100);
+                setTimeout(() => safeCall(updateDashboardOverview, 'updateDashboardOverview'), 100);
+                setTimeout(() => safeCall(renderInflowOutflowChart, 'renderInflowOutflowChart'), 100);
 
                 return holdingsData;
 
@@ -11476,6 +11482,8 @@
 
         // Calculate and update summary statistics
         function updateHoldingsSummary() {
+            if (!holdingsData || !holdingsData.length) return; // nothing to summarize yet
+
             // Get the most recent value for each ETF (they may report on different days)
             let totalXRP = 0;
             let activeCount = 0;
@@ -11508,9 +11516,14 @@
                 document.getElementById('holdingsXRPPrice').textContent = 'Loading...';
             }
 
-            renderMarketSummary(totalXRP, activeCount, latestDate);
-            renderMilestoneProgress(totalXRP);
-            renderETFCards(totalXRP);
+            // Each of these is independent — isolate failures so a bug in one
+            // (e.g. a missing element, a data edge case) can't silently prevent
+            // the others, or anything called after updateHoldingsSummary(), from
+            // running. An uncaught error here previously could cascade into the
+            // whole Holdings tab (charts, dashboard overview) never finishing init.
+            try { renderMarketSummary(totalXRP, activeCount, latestDate); } catch (e) { console.error('renderMarketSummary failed:', e); }
+            try { renderMilestoneProgress(totalXRP); } catch (e) { console.error('renderMilestoneProgress failed:', e); }
+            try { renderETFCards(totalXRP); } catch (e) { console.error('renderETFCards failed:', e); }
         }
 
         // Per-ETF "latest value vs. its own previous value" — same method used
@@ -11567,7 +11580,7 @@
             const fill = document.getElementById('milestoneProgressFill');
             const valueEl = document.getElementById('milestoneValue');
             const targetEl = document.getElementById('milestoneTarget');
-            if (!fill || !totalXRP) return;
+            if (!fill || !valueEl || !targetEl || !totalXRP) return;
 
             // Next round milestone above current total (steps of 100M once past 1B, else steps of 100M from 0)
             const step = 100_000_000;
@@ -13017,10 +13030,56 @@
             "rrrrrrrrrrrrrrrrrrrrrhoLvTp": "Escrow"
         };
 
-        async function fetchSingleBalance(address) {
+        // Try XRPScan's REST API first — this exact app already calls api.xrpscan.com
+        // successfully elsewhere (rich list, circulating supply), so it's a known-working
+        // CORS-friendly source. Public rippled JSON-RPC nodes (s1/s2.ripple.com) frequently
+        // don't set CORS headers for arbitrary browser origins, which was likely why every
+        // wallet was failing regardless of concurrency/retry tuning.
+        async function fetchBalanceFromXRPScan(address) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4500);
+            try {
+                const response = await fetch(`https://api.xrpscan.com/api/v1/account/${address}`, {
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    console.warn(`XRPScan HTTP ${response.status} for ${address}`);
+                    return null;
+                }
+                const data = await response.json();
+                // XRPScan's account payload shape has varied historically — check the
+                // known field names defensively rather than assuming one.
+                if (data.xrpBalance !== undefined && data.xrpBalance !== null) {
+                    return parseFloat(data.xrpBalance);
+                }
+                if (data.account_data && data.account_data.Balance !== undefined) {
+                    return parseInt(data.account_data.Balance) / 1000000;
+                }
+                if (data.balance !== undefined && data.balance !== null) {
+                    // /api/v1/balances (rich list) returns drops; the per-account endpoint
+                    // may too — treat a suspiciously large integer as drops, not XRP.
+                    const raw = Number(data.balance);
+                    return raw > 100_000_000 ? raw / 1_000_000 : raw;
+                }
+                console.warn(`XRPScan: unrecognized response shape for ${address}`, data);
+                return null;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.warn(`XRPScan failed for ${address}:`, error.name === 'AbortError' ? 'timeout' : error.message);
+                return null;
+            }
+        }
+
+        async function fetchSingleBalanceOnce(address) {
+            const xrpscanResult = await fetchBalanceFromXRPScan(address);
+            if (xrpscanResult !== null) return xrpscanResult;
+
+            // Fall back to public rippled nodes if XRPScan didn't have it / failed
             for (const url of RIPPLED_URLS) {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                const timeoutId = setTimeout(() => controller.abort(), 4500);
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
@@ -13042,11 +13101,32 @@
                         if (data.result && data.result.account_data) {
                             return parseInt(data.result.account_data.Balance) / 1000000;
                         }
+                        // Node responded but with an error payload (e.g. rate limited, bad request)
+                        console.warn(`XRPL ${url} rejected ${address}:`, data.result?.error || data.error || 'unknown');
+                    } else {
+                        console.warn(`XRPL ${url} HTTP ${response.status} for ${address}`);
                     }
                 } catch (error) {
                     clearTimeout(timeoutId);
+                    console.warn(`XRPL ${url} failed for ${address}:`, error.name === 'AbortError' ? 'timeout' : error.message);
                     continue;
                 }
+            }
+            return null;
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        // One quick retry only — if XRPL nodes are rate-limiting broadly, a long
+        // backoff-and-retry per wallet just makes the whole run take forever without
+        // actually fixing anything (the limit window hasn't passed yet). Fail fast so
+        // the UI can show whatever data succeeded; the user can hit Refresh later for
+        // the rest once the limit window clears.
+        async function fetchSingleBalance(address, retries = 1) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                const result = await fetchSingleBalanceOnce(address);
+                if (result !== null) return result;
+                if (attempt < retries) await sleep(400 + Math.random() * 300);
             }
             return null;
         }
@@ -13054,13 +13134,16 @@
         // Run async tasks with a concurrency cap instead of one-at-a-time or all-at-once.
         // Public XRPL nodes commonly rate-limit/throttle bursts, so unlimited parallelism
         // can fail just as badly as full sequential — a small pool is the safe middle ground.
-        async function runWithConcurrency(items, worker, limit = 12) {
+        // Each worker also waits a bit between its own requests so the node sees a steady
+        // trickle rather than a burst.
+        async function runWithConcurrency(items, worker, limit = 4) {
             const results = new Array(items.length);
             let nextIndex = 0;
             async function runNext() {
                 while (nextIndex < items.length) {
                     const i = nextIndex++;
                     results[i] = await worker(items[i], i);
+                    await sleep(120); // stagger this lane's next request
                 }
             }
             const runners = Array.from({ length: Math.min(limit, items.length) }, runNext);
@@ -13171,10 +13254,17 @@
             }
 
             let fetchFailed = false;
+            let lastProgressiveRender = 0;
+            const fetchStartTime = Date.now();
+            const MAX_FETCH_DURATION = 60000; // hard ceiling: stop trying new wallets after 60s total
 
             try {
                 await runWithConcurrency(allWallets, async ({ exchangeName, address, walletName }) => {
-                    const balance = await fetchSingleBalance(address);
+                    // Past the time ceiling: stop hitting the network entirely and just
+                    // mark remaining wallets as not-fetched so the run actually finishes
+                    // and shows what it has, instead of grinding on indefinitely.
+                    const timedOut = Date.now() - fetchStartTime > MAX_FETCH_DURATION;
+                    const balance = timedOut ? null : await fetchSingleBalance(address);
                     fetchedAddresses++;
 
                     // Update progress
@@ -13197,7 +13287,16 @@
                     } else {
                         entry.wallets[address] = { name: walletName, balance: null };
                     }
-                }, 12);
+
+                    // Render as data streams in instead of leaving the table blank until
+                    // all 259 wallets finish — a slow/partially rate-limited run should
+                    // still visibly show progress, not look frozen.
+                    const now = Date.now();
+                    if (now - lastProgressiveRender > 700) {
+                        lastProgressiveRender = now;
+                        renderExchangeTable();
+                    }
+                }, 4);
             } catch (error) {
                 console.error('Exchange balance fetch failed:', error);
                 fetchFailed = true;
@@ -13230,7 +13329,17 @@
             // Calculate next refresh time
             const nextRefreshMins = Math.ceil(MANUAL_REFRESH_COOLDOWN / 60000);
 
-            statusEl.innerHTML = `<span style="color: var(--accent-green);">● Live</span> <span style="color: var(--text-muted); font-size: 0.75rem;">(cached for 1h)</span>`;
+            // Surface partial failures instead of silently labeling incomplete data "Live" —
+            // a wallet stuck at $0 looks identical to a genuinely empty wallet otherwise.
+            const totalSuccess = Object.values(exchangeData).reduce((sum, e) => sum + e.successCount, 0);
+            const failedCount = totalAddresses - totalSuccess;
+            if (failedCount > 0) {
+                const pctFailed = Math.round((failedCount / totalAddresses) * 100);
+                statusEl.innerHTML = `<span style="color: var(--amber);">● Partial (${failedCount}/${totalAddresses} wallets failed)</span>`;
+                showToast(`${failedCount} of ${totalAddresses} wallets failed to load (${pctFailed}%) — likely XRPL node rate-limiting. Try Refresh again in a moment.`, 'warning');
+            } else {
+                statusEl.innerHTML = `<span style="color: var(--accent-green);">● Live</span> <span style="color: var(--text-muted); font-size: 0.75rem;">(cached for 1h)</span>`;
+            }
 
             // Update global status and dashboard
             updateDashboardOverview();
