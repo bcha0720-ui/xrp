@@ -168,7 +168,7 @@ function findRelevantDocs(query, topK = 3) {
 // =====================================================
 
 const ETF_SYMBOLS = {
-    'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR'],
+    'Spot ETFs': ['GXRP', 'XRP', 'XRPC', 'XRPZ', 'TOXR', 'XRPR', 'TKNZ'],
     'Futures ETFs': ['UXRP', 'XRPI', 'XRPM', 'XRPK', 'XRPT', 'XXRP', 'XXX'],
     'Canada ETFs': ['XRP.TO', 'XRPP-B.TO', 'XRPP-U.TO', 'XRPP.TO', 'XRPQ-U.TO', 'XRPQ.TO', 'XRP.NE', 'XRPP.NE'],
     'Index ETFs': ['GDLC', 'NCIQ', 'BITW', 'EZPZ']
@@ -184,6 +184,7 @@ const DESCRIPTIONS = {
     'XRPC': 'Canary Capital XRP',
     'XRPZ': 'Franklin XRP ETF',
     'TOXR': '21Shares XRP',
+    'TKNZ': 'T. Rowe Price ETF',
     'UXRP': 'ProShares Ultra XRP',
     'XRPI': 'Volatility Shares Trust',
     'XRPM': 'Amplify XRP',
