@@ -8156,6 +8156,7 @@
             transition: color .12s;
         }
         .dash-btn:hover { color: var(--text-1); }
+        .dash-btn.active { color: var(--xrp); border-color: rgba(45,227,203,.3); background: rgba(45,227,203,.08); }
 
         .donut-legend-row {
             display: flex;
@@ -8434,6 +8435,11 @@
                     <div class="dash-chart-panel">
                         <div class="dash-panel-header">
                             <div class="dash-panel-title">📊 ETF Inflows &amp; Outflows</div>
+                            <div class="dash-panel-actions">
+                                <button class="dash-btn active" data-period="daily" onclick="setDashInflowPeriod('daily')">Daily</button>
+                                <button class="dash-btn" data-period="weekly" onclick="setDashInflowPeriod('weekly')">Weekly</button>
+                                <button class="dash-btn" data-period="monthly" onclick="setDashInflowPeriod('monthly')">Monthly</button>
+                            </div>
                         </div>
                         <div style="position:relative;height:120px;">
                             <canvas id="dashInflowChart"></canvas>
@@ -19969,49 +19975,100 @@
             return (d.getMonth() + 1) + '/' + d.getDate();
         }
 
+        let dashInflowPeriod = 'daily'; // 'daily' | 'weekly' | 'monthly'
+
+        function setDashInflowPeriod(period) {
+            dashInflowPeriod = period;
+            document.querySelectorAll('.dash-panel-actions .dash-btn[data-period]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
+            renderDashInflowChart();
+        }
+
+        // Per-ETF matched-delta flow for every reported date in the full history (not
+        // just a fixed window) — same method as "Today Change" and the KPI delta badge,
+        // so daily/weekly/monthly all stay consistent with every other number on the page.
+        function computeAllDailyFlows() {
+            if (!holdingsData || !etfColumns) return [];
+            const results = [];
+            for (let w = holdingsData.length - 1; w >= 0; w--) {
+                const row = holdingsData[w];
+                let dayTotal = 0;
+                let reportedAny = false;
+
+                etfColumns.forEach(col => {
+                    const val = row[col.key]?.xrp;
+                    if (!(val && val > 0)) return;
+
+                    let prevVal = 0;
+                    for (let j = w + 1; j < holdingsData.length; j++) {
+                        const v = holdingsData[j][col.key]?.xrp;
+                        if (v && v > 0) { prevVal = v; break; }
+                    }
+                    dayTotal += prevVal > 0 ? (val - prevVal) : val;
+                    reportedAny = true;
+                });
+
+                if (reportedAny) {
+                    const parsed = new Date(row.date);
+                    results.push({
+                        date: isNaN(parsed.getTime()) ? null : parsed,
+                        rawDate: row.date,
+                        flow: dayTotal
+                    });
+                }
+            }
+            return results; // oldest -> newest
+        }
+
+        // Group daily flows into weekly (Monday-start) or monthly buckets, summing the
+        // flow within each bucket. Rows with an unparseable date are skipped for
+        // aggregation (can't be bucketed), which only matters for weekly/monthly.
+        function bucketFlows(dailyFlows, period) {
+            if (period === 'daily') {
+                return dailyFlows.map(f => ({ label: formatDashChartDateLabel(f.rawDate), flow: f.flow }));
+            }
+
+            const buckets = new Map();
+            dailyFlows.forEach(f => {
+                if (!f.date) return;
+                let key, label, sortKey;
+                if (period === 'weekly') {
+                    const d = new Date(f.date);
+                    const dayOffset = (d.getDay() + 6) % 7; // Monday = 0
+                    d.setDate(d.getDate() - dayOffset);
+                    d.setHours(0, 0, 0, 0);
+                    key = d.toISOString().slice(0, 10);
+                    label = (d.getMonth() + 1) + '/' + d.getDate();
+                    sortKey = d.getTime();
+                } else { // monthly
+                    const y = f.date.getFullYear(), m = f.date.getMonth();
+                    key = y + '-' + m;
+                    label = f.date.toLocaleString('en-US', { month: 'short' }) + " '" + String(y).slice(2);
+                    sortKey = y * 12 + m;
+                }
+                if (!buckets.has(key)) buckets.set(key, { flow: 0, label, sortKey });
+                buckets.get(key).flow += f.flow;
+            });
+
+            return Array.from(buckets.values()).sort((a, b) => a.sortKey - b.sortKey);
+        }
+
         function renderDashInflowChart() {
             const canvas = document.getElementById('dashInflowChart');
             if (!canvas || !holdingsData || holdingsData.length < 2) return;
 
             if (window._dashInflowChart) window._dashInflowChart.destroy();
 
-            // For each date, compute the sum of each ETF's own change vs. its own most
-            // recent PRIOR reported value (searched across the full history, not just the
-            // display window). This avoids phantom swings from ETFs that simply didn't
-            // report on adjacent calendar rows — the same method used for "Today Change"
-            // and the KPI delta badge, so all three stay consistent with each other.
-            const windowSize = 14;
-            const rows = holdingsData.slice(0, windowSize); // newest-first
-            const flows = [];
-            const labels = [];
+            const dailyFlows = computeAllDailyFlows();
+            let bucketed = bucketFlows(dailyFlows, dashInflowPeriod);
 
-            // Walk oldest -> newest within the window so the chart reads left-to-right
-            for (let w = rows.length - 1; w >= 0; w--) {
-                const row = rows[w];
-                const fullIdx = holdingsData.indexOf(row);
-                let dayTotal = 0;
-                let reportedAny = false;
+            // Cap how many bars are shown so the chart stays readable
+            const maxBars = dashInflowPeriod === 'daily' ? 14 : dashInflowPeriod === 'weekly' ? 12 : 12;
+            bucketed = bucketed.slice(-maxBars);
 
-                if (etfColumns) {
-                    etfColumns.forEach(col => {
-                        const val = row[col.key]?.xrp;
-                        if (!(val && val > 0)) return; // this ETF didn't report on this date
-
-                        let prevVal = 0;
-                        for (let j = fullIdx + 1; j < holdingsData.length; j++) {
-                            const v = holdingsData[j][col.key]?.xrp;
-                            if (v && v > 0) { prevVal = v; break; }
-                        }
-                        dayTotal += prevVal > 0 ? (val - prevVal) : val; // new ETF = count full amount
-                        reportedAny = true;
-                    });
-                }
-
-                if (reportedAny) {
-                    flows.push(dayTotal);
-                    labels.push(formatDashChartDateLabel(row.date));
-                }
-            }
+            const flows = bucketed.map(b => b.flow);
+            const labels = bucketed.map(b => b.label);
 
             window._dashInflowChart = new Chart(canvas.getContext('2d'), {
                 type: 'bar',
