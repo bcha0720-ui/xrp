@@ -8446,7 +8446,7 @@
                         </div>
                         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;">
                             <div class="dash-mini-stat">
-                                <div class="dash-mini-label">Today Change</div>
+                                <div class="dash-mini-label" id="summaryETFChangeLabel">Today Change</div>
                                 <div class="dash-mini-val positive" id="summaryETFChange">--</div>
                                 <div class="dash-mini-sub" id="summaryETFDetail">--</div>
                             </div>
@@ -11565,7 +11565,13 @@
 
             const perETF = getPerETFLatestAndDelta();
             const totalValue = currentXRPPrice ? totalXRP * currentXRPPrice : null;
-            const movers = perETF.filter(e => e.delta !== 0).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+            // Only consider ETFs whose latest data point IS the overall latest date —
+            // otherwise a large but stale move from weeks ago (e.g. an ETF that hasn't
+            // reported since) can keep winning "biggest mover" forever, even when
+            // nothing about it happened today.
+            const movers = perETF
+                .filter(e => e.delta !== 0 && e.date === latestDate)
+                .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
             const top = movers[0];
 
             let sentence = `As of <strong>${latestDate}</strong>, <strong>${activeCount} XRP ETFs</strong> are tracked, holding a combined <strong>${formatHoldingsNumber(totalXRP)} XRP</strong>`;
@@ -11574,7 +11580,7 @@
 
             if (top) {
                 const sign = top.delta >= 0 ? 'added' : 'removed';
-                sentence += ` <strong>${top.ticker}</strong> ${sign} ${formatHoldingsNumber(Math.abs(top.delta))} XRP on its latest reported date (${top.date}).`;
+                sentence += ` <strong>${top.ticker}</strong> ${sign} ${formatHoldingsNumber(Math.abs(top.delta))} XRP on the latest update (${top.date}).`;
             } else {
                 sentence += ` No changes reported on the latest update.`;
             }
@@ -11948,29 +11954,9 @@
                 });
             }
 
-            // Update ETF Change display
-            const changeEl = document.getElementById('summaryETFChange');
-            const detailEl = document.getElementById('summaryETFDetail');
-            if (changeEl) {
-                if (changedETFs.length > 0) {
-                    const sign = totalDailyChange >= 0 ? '+' : '';
-                    changeEl.textContent = sign + formatHoldingsNumber(totalDailyChange) + ' XRP';
-                    changeEl.className = 'summary-item-value ' + (totalDailyChange >= 0 ? 'positive' : 'negative');
-                } else {
-                    changeEl.textContent = 'No updates';
-                    changeEl.className = 'summary-item-value';
-                }
-            }
-            if (detailEl) {
-                if (changedETFs.length > 0) {
-                    const names = changedETFs.map(e => e.isNew ? e.name + ' (NEW)' : e.name).join(', ');
-                    detailEl.textContent = names + ' (' + latestDate + ')';
-                } else if (latestDate) {
-                    detailEl.textContent = 'Latest: ' + latestDate;
-                } else {
-                    detailEl.textContent = 'Click to view details';
-                }
-            }
+            // Note: summaryETFChange / summaryETFDetail are now owned by
+            // renderDashInflowChart() so they stay in sync with the selected
+            // Daily/Weekly/Monthly period instead of always showing "today only."
 
             // Update Trading Volume from cachedData
             const volumeEl = document.getElementById('summaryVolume');
@@ -14236,42 +14222,91 @@
 
         function renderData(data) {
             const groups = data.data;
-            let html = '<div class="etf-groups">';
 
             let grandTotalShares = 0;
             let grandTotalDollars = 0;
-
-            // Collect all ETFs for ranking
             let allETFs = [];
 
-            // Render in specified order
             for (const groupName of groupOrder) {
                 const etfs = groups[groupName] || [];
-                const groupInfo = groupIcons[groupName] || { icon: '📋', class: 'index' };
-
-                // Calculate group totals and collect ETFs
-                let groupTotalShares = 0;
-                let groupTotalDollars = 0;
-
                 etfs.forEach(etf => {
                     const periodData = etf[currentPeriod] || etf.daily || {};
-                    groupTotalShares += periodData.shares || 0;
-                    groupTotalDollars += periodData.dollars || 0;
-
-                    // Add to all ETFs list for ranking
-                    allETFs.push({
-                        symbol: etf.symbol,
-                        price: etf.price,
-                        shares: periodData.shares || 0,
-                        dollars: periodData.dollars || 0,
-                        group: groupName
-                    });
+                    const shares = periodData.shares || 0;
+                    const dollars = periodData.dollars || 0;
+                    grandTotalShares += shares;
+                    grandTotalDollars += dollars;
+                    allETFs.push({ symbol: etf.symbol, price: etf.price, shares, dollars, group: groupName });
                 });
+            }
 
-                grandTotalShares += groupTotalShares;
-                grandTotalDollars += groupTotalDollars;
+            allETFs.sort((a, b) => b.dollars - a.dollars);
+            const activeCount = allETFs.length;
+            const topMover = allETFs[0];
+            const periodLabel = currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1);
 
-                // Sort ETFs by volume (dollars) within each group
+            // ---- KPI strip ----
+            let html = `
+                <div class="kpi-row" style="padding: 0 0 16px;">
+                    <div class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-icon">💵</span></div>
+                        <div class="kpi-value">${formatCurrency(grandTotalDollars)}</div>
+                        <div class="kpi-label">Total ${periodLabel} Volume</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-icon">📦</span></div>
+                        <div class="kpi-value">${formatNumber(grandTotalShares)}</div>
+                        <div class="kpi-label">Total Shares Traded</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-icon">🗂️</span></div>
+                        <div class="kpi-value">${activeCount}</div>
+                        <div class="kpi-label">Active ETFs Tracked</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-top"><span class="kpi-icon">🏆</span></div>
+                        <div class="kpi-value" style="font-size: 22px;">${topMover ? topMover.symbol : '--'}</div>
+                        <div class="kpi-label">Top by Volume${topMover ? ' · ' + formatCurrency(topMover.dollars) : ''}</div>
+                    </div>
+                </div>
+            `;
+
+            // ---- Volume leaderboard (top 8, horizontal bars) ----
+            const leaderboard = allETFs.slice(0, 8);
+            const barColors = ['#2DE3CB', '#A374F7', '#22C58B', '#F5A623', '#4F7DF9', '#B23368', '#0E7C86', '#6B8E23'];
+
+            if (leaderboard.length) {
+                html += `
+                    <div class="holdings-table-container" style="margin-bottom: 16px;">
+                        <div class="holdings-table-header">
+                            <div class="holdings-table-title"><span>📶</span> ETF Volume Leaderboard (${periodLabel})</div>
+                        </div>
+                        <div style="padding: 16px 20px;">
+                            <div class="dominance-bars">
+                                ${leaderboard.map((etf, i) => {
+                                    const share = grandTotalDollars > 0 ? (etf.dollars / grandTotalDollars * 100) : 0;
+                                    return `
+                                        <div class="dominance-bar-item">
+                                            <div class="dominance-bar-label">${etf.symbol}</div>
+                                            <div class="dominance-bar-track">
+                                                <div class="dominance-bar-fill" style="width: ${Math.max(share, 3)}%; background: ${barColors[i % barColors.length]};">
+                                                    <span class="dominance-bar-value">${formatCurrency(etf.dollars)}</span>
+                                                </div>
+                                            </div>
+                                            <div class="dominance-bar-percent">${share.toFixed(1)}%</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ---- ETF cards, grouped by category ----
+            for (const groupName of groupOrder) {
+                const etfs = groups[groupName] || [];
+                if (!etfs.length) continue;
+                const groupInfo = groupIcons[groupName] || { icon: '📋' };
                 const sortedETFs = [...etfs].sort((a, b) => {
                     const aData = a[currentPeriod] || a.daily || {};
                     const bData = b[currentPeriod] || b.daily || {};
@@ -14279,176 +14314,32 @@
                 });
 
                 html += `
-                    <div class="etf-group">
-                        <div class="group-header">
-                            <div class="group-title">
-                                <div class="group-icon ${groupInfo.class}">${groupInfo.icon}</div>
-                                <span class="group-name">${groupName}</span>
-                            </div>
-                            <span class="group-count">${etfs.length} ETFs</span>
+                    <div style="margin-bottom: 20px;">
+                        <div class="holdings-table-title" style="padding: 0 4px 10px;">
+                            <span>${groupInfo.icon}</span> ${groupName}
+                            <span class="group-count" style="margin-left: 8px; font-weight: 400;">${etfs.length} ETFs</span>
                         </div>
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50px;">#</th>
-                                        <th>Symbol</th>
-                                        <th class="right">Price</th>
-                                        <th class="right">Volume (Shares)</th>
-                                        <th class="right">Volume ($)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-
-                if (sortedETFs.length === 0) {
-                    html += `
-                        <tr>
-                            <td colspan="5" class="no-data">No data available for this group</td>
-                        </tr>
-                    `;
-                } else {
-                    sortedETFs.forEach((etf, index) => {
-                        const periodData = etf[currentPeriod] || etf.daily || {};
-                        const desc = descriptions[etf.symbol] || etf.description || '';
-                        const rank = index + 1;
-                        const rankColor = rank === 1 ? 'var(--accent-xrp)' : rank === 2 ? 'var(--accent-purple)' : rank === 3 ? 'var(--accent-orange)' : 'var(--text-muted)';
-
-                        html += `
-                            <tr>
-                                <td style="text-align: center; font-weight: 700; color: ${rankColor};">${rank}</td>
-                                <td>
-                                    <div class="symbol-cell">
-                                        <div>
-                                            <div class="symbol-badge">${etf.symbol}</div>
-                                            <div class="symbol-desc">${desc}</div>
+                        <div class="etf-cards-grid" style="padding: 0;">
+                            ${sortedETFs.map((etf, index) => {
+                                const periodData = etf[currentPeriod] || etf.daily || {};
+                                const desc = descriptions[etf.symbol] || etf.description || ('$' + etf.price.toFixed(2) + '/share');
+                                const rank = index + 1;
+                                return `
+                                    <div class="etf-card2">
+                                        <div class="etf-card2-top">
+                                            <span class="etf-card2-ticker">${etf.symbol}</span>
+                                            <span class="etf-card2-change flat">#${rank}</span>
                                         </div>
+                                        <div class="etf-card2-issuer">${desc}</div>
+                                        <div class="etf-card2-value">${formatCurrency(periodData.dollars || 0)}</div>
+                                        <div class="etf-card2-sub">${formatNumber(periodData.shares || 0)} shares · $${etf.price.toFixed(2)}/share</div>
                                     </div>
-                                </td>
-                                <td class="volume-cell">
-                                    <span class="price">$${etf.price.toFixed(2)}</span>
-                                </td>
-                                <td class="volume-cell">
-                                    <div class="volume-shares">${formatNumber(periodData.shares || 0)}</div>
-                                </td>
-                                <td class="volume-cell">
-                                    <div class="volume-shares">${formatCurrency(periodData.dollars || 0)}</div>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    // Add total row for each group
-                    html += `
-                        <tr class="total-row">
-                            <td></td>
-                            <td>
-                                <div class="symbol-badge">TOTAL</div>
-                            </td>
-                            <td></td>
-                            <td class="volume-cell">
-                                <div class="volume-shares">${formatNumber(groupTotalShares)}</div>
-                            </td>
-                            <td class="volume-cell">
-                                <div class="volume-shares">${formatCurrency(groupTotalDollars)}</div>
-                            </td>
-                        </tr>
-                    `;
-                }
-
-                html += `
-                                </tbody>
-                            </table>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
             }
-
-            html += '</div>';
-
-            // Sort all ETFs by volume for top rankings
-            allETFs.sort((a, b) => b.dollars - a.dollars);
-            const top10 = allETFs.slice(0, 10);
-
-            // Top Volume Rankings Section
-            html += `
-                <div class="etf-group" style="border: 2px solid var(--accent-xrp); margin-top: 2rem;">
-                    <div class="group-header" style="background: linear-gradient(135deg, var(--bg-secondary), var(--accent-xrp-dim));">
-                        <div class="group-title">
-                            <div class="group-icon spot" style="background: linear-gradient(135deg, var(--accent-xrp), var(--accent-purple));">🏆</div>
-                            <span class="group-name">Top 10 ETFs by Volume (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})</span>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">Rank</th>
-                                    <th>Symbol</th>
-                                    <th>Category</th>
-                                    <th class="right">Price</th>
-                                    <th class="right">Volume ($)</th>
-                                    <th class="right">Market Share</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-            `;
-
-            top10.forEach((etf, index) => {
-                const rank = index + 1;
-                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-                const rankStyle = rank <= 3 ? 'font-size: 1.2rem;' : 'color: var(--text-muted); font-weight: 600;';
-                const marketShare = grandTotalDollars > 0 ? ((etf.dollars / grandTotalDollars) * 100).toFixed(2) : 0;
-                const desc = descriptions[etf.symbol] || '';
-
-                html += `
-                    <tr>
-                        <td style="text-align: center; ${rankStyle}">${medal}</td>
-                        <td>
-                            <div class="symbol-cell">
-                                <div>
-                                    <div class="symbol-badge">${etf.symbol}</div>
-                                    <div class="symbol-desc">${desc}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="color: var(--text-secondary); font-size: 0.85rem;">${etf.group}</td>
-                        <td class="volume-cell">
-                            <span class="price">$${etf.price.toFixed(2)}</span>
-                        </td>
-                        <td class="volume-cell">
-                            <div class="volume-shares" style="color: var(--accent-xrp);">${formatCurrency(etf.dollars)}</div>
-                        </td>
-                        <td class="volume-cell">
-                            <div class="volume-shares">${marketShare}%</div>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            // Grand Total Section
-            html += `
-                <div class="grand-total">
-                    <h3>📊 Grand Total (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})</h3>
-                    <div class="grand-total-grid">
-                        <div class="grand-total-item">
-                            <div class="grand-total-label">Total Volume (Shares)</div>
-                            <div class="grand-total-value">${formatNumber(grandTotalShares)}</div>
-                        </div>
-                        <div class="grand-total-item">
-                            <div class="grand-total-label">Total Volume ($)</div>
-                            <div class="grand-total-value">${formatCurrency(grandTotalDollars)}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
 
             document.getElementById('mainContent').innerHTML = html;
         }
@@ -20054,6 +19945,35 @@
             return Array.from(buckets.values()).sort((a, b) => a.sortKey - b.sortKey);
         }
 
+        function updateInflowStatBox(bucketed) {
+            const labelEl = document.getElementById('summaryETFChangeLabel');
+            const changeEl = document.getElementById('summaryETFChange');
+            const detailEl = document.getElementById('summaryETFDetail');
+            if (!labelEl || !changeEl || !detailEl) return;
+
+            const latest = bucketed.length ? bucketed[bucketed.length - 1] : null;
+            const periodLabel = dashInflowPeriod === 'daily' ? 'Today Change'
+                : dashInflowPeriod === 'weekly' ? 'This Week'
+                : 'This Month';
+            labelEl.textContent = periodLabel;
+
+            if (!latest) {
+                changeEl.textContent = 'No updates';
+                changeEl.className = 'dash-mini-val';
+                detailEl.textContent = '--';
+                return;
+            }
+
+            const positive = latest.flow >= 0;
+            changeEl.textContent = (positive ? '+' : '') + formatHoldingsNumber(latest.flow) + ' XRP';
+            changeEl.className = 'dash-mini-val ' + (positive ? 'positive' : 'negative');
+
+            const usd = currentXRPPrice ? Math.abs(latest.flow) * currentXRPPrice : null;
+            detailEl.textContent = usd !== null
+                ? `≈ ${formatHoldingsCurrency(usd)} · ${latest.label}`
+                : latest.label;
+        }
+
         function renderDashInflowChart() {
             const canvas = document.getElementById('dashInflowChart');
             if (!canvas || !holdingsData || holdingsData.length < 2) return;
@@ -20069,6 +19989,12 @@
 
             const flows = bucketed.map(b => b.flow);
             const labels = bucketed.map(b => b.label);
+
+            // Keep the "Today Change" stat box in sync with whichever period is
+            // selected — shows the most recent complete bucket's XRP change and its
+            // USD equivalent at the current price, instead of always showing a
+            // single day's change regardless of the Weekly/Monthly toggle.
+            updateInflowStatBox(bucketed);
 
             window._dashInflowChart = new Chart(canvas.getContext('2d'), {
                 type: 'bar',
