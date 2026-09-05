@@ -14284,9 +14284,13 @@
                             <div class="dominance-bars">
                                 ${leaderboard.map((etf, i) => {
                                     const share = grandTotalDollars > 0 ? (etf.dollars / grandTotalDollars * 100) : 0;
+                                    const name = descriptions[etf.symbol] || etf.description || '';
                                     return `
                                         <div class="dominance-bar-item">
-                                            <div class="dominance-bar-label">${etf.symbol}</div>
+                                            <div class="dominance-bar-label" style="width: 150px; text-transform: none; line-height: 1.25;">
+                                                <div style="font-weight: 700;">${etf.symbol}</div>
+                                                ${name ? `<div style="font-size: 0.7rem; font-weight: 400; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>` : ''}
+                                            </div>
                                             <div class="dominance-bar-track">
                                                 <div class="dominance-bar-fill" style="width: ${Math.max(share, 3)}%; background: ${barColors[i % barColors.length]};">
                                                     <span class="dominance-bar-value">${formatCurrency(etf.dollars)}</span>
