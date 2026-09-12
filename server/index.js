@@ -1,12 +1,14 @@
 'use strict';
 
 /**
- * XRP Insights — Express cache + static server
+ * XRP Insights — Express API + static UI
  *
- * - /api/holdings-cached: Google Sheet CSV (cached)
- * - /api/exchange-balances-cached: FULL XRPL account_info scan of all
- *   exchange wallets in exchanges.json (parallel, multi-node), cached
- * - /api/exchange/trend: thin proxy to upstream trend API
+ * - /api/holdings-cached: Google Sheet CSV (sparse, cached ~5m)
+ * - /api/exchange-balances-cached: FULL XRPL account_info scan of
+ *   every wallet in exchanges.json
+ * - /api/etf-data, /api/historical: Yahoo Finance (server-side)
+ * - /api/price: XRP USD (CoinGecko, Yahoo fallback)
+ * - public/: modular 4-tab UI, same origin
  */
 
 const path = require('path');
@@ -41,10 +43,28 @@ const XRPL_REQ_TIMEOUT_MS = Number(process.env.XRPL_REQ_TIMEOUT_MS) || 8000;
 const COLD_WAIT_MS = Number(process.env.EXCHANGE_COLD_WAIT_MS) || 60000;
 
 const ROOT_DIR = path.join(__dirname, '..');
+const PUBLIC_DIR = path.join(__dirname, 'public');
 const CACHE_DIR = path.join(__dirname, 'cache');
 const HOLDINGS_CACHE_FILE = path.join(CACHE_DIR, 'holdings.json');
 const EXCHANGE_CACHE_FILE = path.join(CACHE_DIR, 'exchange-balances.json');
 const EXCHANGES_FILE = path.join(__dirname, 'exchanges.json');
+
+/** Column index map matching the published Google Sheet. Labels come from the header row. */
+const HOLDINGS_COLUMN_DEFS = [
+  { key: 'canary', xrp: 1, value: 2, fallback: 'Canary XRP' },
+  { key: 'bitwise', xrp: 3, value: 4, fallback: 'Bitwise XRP' },
+  { key: 'franklin', xrp: 5, value: 6, fallback: 'Franklin XRP' },
+  { key: 'grayscale', xrp: 7, value: 8, fallback: 'Grayscale XRP' },
+  { key: 'shares21', xrp: 9, value: 10, fallback: '21Shares XRP' },
+  { key: 'rex', xrp: 11, value: 12, fallback: 'Rex Shares' },
+  { key: 'nciq', xrp: 13, value: null, fallback: 'NCIQ' },
+  { key: 'bitw', xrp: 14, value: null, fallback: 'BITW' },
+  { key: 'gdlc', xrp: 15, value: null, fallback: 'Grayscale GDLC' },
+  { key: 'ezpz', xrp: 16, value: 17, fallback: 'Franklin EZPZ' },
+  { key: 'btgo', xrp: 18, value: null, fallback: 'Bitgo' },
+  { key: 'tknz', xrp: 19, value: null, fallback: 'T RowePrice TKNZ' },
+  { key: 'xxx', xrp: 20, value: null, fallback: 'XXX- CyberHornet' },
+];
 
 ensureDir(CACHE_DIR);
 
@@ -71,6 +91,7 @@ app.use(express.json({ limit: '1mb' }));
 // ---------------------------------------------------------------------------
 const holdingsCache = {
   data: null,
+  columns: null,
   updatedAt: 0,
   fetching: null,
 };
@@ -106,6 +127,7 @@ function loadFileCache(file, target) {
     if (raw && raw.data != null && raw.updatedAt) {
       target.data = raw.data;
       target.updatedAt = raw.updatedAt;
+      if (raw.columns) target.columns = raw.columns;
       console.log(
         `[cache] hydrated ${path.basename(file)} age=${Math.round((Date.now() - raw.updatedAt) / 1000)}s`
       );
@@ -150,9 +172,9 @@ function saveExchangeFileCache() {
   }
 }
 
-function saveFileCache(file, data, updatedAt) {
+function saveFileCache(file, data, updatedAt, extra = {}) {
   try {
-    fs.writeFileSync(file, JSON.stringify({ data, updatedAt }), 'utf8');
+    fs.writeFileSync(file, JSON.stringify({ data, updatedAt, ...extra }), 'utf8');
   } catch (e) {
     console.warn(`[cache] failed to write ${file}:`, e.message);
   }
@@ -202,33 +224,37 @@ function parseHoldingsCsv(csvText) {
   if (lines.length < 2) {
     throw new Error('CSV has no data rows');
   }
-  const header = lines[0].toLowerCase();
-  if (!header.includes('date') || !header.includes('canary')) {
+  const headerCells = parseCSVLine(lines[0]);
+  const headerLower = headerCells.join(',').toLowerCase();
+  if (!headerLower.includes('date') || !headerLower.includes('canary')) {
     throw new Error('CSV does not look like holdings sheet (missing Date/Canary header)');
   }
 
-  return lines
+  const columns = HOLDINGS_COLUMN_DEFS.map((def) => ({
+    key: def.key,
+    label: (headerCells[def.xrp] || def.fallback || def.key).trim(),
+    valueLabel:
+      def.value != null ? String(headerCells[def.value] || '').trim() || null : null,
+    hasValue: def.value != null,
+    labelSource: headerCells[def.xrp] ? 'google-sheet-header' : 'sheet-fallback',
+  }));
+
+  const data = lines
     .slice(1)
     .map((line) => {
       const values = parseCSVLine(line);
-      return {
-        date: values[0] || '',
-        canary: { xrp: parseNum(values[1]), value: parseNum(values[2]) },
-        bitwise: { xrp: parseNum(values[3]), value: parseNum(values[4]) },
-        franklin: { xrp: parseNum(values[5]), value: parseNum(values[6]) },
-        grayscale: { xrp: parseNum(values[7]), value: parseNum(values[8]) },
-        shares21: { xrp: parseNum(values[9]), value: parseNum(values[10]) },
-        rex: { xrp: parseNum(values[11]), value: parseNum(values[12]) },
-        nciq: { xrp: parseNum(values[13]), value: null },
-        bitw: { xrp: parseNum(values[14]), value: null },
-        gdlc: { xrp: parseNum(values[15]), value: null },
-        ezpz: { xrp: parseNum(values[16]), value: parseNum(values[17]) },
-        btgo: { xrp: parseNum(values[18]), value: null },
-        tknz: { xrp: parseNum(values[19]), value: null },
-        xxx: { xrp: parseNum(values[20]), value: null },
-      };
+      const entry = { date: values[0] || '' };
+      for (const def of HOLDINGS_COLUMN_DEFS) {
+        entry[def.key] = {
+          xrp: parseNum(values[def.xrp]),
+          value: def.value != null ? parseNum(values[def.value]) : null,
+        };
+      }
+      return entry;
     })
     .filter((entry) => entry.date && entry.date !== 'Date');
+
+  return { data, columns };
 }
 
 async function fetchText(url, timeoutMs = 20000) {
@@ -283,13 +309,16 @@ async function refreshHoldings() {
   holdingsCache.fetching = (async () => {
     console.log('[holdings] fetching Google Sheet CSV…');
     const csv = await fetchText(SHEET_CSV_URL, 25000);
-    const data = parseHoldingsCsv(csv);
-    if (!data.length) throw new Error('Parsed zero holdings rows');
-    holdingsCache.data = data;
+    const parsed = parseHoldingsCsv(csv);
+    if (!parsed.data.length) throw new Error('Parsed zero holdings rows');
+    holdingsCache.data = parsed.data;
+    holdingsCache.columns = parsed.columns;
     holdingsCache.updatedAt = Date.now();
-    saveFileCache(HOLDINGS_CACHE_FILE, data, holdingsCache.updatedAt);
-    console.log(`[holdings] cached ${data.length} rows`);
-    return data;
+    saveFileCache(HOLDINGS_CACHE_FILE, parsed.data, holdingsCache.updatedAt, {
+      columns: parsed.columns,
+    });
+    console.log(`[holdings] cached ${parsed.data.length} rows`);
+    return parsed.data;
   })()
     .catch((err) => {
       console.error('[holdings] refresh failed:', err.message);
@@ -709,6 +738,19 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+function holdingsColumns() {
+  if (holdingsCache.columns && holdingsCache.columns.length) {
+    return holdingsCache.columns;
+  }
+  return HOLDINGS_COLUMN_DEFS.map((def) => ({
+    key: def.key,
+    label: def.fallback,
+    valueLabel: null,
+    hasValue: def.value != null,
+    labelSource: 'sheet-fallback',
+  }));
+}
+
 app.get('/api/holdings-cached', async (_req, res) => {
   try {
     const fresh = isFresh(holdingsCache.updatedAt) && holdingsCache.data;
@@ -719,9 +761,11 @@ app.get('/api/holdings-cached', async (_req, res) => {
         if (holdingsCache.data && holdingsCache.data.length) {
           return sendJson(res, 200, {
             data: holdingsCache.data,
+            columns: holdingsColumns(),
             updatedAt: holdingsCache.updatedAt,
             stale: true,
             error: err.message,
+            source: 'google-sheet-csv',
           });
         }
         return sendJson(res, 502, {
@@ -733,10 +777,12 @@ app.get('/api/holdings-cached', async (_req, res) => {
 
     return sendJson(res, 200, {
       data: holdingsCache.data,
+      columns: holdingsColumns(),
       updatedAt: holdingsCache.updatedAt,
       stale: !isFresh(holdingsCache.updatedAt),
       count: holdingsCache.data.length,
       source: 'google-sheet-csv',
+      sparse: true,
     });
   } catch (err) {
     return sendJson(res, 500, {
@@ -1051,6 +1097,69 @@ app.get('/api/historical', async (req, res) => {
 });
 
 
+let priceCache = { data: null, timestamp: 0 };
+const PRICE_CACHE_MS = 60 * 1000;
+
+async function fetchXrpPrice() {
+  try {
+    const url =
+      'https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=usd&include_24hr_change=true';
+    const data = await fetchJson(url, 10000);
+    const usd = data && data.ripple && data.ripple.usd;
+    if (usd == null || !Number.isFinite(Number(usd))) throw new Error('CoinGecko missing usd');
+    return {
+      usd: Number(usd),
+      change24h:
+        data.ripple.usd_24h_change != null ? Number(data.ripple.usd_24h_change) : null,
+      source: 'coingecko',
+    };
+  } catch (cgErr) {
+    console.warn('[price] CoinGecko failed:', cgErr.message);
+    const url =
+      'https://query1.finance.yahoo.com/v8/finance/chart/XRP-USD?interval=1d&range=5d';
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const resp = await fetch(url, {
+        signal: ctrl.signal,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      });
+      if (!resp.ok) throw new Error(`Yahoo HTTP ${resp.status}`);
+      const data = await resp.json();
+      const meta = data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
+      if (!meta || meta.regularMarketPrice == null) throw new Error('Yahoo missing price');
+      const usd = Number(meta.regularMarketPrice);
+      const prev = Number(meta.chartPreviousClose);
+      const change24h =
+        Number.isFinite(usd) && Number.isFinite(prev) && prev
+          ? ((usd - prev) / prev) * 100
+          : null;
+      return { usd, change24h, source: 'yahoo-xrp-usd' };
+    } finally {
+      clearTimeout(t);
+    }
+  }
+}
+
+app.get('/api/price', async (_req, res) => {
+  try {
+    if (priceCache.data && Date.now() - priceCache.timestamp < PRICE_CACHE_MS) {
+      return sendJson(res, 200, { ...priceCache.data, cached: true });
+    }
+    const data = await fetchXrpPrice();
+    priceCache = { data, timestamp: Date.now() };
+    return sendJson(res, 200, { ...data, cached: false });
+  } catch (err) {
+    if (priceCache.data) {
+      return sendJson(res, 200, { ...priceCache.data, cached: true, stale: true, error: err.message });
+    }
+    return sendJson(res, 502, { error: 'price failed', message: err.message });
+  }
+});
+
 /** Catch-all for unknown /api/* — JSON 404, never SPA HTML. */
 app.use('/api', (req, res) => {
   sendJson(res, 404, {
@@ -1061,48 +1170,29 @@ app.use('/api', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Static SPA
+// Static UI (server/public) — modular JS/CSS, not the old monolith
 // ---------------------------------------------------------------------------
-function resolveIndexHtml() {
-  const candidates = [
-    path.join(ROOT_DIR, 'index.html'),           // repo root (preferred)
-    path.join(__dirname, 'index.html'),          // copied next to server
-    path.join(__dirname, 'public', 'index.html'),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return p;
-  }
-  return null;
-}
+const INDEX_HTML = path.join(PUBLIC_DIR, 'index.html');
+console.log(`[static] PUBLIC_DIR=${PUBLIC_DIR}`);
+console.log(`[static] index.html=${fs.existsSync(INDEX_HTML) ? INDEX_HTML : 'NOT FOUND'}`);
 
-const INDEX_HTML = resolveIndexHtml();
-console.log(`[static] ROOT_DIR=${ROOT_DIR}`);
-console.log(`[static] index.html=${INDEX_HTML || 'NOT FOUND'}`);
-
-if (INDEX_HTML) {
-  app.use(express.static(path.dirname(INDEX_HTML), { index: false, extensions: ['html'] }));
-}
-app.use(express.static(ROOT_DIR, { index: false, extensions: ['html'] }));
-app.use(express.static(__dirname, { index: false }));
+app.use(express.static(PUBLIC_DIR, { index: false, extensions: ['html'] }));
 
 function sendIndex(res) {
-  const indexPath = resolveIndexHtml();
-  if (!indexPath) {
+  if (!fs.existsSync(INDEX_HTML)) {
     return res.status(500).type('html').send(`<!doctype html><html><body style="font-family:system-ui;background:#0a0d13;color:#edf1f7;padding:2rem">
-      <h1>index.html not found</h1>
-      <p>Put <code>index.html</code> next to the <code>server</code> folder (parent directory), then restart.</p>
-      <pre>expected: ${path.join(ROOT_DIR, 'index.html')}</pre>
-      <p>Or copy index.html into <code>server/</code>.</p>
+      <h1>UI not found</h1>
+      <p>Expected <code>server/public/index.html</code>.</p>
     </body></html>`);
   }
-  return res.sendFile(indexPath, (err) => {
+  return res.sendFile(INDEX_HTML, (err) => {
     if (err) {
       console.error('[static] sendFile failed:', err.message);
       if (!res.headersSent) {
         res.status(500).json({
           error: 'Failed to serve index.html',
           message: err.message,
-          path: indexPath,
+          path: INDEX_HTML,
         });
       }
     }
