@@ -9,44 +9,90 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%230E121A'/%3E%3Cpath d='M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z' fill='%232DE3CB'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="logo" aria-hidden="true"></span>
-        <div>
-          <h1>XRP Insights</h1>
-          <p class="tagline">Holdings · XRPL scan · ETF volume</p>
+<div class="app-layout">
+  <header class="topbar">
+    <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-logo">
+      <svg class="topbar-logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="32" cy="32" r="32" fill="#0E121A"/>
+        <path d="M44.7 20h4.5l-9.6 9.3a10.8 10.8 0 01-15.2 0L14.8 20h4.5l7.4 7.1a7.2 7.2 0 0010.6 0L44.7 20zM19.3 44h-4.5l9.6-9.3a10.8 10.8 0 0115.2 0l9.6 9.3h-4.5l-7.4-7.1a7.2 7.2 0 00-10.6 0L19.3 44z" fill="#2DE3CB"/>
+      </svg>
+      <span class="topbar-logo-text">XRP_INSIGHTS</span>
+    </div>
+    <div class="topbar-price" id="topbarPrice">
+      <span class="topbar-price-label">XRP</span>
+      <span class="topbar-price-value" id="xrpPriceTopbar">—</span>
+    </div>
+    <div class="ticker-strip" aria-hidden="true">
+      <div class="ticker-track">
+        <span class="ticker-item"><span class="ticker-symbol">SHEET</span><span class="ticker-price">sparse holdings</span></span>
+        <span class="ticker-divider">·</span>
+        <span class="ticker-item"><span class="ticker-symbol">XRPL</span><span class="ticker-price">full wallet scan</span></span>
+        <span class="ticker-divider">·</span>
+        <span class="ticker-item"><span class="ticker-symbol">YAHOO</span><span class="ticker-price">ETF volume</span></span>
+        <span class="ticker-divider">·</span>
+        <span class="ticker-item"><span class="ticker-symbol">SHEET</span><span class="ticker-price">sparse holdings</span></span>
+        <span class="ticker-divider">·</span>
+        <span class="ticker-item"><span class="ticker-symbol">XRPL</span><span class="ticker-price">full wallet scan</span></span>
+        <span class="ticker-divider">·</span>
+        <span class="ticker-item"><span class="ticker-symbol">YAHOO</span><span class="ticker-price">ETF volume</span></span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="statusPill" class="status-chip" role="status">Idle</span>
+      <button id="retryBtn" class="topbar-btn" type="button">Retry</button>
+    </div>
+  </header>
+
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop" hidden></div>
+
+  <div class="body-layout">
+    <nav class="sidebar" id="mainSidebar" aria-label="Main">
+      <div class="sidebar-section-label">Overview</div>
+      <button class="sidebar-item active" type="button" data-tab="overview">
+        <span class="sidebar-item-icon">◉</span>
+        <span class="sidebar-item-label">Overview</span>
+      </button>
+      <button class="sidebar-item" type="button" data-tab="holdings">
+        <span class="sidebar-item-icon">💎</span>
+        <span class="sidebar-item-label">ETF Holdings</span>
+        <span class="sidebar-badge live" id="badgeHoldings">Live</span>
+      </button>
+      <button class="sidebar-item" type="button" data-tab="exchanges">
+        <span class="sidebar-item-icon">🏦</span>
+        <span class="sidebar-item-label">Exchange Balances</span>
+        <span class="sidebar-badge" id="badgeExchanges">62</span>
+      </button>
+      <button class="sidebar-item" type="button" data-tab="etf">
+        <span class="sidebar-item-icon">📈</span>
+        <span class="sidebar-item-label">ETF Trading</span>
+      </button>
+      <div class="sidebar-footer">
+        <a class="sidebar-link" href="https://x.com/chachaX72" target="_blank" rel="noopener">𝕏 @chachaX72</a>
+        <div class="sidebar-meta">
+          <div class="last-updated" id="lastUpdated">Not yet loaded</div>
+          <div class="status-line">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Ready</span>
+          </div>
         </div>
       </div>
-      <div class="status-cluster">
-        <span id="statusPill" class="pill pill-idle" role="status">Idle</span>
-        <button id="retryBtn" class="btn btn-ghost" type="button">Retry</button>
-      </div>
-    </header>
-
-    <nav class="tabs" role="tablist" aria-label="Main">
-      <button class="tab active" role="tab" aria-selected="true" data-tab="overview">Overview</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="holdings">Holdings</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="exchanges">Exchanges</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="etf">ETF Trading</button>
     </nav>
 
-    <main>
-      <section id="tab-overview" class="panel active" role="tabpanel"></section>
-      <section id="tab-holdings" class="panel" role="tabpanel" hidden></section>
-      <section id="tab-exchanges" class="panel" role="tabpanel" hidden></section>
-      <section id="tab-etf" class="panel" role="tabpanel" hidden></section>
+    <main class="content-area">
+      <section id="tab-overview" class="tab-content active" role="tabpanel"></section>
+      <section id="tab-holdings" class="tab-content" role="tabpanel" hidden></section>
+      <section id="tab-exchanges" class="tab-content" role="tabpanel" hidden></section>
+      <section id="tab-etf" class="tab-content" role="tabpanel" hidden></section>
     </main>
-
-    <footer class="foot">
-      Numbers come from live APIs only — Google Sheet (sparse), XRPL account_info, Yahoo Finance.
-      Static Render hosting cannot run the exchange scan or ETF proxy.
-    </footer>
   </div>
-  <script type="module" src="/js/app.js"></script>
+</div>
+<script type="module" src="/js/app.js"></script>
 </body>
 </html>

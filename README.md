@@ -6,6 +6,8 @@ v1 is four tabs only: **Overview**, **Holdings**, **Exchanges**, **ETF Trading**
 
 This is a from-scratch redesign. The old ~20k-line `index.html` monolith is gone. A Render **Static Site** (no Node) cannot run the ETF proxy or the full exchange scan.
 
+The frontend was restyled to match the legacy XRP Insights chrome (Space Grotesk / Space Mono, dark slate surfaces, sticky topbar + left sidebar, KPI cards, dense holdings/exchange tables). Server APIs and data rules are unchanged.
+
 ## Run locally
 
 ```bash

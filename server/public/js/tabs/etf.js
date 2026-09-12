@@ -1,25 +1,37 @@
 import { api } from '../api.js';
-import { esc, fmtNum, fmtUsd, isNum } from '../format.js';
+import { esc, fmtNum, fmtUsd, fmtUsdCompact, isNum } from '../format.js';
 
-const COLORS = ['#2de3cb', '#4f7df9', '#f5a623', '#a374f7'];
+const COLORS = ['#2DE3CB', '#4F7DF9', '#F5A623', '#A374F7'];
+const PERIODS = {
+  daily: { label: 'Daily', hist: '1mo', field: 'daily' },
+  weekly: { label: 'Weekly', hist: '3mo', field: 'weekly' },
+  monthly: { label: 'Monthly', hist: '6mo', field: 'monthly' },
+};
 
-function tableFor(groupName, rows) {
-  const body = (rows || []).map((r) => `<tr class="row-hover">
-    <td class="left">${esc(r.symbol)}<div class="venue-meta">${esc(r.description || '')}</div></td>
-    <td>${isNum(r.price) ? esc(fmtUsd(r.price)) : '—'}</td>
-    <td>${esc(fmtNum(r.daily?.shares))}</td>
-    <td>${esc(fmtUsd(r.daily?.dollars))}</td>
-    <td>${esc(fmtUsd(r.weekly?.dollars))}</td>
-    <td>${esc(fmtUsd(r.monthly?.dollars))}</td>
-  </tr>`).join('');
-  return `<section class="group">
-    <h2>${esc(groupName)}</h2>
-    <div class="table-wrap"><table>
-      <thead><tr>
-        <th class="left">Symbol</th><th>Price</th><th>Daily shares</th><th>Daily $</th><th>5d $</th><th>21d $</th>
-      </tr></thead>
-      <tbody>${body || '<tr><td class="left">No Yahoo rows</td></tr>'}</tbody>
-    </table></div>
+function volumeOf(row, field) {
+  const block = row?.[field] || {};
+  return {
+    shares: isNum(block.shares) ? block.shares : null,
+    dollars: isNum(block.dollars) ? block.dollars : null,
+  };
+}
+
+function cardsFor(groupName, rows, field) {
+  const cards = (rows || []).map((r) => {
+    const vol = volumeOf(r, field);
+    return `<article class="etf-card2">
+      <div class="etf-card2-top">
+        <span class="etf-card2-ticker">${esc(r.symbol)}</span>
+        <span class="etf-card2-sub">${isNum(r.price) ? esc(fmtUsd(r.price)) : '—'}</span>
+      </div>
+      <div class="etf-card2-issuer">${esc(r.description || '')}</div>
+      <div class="etf-card2-value">${vol.dollars != null ? esc(fmtUsdCompact(vol.dollars)) : '—'}</div>
+      <div class="etf-card2-sub">${vol.shares != null ? `${esc(fmtNum(vol.shares))} shares` : 'no volume'}</div>
+    </article>`;
+  }).join('');
+  return `<section class="etf-group">
+    <div class="etf-group-title">${esc(groupName)}</div>
+    <div class="etf-cards-grid">${cards || '<div class="banner">No Yahoo rows</div>'}</div>
   </section>`;
 }
 
@@ -52,28 +64,63 @@ function lineChart(seriesMap) {
     <div class="legend">${legend}</div>`;
 }
 
-export async function renderEtf(root, { setStatus }) {
-  root.innerHTML = `<div class="banner">Loading Yahoo ETF data via /api/etf-data…</div>`;
-  setStatus('load', 'Loading');
-  try {
-    const [etf, hist] = await Promise.all([
-      api.etf(),
-      api.historical('1mo').catch(() => ({ data: {}, count: 0 })),
-    ]);
-    const groups = etf.data || {};
-    const sections = Object.entries(groups).map(([name, rows]) => tableFor(name, rows)).join('');
-    root.innerHTML = `
-      <div class="toolbar">
-        <p class="hint">Server-side Yahoo Finance (browser CORS blocks a direct call). ${etf.cached ? 'Cached' : 'Fresh'} · ${esc(etf.timestamp || '')}</p>
+function paint(root, { etf, hist, period }) {
+  const spec = PERIODS[period] || PERIODS.daily;
+  const groups = etf.data || {};
+  const sections = Object.entries(groups).map(([name, rows]) => cardsFor(name, rows, spec.field)).join('');
+  const toggles = Object.entries(PERIODS).map(([key, p]) =>
+    `<button class="period-btn${key === period ? ' active' : ''}" type="button" data-period="${key}">${p.label}</button>`
+  ).join('');
+
+  root.innerHTML = `
+    <div class="page-hero">
+      <div class="page-hero-badge">${etf.cached ? 'Cached' : 'Live'}</div>
+      <div class="page-hero-title">ETF Trading</div>
+      <div class="page-hero-subtitle">Yahoo Finance spot / futures / Canada / index — ${esc(etf.timestamp || '')}</div>
+    </div>
+    <div class="controls">
+      <div class="period-buttons">${toggles}</div>
+      <button id="etfRefresh" class="btn btn-refresh" type="button">↻ Refresh</button>
+    </div>
+    <div class="chart-card">
+      <div class="chart-section-header">
+        <div class="chart-section-title">Historical volume · ${esc(spec.label)} (${esc(spec.hist)})</div>
       </div>
-      ${sections || '<div class="banner error">Yahoo returned no ETF groups.</div>'}
-      <section class="group">
-        <h2>Historical volume (1 month)</h2>
-        ${lineChart(hist.data || {})}
-      </section>`;
-    setStatus(Object.keys(groups).length ? 'live' : 'error', Object.keys(groups).length ? 'Live' : 'Error');
-  } catch (err) {
-    root.innerHTML = `<div class="banner error">${esc(err.message)}</div>`;
-    setStatus('error', 'Error');
+      ${lineChart(hist.data || {})}
+    </div>
+    ${sections || '<div class="banner error">Yahoo returned no ETF groups.</div>'}
+    <p class="hint">Period toggle switches Yahoo daily / weekly / monthly fields and the matching historical window. Empty Yahoo series stay empty.</p>`;
+}
+
+export async function renderEtf(root, { setStatus }) {
+  root.innerHTML = `<div class="page-hero">
+    <div class="page-hero-badge warn">Loading</div>
+    <div class="page-hero-title">ETF Trading</div>
+  </div><div class="banner">Loading Yahoo ETF data via /api/etf-data…</div>`;
+  setStatus('load', 'Loading');
+
+  let period = 'daily';
+  let etf;
+
+  async function load(nextPeriod, { refresh = false } = {}) {
+    period = nextPeriod;
+    setStatus('load', 'Loading');
+    try {
+      if (refresh || !etf) etf = await api.etf();
+      const hist = await api.historical(PERIODS[period].hist).catch(() => ({ data: {}, count: 0 }));
+      paint(root, { etf, hist, period });
+      root.querySelectorAll('.period-btn').forEach((btn) => {
+        btn.addEventListener('click', () => load(btn.dataset.period));
+      });
+      root.querySelector('#etfRefresh')?.addEventListener('click', () => load(period, { refresh: true }));
+      const groups = etf.data || {};
+      setStatus(Object.keys(groups).length ? 'live' : 'error', Object.keys(groups).length ? 'Live' : 'Error');
+    } catch (err) {
+      root.innerHTML = `<div class="page-hero"><div class="page-hero-badge err">Error</div><div class="page-hero-title">ETF Trading</div></div>
+        <div class="banner error">${esc(err.message)}</div>`;
+      setStatus('error', 'Error');
+    }
   }
+
+  await load('daily');
 }

@@ -1,5 +1,5 @@
 import { api } from '../api.js';
-import { esc, fmtNum, fmtXrp, venueLabel, isNum } from '../format.js';
+import { esc, fmtNum, fmtUsdCompact, fmtXrp, venueLabel, isNum } from '../format.js';
 
 function rowsFrom(payload) {
   const data = (payload && payload.data) || {};
@@ -21,40 +21,72 @@ function rowHtml(r, i) {
     .slice(0, 8)
     .map(([addr, w]) => `${esc(w.name || addr)} · ${isNum(w.balance) ? fmtNum(w.balance) : '—'}`)
     .join('<br>');
-  return `<tr class="row-hover" data-name="${esc((r.name + ' ' + r.key).toLowerCase())}">
-    <td class="left">${i + 1}</td>
-    <td class="left">${esc(r.name)}<div class="venue-meta">${r.successCount}/${r.walletCount} wallets</div></td>
-    <td>${esc(fmtNum(r.total))}</td>
-    <td class="left"><details><summary>wallets</summary><div class="wallet-list">${walletBits || '—'}</div></details></td>
+  return `<tr data-name="${esc((r.name + ' ' + r.key).toLowerCase())}">
+    <td>${i + 1}</td>
+    <td>${esc(r.name)}<div class="venue-meta">${r.successCount}/${r.walletCount} wallets</div></td>
+    <td class="num">${esc(fmtNum(r.total))}</td>
+    <td><details><summary>wallets</summary><div class="wallet-list">${walletBits || '—'}</div></details></td>
   </tr>`;
 }
 
-function paint(root, payload) {
+function paint(root, payload, priceUsd) {
   const full = payload.source === 'xrpl-full-scan';
   const ws = payload.walletStats || {};
   const scan = payload.scan;
   const venues = Object.keys(payload.data || {}).length;
   const list = rowsFrom(payload);
   const grand = list.reduce((s, r) => s + r.total, 0);
-  const status = full
-    ? `${venues} venues · ${ws.total ?? '—'} wallets`
-    : `Source ${payload.source || 'unknown'} — waiting for xrpl-full-scan`;
-  const progress = scan && scan.running ? ` · scan ${scan.done}/${scan.total} (ok ${scan.success}, fail ${scan.failed})` : '';
+  const usd = full && isNum(priceUsd) ? grand * priceUsd : null;
+  const running = scan && scan.running;
+  const wallets = ws.total ?? list.reduce((s, r) => s + r.walletCount, 0);
+  const ok = ws.success ?? '—';
   const filterVal = root.querySelector('#exFilter')?.value || '';
 
+  const statusLabel = running ? 'Scanning' : full ? 'Live scan' : 'Waiting';
+  const statusClass = running ? 'warn' : full ? '' : 'warn';
+
   root.innerHTML = `
-    <div class="toolbar">
-      <p class="hint">${esc(status)}${esc(progress)}. Primary total is the full XRPL scan of exchanges.json — not the thin trend seed.</p>
-      <div>
-        <input id="exFilter" class="search" type="search" placeholder="Filter venue" value="${esc(filterVal)}">
-        <button id="exRefresh" class="btn" type="button">Rescan</button>
+    <div class="page-hero">
+      <div class="page-hero-badge${statusClass ? ` ${statusClass}` : ''}">${statusLabel}</div>
+      <div class="page-hero-title">Exchange Balances</div>
+      <div class="page-hero-subtitle">Full XRPL account_info over exchanges.json — not a thin sample</div>
+    </div>
+    <div class="exchange-summary">
+      <div class="exchange-stat-card">
+        <div class="exchange-stat-label">Total XRP</div>
+        <div class="exchange-stat-value accent">${full ? esc(fmtXrp(grand, { compact: true })) : '—'}</div>
+      </div>
+      <div class="exchange-stat-card">
+        <div class="exchange-stat-label">USD value</div>
+        <div class="exchange-stat-value">${usd != null ? esc(fmtUsdCompact(usd)) : '—'}</div>
+        <div class="exchange-stat-sub">${usd != null ? 'total × live XRP price' : 'needs full scan + price'}</div>
+      </div>
+      <div class="exchange-stat-card">
+        <div class="exchange-stat-label">Venues tracked</div>
+        <div class="exchange-stat-value">${venues || '—'}</div>
+      </div>
+      <div class="exchange-stat-card">
+        <div class="exchange-stat-label">Wallets</div>
+        <div class="exchange-stat-value">${ok} / ${wallets || '—'}</div>
+        <div class="exchange-stat-sub">${running && scan ? `scan ${scan.done}/${scan.total}` : 'XRPL account_info'}</div>
+      </div>
+      <div class="exchange-stat-card">
+        <div class="exchange-stat-label">Data status</div>
+        <div class="exchange-stat-value ${full && !running ? 'green' : ''}">${esc(payload.source || 'unknown')}</div>
       </div>
     </div>
-    <div id="exBanner" class="banner">${full ? `Full-scan total ${esc(fmtXrp(grand, { compact: true }))}` : 'Scan in progress — totals appear as wallets return.'}</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th class="left">#</th><th class="left">Venue</th><th>XRP</th><th class="left">Wallets</th></tr></thead>
-        <tbody id="exBody">${list.map(rowHtml).join('') || '<tr><td class="left" colspan="4">No venues</td></tr>'}</tbody>
+    <div class="exchange-controls">
+      <input id="exFilter" class="search" type="search" placeholder="Filter venue" value="${esc(filterVal)}">
+      <button id="exRefresh" class="btn btn-refresh" type="button">↻ Refresh</button>
+    </div>
+    <div class="exchange-table-header">
+      <div class="exchange-table-title">Venue balances</div>
+      <div class="exchange-count">${venues} venues</div>
+    </div>
+    <div class="exchange-table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Venue</th><th>XRP</th><th>Wallets</th></tr></thead>
+        <tbody id="exBody">${list.map(rowHtml).join('') || '<tr><td colspan="4">No venues</td></tr>'}</tbody>
       </table>
     </div>`;
   applyFilter(root);
@@ -62,20 +94,21 @@ function paint(root, payload) {
 
 function applyFilter(root) {
   const q = (root.querySelector('#exFilter')?.value || '').trim().toLowerCase();
-  const rows = root.querySelectorAll('#exBody tr[data-name]');
-  let n = 0;
-  rows.forEach((tr) => {
-    const show = !q || (tr.dataset.name || '').includes(q);
-    tr.hidden = !show;
-    if (show) n += 1;
+  root.querySelectorAll('#exBody tr[data-name]').forEach((tr) => {
+    tr.hidden = !!(q && !(tr.dataset.name || '').includes(q));
   });
 }
 
 export async function renderExchanges(root, { setStatus }) {
-  root.innerHTML = `<div class="banner">Starting XRPL full scan…</div>`;
+  root.innerHTML = `<div class="page-hero">
+    <div class="page-hero-badge warn">Scanning</div>
+    <div class="page-hero-title">Exchange Balances</div>
+  </div><div class="banner">Starting XRPL full scan…</div>`;
   setStatus('load', 'Scanning');
 
   let payload;
+  let priceUsd = null;
+  api.price().then((p) => { if (isNum(p.usd)) priceUsd = p.usd; }).catch(() => {});
 
   const onFilter = () => applyFilter(root);
   const onRefresh = async () => {
@@ -84,7 +117,7 @@ export async function renderExchanges(root, { setStatus }) {
     setStatus('load', 'Scanning');
     try {
       payload = await api.exchanges({ refresh: true });
-      paint(root, payload);
+      paint(root, payload, priceUsd);
       bind();
       const running = payload.scan && payload.scan.running;
       setStatus(payload.source === 'xrpl-full-scan' && !running ? 'live' : running ? 'load' : 'error',
@@ -101,8 +134,13 @@ export async function renderExchanges(root, { setStatus }) {
   }
 
   try {
-    payload = await api.exchanges();
-    paint(root, payload);
+    const [ex, price] = await Promise.all([
+      api.exchanges(),
+      api.price().catch(() => null),
+    ]);
+    payload = ex;
+    if (price && isNum(price.usd)) priceUsd = price.usd;
+    paint(root, payload, priceUsd);
     bind();
 
     if (payload.scan && payload.scan.running) {
@@ -110,7 +148,7 @@ export async function renderExchanges(root, { setStatus }) {
         try {
           payload = await api.exchanges();
           const keep = root.querySelector('#exFilter')?.value || '';
-          paint(root, payload);
+          paint(root, payload, priceUsd);
           const input = root.querySelector('#exFilter');
           if (input) input.value = keep;
           applyFilter(root);
@@ -132,7 +170,8 @@ export async function renderExchanges(root, { setStatus }) {
         payload.source === 'xrpl-full-scan' ? 'Live' : 'Error');
     }
   } catch (err) {
-    root.innerHTML = `<div class="banner error">${esc(err.message)}</div>`;
+    root.innerHTML = `<div class="page-hero"><div class="page-hero-badge err">Error</div><div class="page-hero-title">Exchange Balances</div></div>
+      <div class="banner error">${esc(err.message)}</div>`;
     setStatus('error', 'Error');
   }
 }

@@ -18,6 +18,11 @@ export function fmtUsd(v, { empty = '—' } = {}) {
   return isNum(v) ? usd.format(v) : empty;
 }
 
+export function fmtUsdCompact(v, { empty = '—' } = {}) {
+  if (!isNum(v)) return empty;
+  return `$${compact.format(v)}`;
+}
+
 export function fmtXrp(v, { compact: useCompact = false, empty = '—' } = {}) {
   if (!isNum(v)) return empty;
   return `${useCompact ? compact.format(v) : num.format(v)} XRP`;
