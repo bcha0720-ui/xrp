@@ -1,0 +1,18 @@
+{
+  "name": "xrp-insights-server",
+  "version": "1.0.0",
+  "description": "Express backend with cached holdings & exchange balance APIs for XRP Insights",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "private": true
+}
