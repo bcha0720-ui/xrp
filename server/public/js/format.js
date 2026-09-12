@@ -88,6 +88,7 @@ export function latestReportedHoldings(rows, columns) {
   return { latest, totalXrp, issuersWithData };
 }
 
+
 export function exchangeTotal(payload) {
   const data = (payload && payload.data) || {};
   let total = 0;
