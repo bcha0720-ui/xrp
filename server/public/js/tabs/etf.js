@@ -81,8 +81,12 @@ function lineChart(seriesMap) {
     return `<polyline fill="none" stroke="${COLORS[i % COLORS.length]}" stroke-width="2" points="${pts.join(' ')}" />`;
   }).join('');
   const legend = keys.map((k, i) => `<span><i class="swatch" style="background:${COLORS[i % COLORS.length]}"></i>${esc(k)}</span>`).join('');
-  return `<div class="chart"><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${paths}</svg></div>
-    <div class="legend">${legend}</div>`;
+  return `<div class="chart-body">
+      <div class="chart">
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>
+      </div>
+      <div class="legend">${legend}</div>
+    </div>`;
 }
 
 function paint(root, { etf, hist, period }) {
@@ -110,7 +114,7 @@ function paint(root, { etf, hist, period }) {
         <div class="k-sub">${rows.length} symbols with Yahoo volume</div>
         <div class="rank-list">${rankList(rows.slice(0, 10)) || '<div class="k-sub">No volume rows.</div>'}</div>
       </section>
-      <section class="card">
+      <section class="card chart-fill">
         <div class="k-label">Historical volume · ${esc(spec.hist)}</div>
         ${lineChart(hist.data || {})}
       </section>
