@@ -100,6 +100,7 @@ export function issuerMeta(keyOrTicker) {
 
 export function fmtMillions(v, { prefix = '', empty = '—' } = {}) {
   if (!isNum(v)) return empty;
+  if (Math.abs(v) >= 1e10) return `${prefix}${(v / 1e9).toFixed(2)}B`;
   return `${prefix}${(v / 1e6).toFixed(2)}M`;
 }
 
