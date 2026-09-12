@@ -14,13 +14,10 @@ const tabs = {
 
 const pill = document.getElementById('statusPill');
 const retryBtn = document.getElementById('retryBtn');
-const statusDot = document.getElementById('statusDot');
-const statusText = document.getElementById('statusText');
-const lastUpdated = document.getElementById('lastUpdated');
 const priceEl = document.getElementById('xrpPriceTopbar');
-const sidebar = document.getElementById('mainSidebar');
 const toggle = document.getElementById('mobileNavToggle');
 const backdrop = document.getElementById('mobileNavBackdrop');
+const mobileNav = document.getElementById('mobileNav');
 
 let current = 'overview';
 const rendered = new Set();
@@ -28,19 +25,15 @@ const rendered = new Set();
 function setStatus(kind, label) {
   const cls = kind === 'live' ? 'live' : kind === 'error' ? 'error' : 'load';
   if (pill) {
-    pill.className = `status-chip ${cls}`;
+    pill.className = `live-chip ${cls}`;
     pill.textContent = label;
-  }
-  if (statusDot) statusDot.className = `status-dot ${cls}`;
-  if (statusText) statusText.textContent = label;
-  if (kind === 'live' && lastUpdated) {
-    lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
   }
 }
 
 function closeMobileNav() {
-  sidebar?.classList.remove('mobile-open');
   toggle?.classList.remove('open');
+  mobileNav?.classList.remove('open');
+  if (mobileNav) mobileNav.hidden = true;
   if (backdrop) {
     backdrop.classList.remove('open');
     backdrop.hidden = true;
@@ -48,8 +41,11 @@ function closeMobileNav() {
 }
 
 function openMobileNav() {
-  sidebar?.classList.add('mobile-open');
   toggle?.classList.add('open');
+  if (mobileNav) {
+    mobileNav.hidden = false;
+    mobileNav.classList.add('open');
+  }
   if (backdrop) {
     backdrop.hidden = false;
     backdrop.classList.add('open');
@@ -58,7 +54,7 @@ function openMobileNav() {
 
 function showTab(name) {
   current = name;
-  document.querySelectorAll('.sidebar-item[data-tab]').forEach((btn) => {
+  document.querySelectorAll('.nav-link[data-tab]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tab === name);
   });
   document.querySelectorAll('.tab-content').forEach((panel) => {
@@ -83,12 +79,13 @@ async function loadPrice() {
     if (!priceEl) return;
     const change = isNum(p.change24h) ? ` ${fmtPct(p.change24h)}` : '';
     priceEl.textContent = `${fmtUsd(p.usd)}${change}`;
+    priceEl.className = `price-chip-value ${isNum(p.change24h) && p.change24h < 0 ? 'down' : 'up'}`;
   } catch {
     if (priceEl) priceEl.textContent = '—';
   }
 }
 
-document.querySelectorAll('.sidebar-item[data-tab]').forEach((btn) => {
+document.querySelectorAll('.nav-link[data-tab]').forEach((btn) => {
   btn.addEventListener('click', () => load(btn.dataset.tab));
 });
 
@@ -99,10 +96,9 @@ retryBtn?.addEventListener('click', () => {
 });
 
 toggle?.addEventListener('click', () => {
-  if (sidebar?.classList.contains('mobile-open')) closeMobileNav();
+  if (mobileNav?.classList.contains('open')) closeMobileNav();
   else openMobileNav();
 });
-
 backdrop?.addEventListener('click', closeMobileNav);
 
 loadPrice();

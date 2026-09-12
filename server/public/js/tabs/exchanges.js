@@ -1,5 +1,5 @@
 import { api } from '../api.js';
-import { esc, fmtNum, fmtUsdCompact, fmtXrp, venueLabel, isNum } from '../format.js';
+import { esc, fmtNum, fmtUsdM, fmtMillions, venueLabel, isNum } from '../format.js';
 
 function rowsFrom(payload) {
   const data = (payload && payload.data) || {};
@@ -24,9 +24,24 @@ function rowHtml(r, i) {
   return `<tr data-name="${esc((r.name + ' ' + r.key).toLowerCase())}">
     <td>${i + 1}</td>
     <td>${esc(r.name)}<div class="venue-meta">${r.successCount}/${r.walletCount} wallets</div></td>
-    <td class="num">${esc(fmtNum(r.total))}</td>
+    <td>${esc(fmtNum(r.total))}</td>
     <td><details><summary>wallets</summary><div class="wallet-list">${walletBits || '—'}</div></details></td>
   </tr>`;
+}
+
+function rankHtml(list) {
+  const top = list.slice(0, 8);
+  const peak = top[0]?.total || 1;
+  return top.map((r, i) => `
+    <div class="rank-row">
+      <div class="rank-num">${i + 1}</div>
+      <div>
+        <div class="rank-name">${esc(r.name)}</div>
+        <div class="rank-meta">${r.successCount}/${r.walletCount} wallets</div>
+      </div>
+      <div class="rank-val">${esc(fmtMillions(r.total))}</div>
+      <div class="rank-bar"><i style="width:${Math.max(4, (r.total / peak) * 100)}%"></i></div>
+    </div>`).join('');
 }
 
 function paint(root, payload, priceUsd) {
@@ -42,52 +57,57 @@ function paint(root, payload, priceUsd) {
   const ok = ws.success ?? '—';
   const filterVal = root.querySelector('#exFilter')?.value || '';
 
-  const statusLabel = running ? 'Scanning' : full ? 'Live scan' : 'Waiting';
-  const statusClass = running ? 'warn' : full ? '' : 'warn';
-
   root.innerHTML = `
-    <div class="page-hero">
-      <div class="page-hero-badge${statusClass ? ` ${statusClass}` : ''}">${statusLabel}</div>
-      <div class="page-hero-title">Exchange Balances</div>
-      <div class="page-hero-subtitle">Full XRPL account_info over exchanges.json — not a thin sample</div>
+    <div class="page-head">
+      <div class="hero-pill${running || !full ? ' warn' : ''}">${running ? 'Scanning XRPL' : full ? 'Live XRPL scan' : 'Waiting for scan'}</div>
+      <h1>Exchange Balances</h1>
+      <p>Full XRPL account_info over exchanges.json — not a thin sample.</p>
     </div>
-    <div class="exchange-summary">
-      <div class="exchange-stat-card">
-        <div class="exchange-stat-label">Total XRP</div>
-        <div class="exchange-stat-value accent">${full ? esc(fmtXrp(grand, { compact: true })) : '—'}</div>
-      </div>
-      <div class="exchange-stat-card">
-        <div class="exchange-stat-label">USD value</div>
-        <div class="exchange-stat-value">${usd != null ? esc(fmtUsdCompact(usd)) : '—'}</div>
-        <div class="exchange-stat-sub">${usd != null ? 'total × live XRP price' : 'needs full scan + price'}</div>
-      </div>
-      <div class="exchange-stat-card">
-        <div class="exchange-stat-label">Venues tracked</div>
-        <div class="exchange-stat-value">${venues || '—'}</div>
-      </div>
-      <div class="exchange-stat-card">
-        <div class="exchange-stat-label">Wallets</div>
-        <div class="exchange-stat-value">${ok} / ${wallets || '—'}</div>
-        <div class="exchange-stat-sub">${running && scan ? `scan ${scan.done}/${scan.total}` : 'XRPL account_info'}</div>
-      </div>
-      <div class="exchange-stat-card">
-        <div class="exchange-stat-label">Data status</div>
-        <div class="exchange-stat-value ${full && !running ? 'green' : ''}">${esc(payload.source || 'unknown')}</div>
-      </div>
+    <div class="metric-board">
+      <section class="card metric-stack">
+        <div class="metric-block">
+          <div class="k-label">Total XRP</div>
+          <div class="k-value blue">${full ? esc(fmtMillions(grand)) : '—'}</div>
+        </div>
+        <div class="metric-block">
+          <div class="k-label">USD value</div>
+          <div class="k-value">${usd != null ? esc(fmtUsdM(usd)) : '—'}</div>
+          <div class="k-sub">${usd != null ? 'total × live XRP price' : 'needs full scan + price'}</div>
+        </div>
+        <div class="metric-block">
+          <div class="k-label">Venues tracked</div>
+          <div class="k-value">${venues || '—'}</div>
+        </div>
+        <div class="metric-block">
+          <div class="k-label">Wallets</div>
+          <div class="k-value">${ok} / ${wallets || '—'}</div>
+          <div class="k-sub">${running && scan ? `scan ${scan.done}/${scan.total}` : 'XRPL account_info'}</div>
+        </div>
+        <div class="metric-block">
+          <div class="k-label">Data status</div>
+          <div class="k-value" style="font-size:22px">${esc(payload.source || 'unknown')}</div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="k-label">Largest venues</div>
+        <div class="rank-list">${full ? rankHtml(list) : '<div class="k-sub">Ranked list appears after xrpl-full-scan.</div>'}</div>
+      </section>
     </div>
-    <div class="exchange-controls">
+    <div class="toolbar">
       <input id="exFilter" class="search" type="search" placeholder="Filter venue" value="${esc(filterVal)}">
-      <button id="exRefresh" class="btn btn-refresh" type="button">↻ Refresh</button>
+      <button id="exRefresh" class="btn btn-blue" type="button">Refresh scan</button>
     </div>
-    <div class="exchange-table-header">
-      <div class="exchange-table-title">Venue balances</div>
-      <div class="exchange-count">${venues} venues</div>
-    </div>
-    <div class="exchange-table-wrapper">
-      <table class="data-table">
-        <thead><tr><th>#</th><th>Venue</th><th>XRP</th><th>Wallets</th></tr></thead>
-        <tbody id="exBody">${list.map(rowHtml).join('') || '<tr><td colspan="4">No venues</td></tr>'}</tbody>
-      </table>
+    <div class="card table-card">
+      <div class="table-head">
+        <strong>Venue balances</strong>
+        <span class="foot">${venues} venues</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Venue</th><th>XRP</th><th>Wallets</th></tr></thead>
+          <tbody id="exBody">${list.map(rowHtml).join('') || '<tr><td colspan="4">No venues</td></tr>'}</tbody>
+        </table>
+      </div>
     </div>`;
   applyFilter(root);
 }
@@ -100,15 +120,12 @@ function applyFilter(root) {
 }
 
 export async function renderExchanges(root, { setStatus }) {
-  root.innerHTML = `<div class="page-hero">
-    <div class="page-hero-badge warn">Scanning</div>
-    <div class="page-hero-title">Exchange Balances</div>
-  </div><div class="banner">Starting XRPL full scan…</div>`;
+  root.innerHTML = `<div class="page-head"><div class="hero-pill warn">Scanning</div><h1>Exchange Balances</h1></div>
+    <div class="banner">Starting XRPL full scan…</div>`;
   setStatus('load', 'Scanning');
 
   let payload;
   let priceUsd = null;
-  api.price().then((p) => { if (isNum(p.usd)) priceUsd = p.usd; }).catch(() => {});
 
   const onFilter = () => applyFilter(root);
   const onRefresh = async () => {
@@ -170,7 +187,7 @@ export async function renderExchanges(root, { setStatus }) {
         payload.source === 'xrpl-full-scan' ? 'Live' : 'Error');
     }
   } catch (err) {
-    root.innerHTML = `<div class="page-hero"><div class="page-hero-badge err">Error</div><div class="page-hero-title">Exchange Balances</div></div>
+    root.innerHTML = `<div class="page-head"><div class="hero-pill err">Error</div><h1>Exchange Balances</h1></div>
       <div class="banner error">${esc(err.message)}</div>`;
     setStatus('error', 'Error');
   }

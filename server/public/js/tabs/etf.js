@@ -1,38 +1,59 @@
 import { api } from '../api.js';
-import { esc, fmtNum, fmtUsd, fmtUsdCompact, isNum } from '../format.js';
+import { esc, fmtNum, fmtUsd, fmtUsdM, fmtCompact, flattenEtf, volumeField, issuerMeta, isNum } from '../format.js';
 
-const COLORS = ['#2DE3CB', '#4F7DF9', '#F5A623', '#A374F7'];
+const COLORS = ['#3b82f6', '#22c55e', '#eab308', '#a855f7', '#ef4444', '#94a3b8'];
 const PERIODS = {
   daily: { label: 'Daily', hist: '1mo', field: 'daily' },
   weekly: { label: 'Weekly', hist: '3mo', field: 'weekly' },
   monthly: { label: 'Monthly', hist: '6mo', field: 'monthly' },
 };
 
-function volumeOf(row, field) {
-  const block = row?.[field] || {};
-  return {
-    shares: isNum(block.shares) ? block.shares : null,
-    dollars: isNum(block.dollars) ? block.dollars : null,
-  };
+function ranked(rows, field) {
+  return rows
+    .map((r) => ({ ...r, vol: volumeField(r, field) }))
+    .filter((r) => isNum(r.vol.dollars))
+    .sort((a, b) => b.vol.dollars - a.vol.dollars);
 }
 
-function cardsFor(groupName, rows, field) {
-  const cards = (rows || []).map((r) => {
-    const vol = volumeOf(r, field);
-    return `<article class="etf-card2">
-      <div class="etf-card2-top">
-        <span class="etf-card2-ticker">${esc(r.symbol)}</span>
-        <span class="etf-card2-sub">${isNum(r.price) ? esc(fmtUsd(r.price)) : '—'}</span>
+function rankList(rows) {
+  const peak = rows[0]?.vol.dollars || 1;
+  return rows.map((r, i) => {
+    const meta = issuerMeta(r.symbol);
+    return `<div class="rank-row">
+      <div class="rank-num">${i + 1}</div>
+      <div>
+        <div class="rank-name">${esc(r.description || r.symbol)}</div>
+        <div class="rank-meta">${esc(r.symbol)}${r.vol.shares != null ? ` · ${esc(fmtCompact(r.vol.shares))} shares` : ''}</div>
       </div>
-      <div class="etf-card2-issuer">${esc(r.description || '')}</div>
-      <div class="etf-card2-value">${vol.dollars != null ? esc(fmtUsdCompact(vol.dollars)) : '—'}</div>
-      <div class="etf-card2-sub">${vol.shares != null ? `${esc(fmtNum(vol.shares))} shares` : 'no volume'}</div>
+      <div class="rank-val">${esc(fmtUsdM(r.vol.dollars))}</div>
+      <div class="rank-bar"><i style="width:${Math.max(4, (r.vol.dollars / peak) * 100)}%;background:${meta.color}"></i></div>
+    </div>`;
+  }).join('');
+}
+
+function cards(rows) {
+  return rows.map((r) => {
+    const meta = issuerMeta(r.symbol);
+    return `<article class="issuer-card">
+      <div class="issuer-top">
+        <div>
+          <div class="issuer-ticker" style="color:${meta.color}">${esc(r.symbol)}</div>
+          <div class="issuer-name">${esc(r.description || r.group || '')}</div>
+        </div>
+        <div class="issuer-px">${isNum(r.price) ? esc(fmtUsd(r.price)) : '—'}</div>
+      </div>
+      <div class="issuer-stats">
+        <div>
+          <div class="k-label">Volume</div>
+          <div class="k-value blue" style="font-size:22px">${r.vol.dollars != null ? esc(fmtUsdM(r.vol.dollars)) : '—'}</div>
+        </div>
+        <div>
+          <div class="k-label">Shares</div>
+          <div class="k-value" style="font-size:22px">${r.vol.shares != null ? esc(fmtNum(r.vol.shares)) : '—'}</div>
+        </div>
+      </div>
     </article>`;
   }).join('');
-  return `<section class="etf-group">
-    <div class="etf-group-title">${esc(groupName)}</div>
-    <div class="etf-cards-grid">${cards || '<div class="banner">No Yahoo rows</div>'}</div>
-  </section>`;
 }
 
 function lineChart(seriesMap) {
@@ -59,44 +80,51 @@ function lineChart(seriesMap) {
     }).filter(Boolean);
     return `<polyline fill="none" stroke="${COLORS[i % COLORS.length]}" stroke-width="2" points="${pts.join(' ')}" />`;
   }).join('');
-  const legend = keys.map((k, i) => `<span><i class="swatch" style="background:${COLORS[i % COLORS.length]}"></i>${esc(k)} volume</span>`).join('');
+  const legend = keys.map((k, i) => `<span><i class="swatch" style="background:${COLORS[i % COLORS.length]}"></i>${esc(k)}</span>`).join('');
   return `<div class="chart"><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${paths}</svg></div>
     <div class="legend">${legend}</div>`;
 }
 
 function paint(root, { etf, hist, period }) {
   const spec = PERIODS[period] || PERIODS.daily;
-  const groups = etf.data || {};
-  const sections = Object.entries(groups).map(([name, rows]) => cardsFor(name, rows, spec.field)).join('');
+  const rows = ranked(flattenEtf(etf), spec.field);
+  const total = rows.reduce((s, r) => s + r.vol.dollars, 0);
   const toggles = Object.entries(PERIODS).map(([key, p]) =>
-    `<button class="period-btn${key === period ? ' active' : ''}" type="button" data-period="${key}">${p.label}</button>`
+    `<button class="seg${key === period ? ' active' : ''}" type="button" data-period="${key}">${p.label}</button>`
   ).join('');
 
   root.innerHTML = `
-    <div class="page-hero">
-      <div class="page-hero-badge">${etf.cached ? 'Cached' : 'Live'}</div>
-      <div class="page-hero-title">ETF Trading</div>
-      <div class="page-hero-subtitle">Yahoo Finance spot / futures / Canada / index — ${esc(etf.timestamp || '')}</div>
+    <div class="page-head">
+      <div class="hero-pill">${etf.cached ? 'Cached Yahoo' : 'Live Yahoo'}</div>
+      <h1>ETF Trading</h1>
+      <p>Volume ranking from Yahoo Finance · ${esc(etf.timestamp || '')}</p>
     </div>
-    <div class="controls">
-      <div class="period-buttons">${toggles}</div>
-      <button id="etfRefresh" class="btn btn-refresh" type="button">↻ Refresh</button>
+    <div class="toolbar">
+      <div class="volume-tabs">${toggles}</div>
+      <button id="etfRefresh" class="btn btn-blue" type="button">Refresh</button>
     </div>
-    <div class="chart-card">
-      <div class="chart-section-header">
-        <div class="chart-section-title">Historical volume · ${esc(spec.label)} (${esc(spec.hist)})</div>
-      </div>
-      ${lineChart(hist.data || {})}
+    <div class="metric-board">
+      <section class="card">
+        <div class="k-label">${esc(spec.label)} volume</div>
+        <div class="k-value lg blue">${total ? esc(fmtUsdM(total)) : '—'}</div>
+        <div class="k-sub">${rows.length} symbols with Yahoo volume</div>
+        <div class="rank-list">${rankList(rows.slice(0, 10)) || '<div class="k-sub">No volume rows.</div>'}</div>
+      </section>
+      <section class="card">
+        <div class="k-label">Historical volume · ${esc(spec.hist)}</div>
+        ${lineChart(hist.data || {})}
+      </section>
     </div>
-    ${sections || '<div class="banner error">Yahoo returned no ETF groups.</div>'}
-    <p class="hint">Period toggle switches Yahoo daily / weekly / monthly fields and the matching historical window. Empty Yahoo series stay empty.</p>`;
+    <section class="section">
+      <div class="section-title">All symbols</div>
+      <div class="issuer-grid">${cards(rows) || '<div class="banner">Yahoo returned no ETF rows.</div>'}</div>
+    </section>
+    <p class="hint">Period toggle uses Yahoo daily / weekly / monthly fields and the matching historical window.</p>`;
 }
 
 export async function renderEtf(root, { setStatus }) {
-  root.innerHTML = `<div class="page-hero">
-    <div class="page-hero-badge warn">Loading</div>
-    <div class="page-hero-title">ETF Trading</div>
-  </div><div class="banner">Loading Yahoo ETF data via /api/etf-data…</div>`;
+  root.innerHTML = `<div class="page-head"><div class="hero-pill warn">Loading</div><h1>ETF Trading</h1></div>
+    <div class="banner">Loading Yahoo ETF data via /api/etf-data…</div>`;
   setStatus('load', 'Loading');
 
   let period = 'daily';
@@ -109,14 +137,14 @@ export async function renderEtf(root, { setStatus }) {
       if (refresh || !etf) etf = await api.etf();
       const hist = await api.historical(PERIODS[period].hist).catch(() => ({ data: {}, count: 0 }));
       paint(root, { etf, hist, period });
-      root.querySelectorAll('.period-btn').forEach((btn) => {
+      root.querySelectorAll('.seg[data-period]').forEach((btn) => {
         btn.addEventListener('click', () => load(btn.dataset.period));
       });
       root.querySelector('#etfRefresh')?.addEventListener('click', () => load(period, { refresh: true }));
       const groups = etf.data || {};
       setStatus(Object.keys(groups).length ? 'live' : 'error', Object.keys(groups).length ? 'Live' : 'Error');
     } catch (err) {
-      root.innerHTML = `<div class="page-hero"><div class="page-hero-badge err">Error</div><div class="page-hero-title">ETF Trading</div></div>
+      root.innerHTML = `<div class="page-head"><div class="hero-pill err">Error</div><h1>ETF Trading</h1></div>
         <div class="banner error">${esc(err.message)}</div>`;
       setStatus('error', 'Error');
     }

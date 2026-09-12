@@ -71,6 +71,77 @@ function sheetDateTs(s) {
 }
 
 /** Latest non-null XRP per issuer from a sparse sheet (no invented fill for missing issuers). */
+export const XRP_TOTAL_SUPPLY = 100_000_000_000;
+
+export const ISSUER_META = {
+  canary: { ticker: 'XRPC', color: '#94a3b8' },
+  bitwise: { ticker: 'XRP', color: '#22c55e' },
+  franklin: { ticker: 'XRPZ', color: '#3b82f6' },
+  grayscale: { ticker: 'GXRP', color: '#a855f7' },
+  shares21: { ticker: 'TOXR', color: '#eab308' },
+  rex: { ticker: 'XRPR', color: '#ef4444' },
+  nciq: { ticker: 'NCIQ', color: '#64748b' },
+  bitw: { ticker: 'BITW', color: '#22c55e' },
+  gdlc: { ticker: 'GDLC', color: '#a855f7' },
+  ezpz: { ticker: 'EZPZ', color: '#3b82f6' },
+  btgo: { ticker: 'BTGO', color: '#06b6d4' },
+  tknz: { ticker: 'TKNZ', color: '#f97316' },
+  xxx: { ticker: 'XXX', color: '#78716c' },
+};
+
+export function issuerMeta(keyOrTicker) {
+  const k = String(keyOrTicker || '').toLowerCase();
+  if (ISSUER_META[k]) return ISSUER_META[k];
+  for (const meta of Object.values(ISSUER_META)) {
+    if (meta.ticker.toLowerCase() === k) return meta;
+  }
+  return { ticker: String(keyOrTicker || '').toUpperCase(), color: '#3b82f6' };
+}
+
+export function fmtMillions(v, { prefix = '', empty = '—' } = {}) {
+  if (!isNum(v)) return empty;
+  return `${prefix}${(v / 1e6).toFixed(2)}M`;
+}
+
+export function fmtUsdM(v, { empty = '—' } = {}) {
+  return fmtMillions(v, { prefix: '$', empty });
+}
+
+export function supplyPct(xrp) {
+  if (!isNum(xrp) || xrp <= 0) return '—';
+  return `${((xrp / XRP_TOTAL_SUPPLY) * 100).toFixed(4)}%`;
+}
+
+export function flattenEtf(payload) {
+  const groups = (payload && payload.data) || {};
+  const rows = [];
+  for (const [group, list] of Object.entries(groups)) {
+    for (const row of list || []) rows.push({ ...row, group });
+  }
+  return rows;
+}
+
+export function volumeField(row, field = 'daily') {
+  const block = row?.[field] || {};
+  return {
+    shares: isNum(block.shares) ? block.shares : null,
+    dollars: isNum(block.dollars) ? block.dollars : null,
+  };
+}
+
+export function derivedAum(latest, priceUsd) {
+  let aum = 0;
+  let usedPrice = false;
+  for (const v of Object.values(latest || {})) {
+    if (isNum(v.value)) aum += v.value;
+    else if (isNum(v.xrp) && isNum(priceUsd)) {
+      aum += v.xrp * priceUsd;
+      usedPrice = true;
+    }
+  }
+  return { aum, usedPrice };
+}
+
 export function latestReportedHoldings(rows, columns) {
   const latest = {};
   for (const col of columns) latest[col.key] = { xrp: null, value: null, date: null, ts: -1 };
@@ -89,8 +160,9 @@ export function latestReportedHoldings(rows, columns) {
     }
   }
   const totalXrp = Object.values(latest).reduce((s, v) => s + (isNum(v.xrp) ? v.xrp : 0), 0);
+  const totalValue = Object.values(latest).reduce((s, v) => s + (isNum(v.value) ? v.value : 0), 0);
   const issuersWithData = Object.values(latest).filter((v) => isNum(v.xrp)).length;
-  return { latest, totalXrp, issuersWithData };
+  return { latest, totalXrp, totalValue, issuersWithData };
 }
 
 

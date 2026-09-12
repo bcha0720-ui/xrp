@@ -6,7 +6,7 @@ v1 is four tabs only: **Overview**, **Holdings**, **Exchanges**, **ETF Trading**
 
 This is a from-scratch redesign. The old ~20k-line `index.html` monolith is gone. A Render **Static Site** (no Node) cannot run the ETF proxy or the full exchange scan.
 
-The frontend was restyled to match the legacy XRP Insights chrome (Space Grotesk / Space Mono, dark slate surfaces, sticky topbar + left sidebar, KPI cards, dense holdings/exchange tables). Server APIs and data rules are unchanged.
+The frontend is a dark marketing/dashboard hybrid in the visual language of [xrp-insights.com](https://xrp-insights.com/): near-black `#0a0a0a`, Inter, cobalt accents, hero metrics, ranked volume, and issuer cards. Numbers still come only from our APIs (sparse Google Sheet, full XRPL scan, Yahoo ETF). Server contracts are unchanged.
 
 ## Run locally
 
