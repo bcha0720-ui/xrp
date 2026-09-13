@@ -1,7 +1,7 @@
 {
   "name": "xrp-insights-server",
   "version": "1.0.0",
-  "description": "Express backend with cached holdings & exchange balance APIs for XRP Insights",
+  "description": "XRP Insights — Express APIs (Sheet, XRPL full scan, Yahoo ETF) + modular UI",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
