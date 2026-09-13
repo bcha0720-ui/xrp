@@ -56,36 +56,94 @@ function cards(rows) {
   }).join('');
 }
 
+function niceCeil(max) {
+  if (!isNum(max) || max <= 0) return 1;
+  const exp = 10 ** Math.floor(Math.log10(max));
+  const n = max / exp;
+  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return nice * exp;
+}
+
+function fmtAxisVol(v) {
+  if (!isNum(v)) return '';
+  if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M`;
+  if (v >= 1e3) return `${(v / 1e3).toFixed(v >= 1e4 ? 0 : 1)}K`;
+  return String(Math.round(v));
+}
+
+function fmtAxisDate(iso) {
+  const parts = String(iso || '').split('-');
+  if (parts.length < 3) return String(iso || '');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[Number(parts[1]) - 1] || ''} ${Number(parts[2])}`;
+}
+
+function pickIndices(len, count) {
+  if (len <= 0) return [];
+  const n = Math.min(Math.max(count, 2), len);
+  const idx = [];
+  for (let t = 0; t < n; t++) idx.push(Math.round((t * (len - 1)) / (n - 1)));
+  return [...new Set(idx)];
+}
+
 function lineChart(seriesMap) {
   const keys = Object.keys(seriesMap);
   if (!keys.length) {
     return `<div class="banner">No historical series from Yahoo for this period. Nothing is invented.</div>`;
   }
   const dates = new Set();
-  for (const k of keys) for (const p of seriesMap[k]) dates.add(p.date);
+  const vols = [];
+  for (const k of keys) {
+    for (const p of seriesMap[k]) {
+      dates.add(p.date);
+      if (isNum(p.volume)) vols.push(p.volume);
+    }
+  }
   const x = [...dates].sort();
+  const yMax = niceCeil(Math.max(...vols, 1));
+  const yTicks = [0, 1, 2, 3, 4].map((i) => (yMax * i) / 4);
+  const xTickCount = x.length <= 25 ? 5 : x.length <= 80 ? 6 : 7;
+  const xIdx = pickIndices(x.length, xTickCount);
+
   const w = 1000;
-  const h = 220;
-  const pad = { l: 8, r: 8, t: 12, b: 24 };
+  const h = 400;
+  const xAt = (idx) => (idx / Math.max(x.length - 1, 1)) * w;
+  const yAt = (v) => (1 - v / yMax) * h;
+
+  const grid = yTicks.map((v) => {
+    const y = yAt(v);
+    return `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1" vector-effect="non-scaling-stroke" />`;
+  }).join('');
+  const vGrid = xIdx.map((i) => {
+    const px = xAt(i);
+    return `<line x1="${px}" y1="0" x2="${px}" y2="${h}" stroke="rgba(255,255,255,0.05)" stroke-width="1" vector-effect="non-scaling-stroke" />`;
+  }).join('');
+
   const paths = keys.map((k, i) => {
     const byDate = Object.fromEntries(seriesMap[k].map((p) => [p.date, p.volume]));
-    const ys = x.map((d) => byDate[d]).filter(isNum);
-    const max = Math.max(...ys, 1);
     const pts = x.map((d, idx) => {
       const v = byDate[d];
       if (!isNum(v)) return null;
-      const px = pad.l + (idx / Math.max(x.length - 1, 1)) * (w - pad.l - pad.r);
-      const py = pad.t + (1 - v / max) * (h - pad.t - pad.b);
-      return `${px.toFixed(1)},${py.toFixed(1)}`;
+      return `${xAt(idx).toFixed(1)},${yAt(v).toFixed(1)}`;
     }).filter(Boolean);
-    return `<polyline fill="none" stroke="${COLORS[i % COLORS.length]}" stroke-width="2" points="${pts.join(' ')}" />`;
+    return `<polyline fill="none" stroke="${COLORS[i % COLORS.length]}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts.join(' ')}" />`;
   }).join('');
+
+  const yLabels = [...yTicks].reverse().map((v) => `<span>${esc(fmtAxisVol(v))}</span>`).join('');
+  const xLabels = xIdx.map((i) => `<span>${esc(fmtAxisDate(x[i]))}</span>`).join('');
   const legend = keys.map((k, i) => `<span><i class="swatch" style="background:${COLORS[i % COLORS.length]}"></i>${esc(k)}</span>`).join('');
+
   return `<div class="chart-body">
-      <div class="chart">
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>
+      <div class="chart chart-axes">
+        <div class="chart-y" aria-hidden="true">${yLabels}</div>
+        <div class="chart-plot">
+          <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Historical share volume">
+            ${grid}${vGrid}${paths}
+          </svg>
+        </div>
+        <div class="chart-x" aria-hidden="true">${xLabels}</div>
       </div>
-      <div class="legend">${legend}</div>
+      <div class="legend">${legend}<span class="legend-unit">Y: share volume · X: date</span></div>
     </div>`;
 }
 
